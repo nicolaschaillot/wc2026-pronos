@@ -148,9 +148,10 @@ function renderNextMatchBanner(pseudo) {
       <span class="nm-vs">vs</span>
       <span>${next.team2.flag} ${next.team2.name}</span>
     </div>
-    <div class="nm-meta">${formatDate(next.date)} · 📍 ${next.venue}</div>
-    <div class="nm-countdown" id="nm-countdown"></div>
-    <div class="nm-prono">${pronoTxt}</div>`;
+    <div class="nm-bottom">
+      <div class="nm-countdown" id="nm-countdown"></div>
+      <div class="nm-prono">${pronoTxt}</div>
+    </div>`;
 
   const countdownEl = document.getElementById('nm-countdown');
   const tick = () => {
