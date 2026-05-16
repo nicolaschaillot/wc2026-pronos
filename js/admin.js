@@ -1,5 +1,5 @@
 import { db, ADMIN_PASSWORD_HASH } from './firebase-config.js';
-import { MATCHES, ROUND_MULTIPLIERS } from './data.js';
+import { MATCHES, GROUPS, ROUND_MULTIPLIERS } from './data.js';
 import {
   doc, getDoc, setDoc, getDocs, addDoc,
   collection, deleteDoc, serverTimestamp,
@@ -32,9 +32,28 @@ async function handleAdminLogin(e) {
 function showAdminPanel() {
   document.getElementById('admin-login').hidden = true;
   document.getElementById('admin-panel').hidden = false;
+  buildTeamSelects();
   renderMatchResults();
   loadCodes();
   renderKnockoutMatches();
+}
+
+function buildTeamSelects() {
+  // Collecte toutes les équipes triées par nom
+  const teams = Object.values(GROUPS)
+    .flatMap(g => g.teams)
+    .sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+
+  ['ko-team1', 'ko-team2'].forEach(id => {
+    const sel = document.getElementById(id);
+    sel.innerHTML = '<option value="">— Sélectionner —</option>';
+    teams.forEach(t => {
+      const opt = document.createElement('option');
+      opt.value = JSON.stringify({ flag: t.flag, name: t.name });
+      opt.textContent = `${t.flag} ${t.name}`;
+      sel.appendChild(opt);
+    });
+  });
 }
 
 // ─── Formatage date (UTC+2 été = France & Albanie) ───────────────────────────
@@ -177,30 +196,29 @@ async function renderKnockoutMatches() {
 
 async function handleAddKnockoutMatch(e) {
   e.preventDefault();
-  const round    = document.getElementById('ko-round').value;
-  const flag1    = document.getElementById('ko-flag1').value.trim() || '⚽';
-  const name1    = document.getElementById('ko-name1').value.trim();
-  const flag2    = document.getElementById('ko-flag2').value.trim() || '⚽';
-  const name2    = document.getElementById('ko-name2').value.trim();
-  const dtValue  = document.getElementById('ko-datetime').value;
-  const venue    = document.getElementById('ko-venue').value.trim();
-  const errEl    = document.getElementById('ko-error');
+  const round   = document.getElementById('ko-round').value;
+  const raw1    = document.getElementById('ko-team1').value;
+  const raw2    = document.getElementById('ko-team2').value;
+  const dtValue = document.getElementById('ko-datetime').value;
+  const venue   = document.getElementById('ko-venue').value.trim();
+  const errEl   = document.getElementById('ko-error');
 
-  if (!name1 || !name2 || !dtValue || !venue) {
+  if (!raw1 || !raw2 || !dtValue || !venue) {
     errEl.textContent = 'Tous les champs sont obligatoires.'; return;
+  }
+  if (raw1 === raw2) {
+    errEl.textContent = 'Les deux équipes doivent être différentes.'; return;
   }
 
   errEl.textContent = '';
+  const team1 = JSON.parse(raw1);
+  const team2 = JSON.parse(raw2);
 
   // L'admin saisit l'heure en heure locale France/Albanie (UTC+2 en été)
   const isoDate = `${dtValue}:00+02:00`;
 
   await addDoc(collection(db, 'matches_extra'), {
-    round,
-    team1: { flag: flag1, name: name1 },
-    team2: { flag: flag2, name: name2 },
-    date: isoDate,
-    venue,
+    round, team1, team2, date: isoDate, venue,
     createdAt: serverTimestamp(),
   });
 

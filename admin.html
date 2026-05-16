@@ -91,7 +91,7 @@
       </p>
       <form id="ko-form" class="ko-form">
         <div class="ko-form-row">
-          <div class="form-group" style="flex:0 0 180px">
+          <div class="form-group" style="flex:0 0 190px">
             <label>Tour</label>
             <select id="ko-round" class="ko-select">
               <option value="1/32">1/32 de finale (×1)</option>
@@ -102,21 +102,18 @@
               <option value="Finale">Finale (×4)</option>
             </select>
           </div>
-          <div class="form-group" style="flex:0 0 60px">
-            <label>Drapeau 1</label>
-            <input id="ko-flag1" type="text" placeholder="🇫🇷" maxlength="4">
-          </div>
           <div class="form-group" style="flex:1">
             <label>Équipe 1</label>
-            <input id="ko-name1" type="text" placeholder="France" required>
+            <select id="ko-team1" class="ko-select" required>
+              <option value="">— Sélectionner —</option>
+            </select>
           </div>
-          <div class="form-group" style="flex:0 0 60px">
-            <label>Drapeau 2</label>
-            <input id="ko-flag2" type="text" placeholder="🇦🇷" maxlength="4">
-          </div>
+          <div style="align-self:flex-end;padding-bottom:8px;color:var(--muted);font-weight:700">vs</div>
           <div class="form-group" style="flex:1">
             <label>Équipe 2</label>
-            <input id="ko-name2" type="text" placeholder="Argentine" required>
+            <select id="ko-team2" class="ko-select" required>
+              <option value="">— Sélectionner —</option>
+            </select>
           </div>
           <div class="form-group" style="flex:0 0 190px">
             <label>Date &amp; heure (heure FR/AL)</label>

@@ -77,102 +77,104 @@ export const GROUPS = {
 };
 
 // [idx_team1, idx_team2, date_UTC, stade, journée]
+// Heures en UTC — la source originale était en CET (UTC+1) au lieu de CEST (UTC+2).
+// Toutes les heures ont été corrigées de -1h pour correspondre aux vrais coups d'envoi.
 const GROUP_SCHEDULE = {
   A: [
-    [0, 1, '2026-06-11T20:00:00Z', 'Mexico (Estadio Azteca)', 1],
-    [2, 3, '2026-06-12T03:00:00Z', 'Guadalajara (Estadio Akron)', 1],
-    [0, 2, '2026-06-18T02:00:00Z', 'Guadalajara (Estadio Akron)', 2],
-    [3, 1, '2026-06-18T17:00:00Z', 'Atlanta (Mercedes-Benz Stadium)', 2],
-    [3, 0, '2026-06-24T02:00:00Z', 'Mexico (Estadio Azteca)', 3],
-    [1, 2, '2026-06-24T02:00:00Z', 'Monterrey (Estadio BBVA)', 3],
+    [0, 1, '2026-06-11T19:00:00Z', 'Mexico (Estadio Azteca)', 1],           // 21h CEST
+    [2, 3, '2026-06-12T02:00:00Z', 'Guadalajara (Estadio Akron)', 1],       // 04h CEST
+    [0, 2, '2026-06-18T01:00:00Z', 'Guadalajara (Estadio Akron)', 2],       // 03h CEST
+    [3, 1, '2026-06-18T16:00:00Z', 'Atlanta (Mercedes-Benz Stadium)', 2],   // 18h CEST
+    [3, 0, '2026-06-24T01:00:00Z', 'Mexico (Estadio Azteca)', 3],           // 03h CEST
+    [1, 2, '2026-06-24T01:00:00Z', 'Monterrey (Estadio BBVA)', 3],          // 03h CEST
   ],
   B: [
-    [0, 1, '2026-06-12T20:00:00Z', 'Toronto (BMO Field)', 1],
-    [2, 3, '2026-06-13T20:00:00Z', 'San Francisco (Levi\'s Stadium)', 1],
-    [3, 1, '2026-06-18T20:00:00Z', 'Los Angeles (SoFi Stadium)', 2],
-    [0, 2, '2026-06-19T23:00:00Z', 'Vancouver (BC Place)', 2],
-    [3, 0, '2026-06-24T20:00:00Z', 'Vancouver (BC Place)', 3],
-    [1, 2, '2026-06-24T23:00:00Z', 'Seattle (Lumen Field)', 3],
+    [0, 1, '2026-06-12T19:00:00Z', 'Toronto (BMO Field)', 1],               // 21h CEST
+    [2, 3, '2026-06-13T19:00:00Z', 'San Francisco (Levi\'s Stadium)', 1],   // 21h CEST
+    [3, 1, '2026-06-18T19:00:00Z', 'Los Angeles (SoFi Stadium)', 2],        // 21h CEST
+    [0, 2, '2026-06-19T22:00:00Z', 'Vancouver (BC Place)', 2],              // 00h CEST
+    [3, 0, '2026-06-24T19:00:00Z', 'Vancouver (BC Place)', 3],              // 21h CEST
+    [1, 2, '2026-06-24T22:00:00Z', 'Seattle (Lumen Field)', 3],             // 00h CEST
   ],
   C: [
-    [2, 3, '2026-06-14T02:00:00Z', 'Boston (Gillette Stadium)', 1],
-    [0, 1, '2026-06-14T23:00:00Z', 'New Jersey (MetLife Stadium)', 1],
-    [0, 2, '2026-06-20T02:00:00Z', 'Philadelphie (Lincoln Financial Field)', 2],
-    [3, 1, '2026-06-20T23:00:00Z', 'Boston (Gillette Stadium)', 2],
-    [1, 2, '2026-06-25T02:00:00Z', 'Atlanta (Mercedes-Benz Stadium)', 3],
-    [3, 0, '2026-06-25T23:00:00Z', 'Miami (Hard Rock Stadium)', 3],
+    [2, 3, '2026-06-14T01:00:00Z', 'Boston (Gillette Stadium)', 1],         // 03h CEST
+    [0, 1, '2026-06-14T22:00:00Z', 'New Jersey (MetLife Stadium)', 1],      // 00h CEST
+    [0, 2, '2026-06-20T01:00:00Z', 'Philadelphie (Lincoln Financial Field)', 2], // 03h CEST
+    [3, 1, '2026-06-20T22:00:00Z', 'Boston (Gillette Stadium)', 2],         // 00h CEST
+    [1, 2, '2026-06-25T01:00:00Z', 'Atlanta (Mercedes-Benz Stadium)', 3],   // 03h CEST
+    [3, 0, '2026-06-25T22:00:00Z', 'Miami (Hard Rock Stadium)', 3],         // 00h CEST
   ],
   D: [
-    [0, 1, '2026-06-13T02:00:00Z', 'Los Angeles (SoFi Stadium)', 1],
-    [2, 3, '2026-06-13T05:00:00Z', 'Vancouver (BC Place)', 1],
-    [3, 1, '2026-06-19T05:00:00Z', 'San Francisco (Levi\'s Stadium)', 2],
-    [0, 2, '2026-06-19T20:00:00Z', 'Seattle (Lumen Field)', 2],
-    [3, 0, '2026-06-26T03:00:00Z', 'Los Angeles (SoFi Stadium)', 3],
-    [1, 2, '2026-06-26T03:00:00Z', 'San Francisco (Levi\'s Stadium)', 3],
+    [0, 1, '2026-06-13T01:00:00Z', 'Los Angeles (SoFi Stadium)', 1],        // 03h CEST
+    [2, 3, '2026-06-13T04:00:00Z', 'Vancouver (BC Place)', 1],              // 06h CEST
+    [3, 1, '2026-06-19T04:00:00Z', 'San Francisco (Levi\'s Stadium)', 2],   // 06h CEST
+    [0, 2, '2026-06-19T19:00:00Z', 'Seattle (Lumen Field)', 2],             // 21h CEST
+    [3, 0, '2026-06-26T02:00:00Z', 'Los Angeles (SoFi Stadium)', 3],        // 04h CEST
+    [1, 2, '2026-06-26T02:00:00Z', 'San Francisco (Levi\'s Stadium)', 3],   // 04h CEST
   ],
   E: [
-    [0, 1, '2026-06-14T18:00:00Z', 'Houston (NRG Stadium)', 1],
-    [2, 3, '2026-06-15T00:00:00Z', 'Philadelphie (Lincoln Financial Field)', 1],
-    [0, 2, '2026-06-20T21:00:00Z', 'Toronto (BMO Field)', 2],
-    [3, 1, '2026-06-21T01:00:00Z', 'Kansas City (Arrowhead Stadium)', 2],
-    [3, 0, '2026-06-25T21:00:00Z', 'New Jersey (MetLife Stadium)', 3],
-    [1, 2, '2026-06-25T21:00:00Z', 'Philadelphie (Lincoln Financial Field)', 3],
+    [0, 1, '2026-06-14T17:00:00Z', 'Houston (NRG Stadium)', 1],             // 19h CEST
+    [2, 3, '2026-06-14T23:00:00Z', 'Philadelphie (Lincoln Financial Field)', 1], // 01h CEST
+    [0, 2, '2026-06-20T20:00:00Z', 'Toronto (BMO Field)', 2],               // 22h CEST
+    [3, 1, '2026-06-21T00:00:00Z', 'Kansas City (Arrowhead Stadium)', 2],   // 02h CEST
+    [3, 0, '2026-06-25T20:00:00Z', 'New Jersey (MetLife Stadium)', 3],      // 22h CEST
+    [1, 2, '2026-06-25T20:00:00Z', 'Philadelphie (Lincoln Financial Field)', 3], // 22h CEST
   ],
   F: [
-    [0, 1, '2026-06-14T21:00:00Z', 'Dallas (AT&T Stadium)', 1],
-    [2, 3, '2026-06-15T03:00:00Z', 'Monterrey (Estadio BBVA)', 1],
-    [0, 2, '2026-06-20T18:00:00Z', 'Houston (NRG Stadium)', 2],
-    [3, 1, '2026-06-20T05:00:00Z', 'Monterrey (Estadio BBVA)', 2],
-    [1, 2, '2026-06-26T01:00:00Z', 'Dallas (AT&T Stadium)', 3],
-    [3, 0, '2026-06-26T01:00:00Z', 'Kansas City (Arrowhead Stadium)', 3],
+    [0, 1, '2026-06-14T20:00:00Z', 'Dallas (AT&T Stadium)', 1],             // 22h CEST
+    [2, 3, '2026-06-15T02:00:00Z', 'Monterrey (Estadio BBVA)', 1],          // 04h CEST
+    [0, 2, '2026-06-20T17:00:00Z', 'Houston (NRG Stadium)', 2],             // 19h CEST
+    [3, 1, '2026-06-20T04:00:00Z', 'Monterrey (Estadio BBVA)', 2],          // 06h CEST
+    [1, 2, '2026-06-26T00:00:00Z', 'Dallas (AT&T Stadium)', 3],             // 02h CEST
+    [3, 0, '2026-06-26T00:00:00Z', 'Kansas City (Arrowhead Stadium)', 3],   // 02h CEST
   ],
   G: [
-    [2, 3, '2026-06-15T02:00:00Z', 'Los Angeles (SoFi Stadium)', 1],
-    [0, 1, '2026-06-15T19:00:00Z', 'Seattle (Lumen Field)', 1],
-    [0, 2, '2026-06-21T19:00:00Z', 'Los Angeles (SoFi Stadium)', 2],
-    [3, 1, '2026-06-21T01:00:00Z', 'Vancouver (BC Place)', 2],
-    [1, 2, '2026-06-26T04:00:00Z', 'Seattle (Lumen Field)', 3],
-    [3, 0, '2026-06-26T04:00:00Z', 'Vancouver (BC Place)', 3],
+    [2, 3, '2026-06-15T01:00:00Z', 'Los Angeles (SoFi Stadium)', 1],        // 03h CEST
+    [0, 1, '2026-06-15T18:00:00Z', 'Seattle (Lumen Field)', 1],             // 20h CEST
+    [0, 2, '2026-06-21T18:00:00Z', 'Los Angeles (SoFi Stadium)', 2],        // 20h CEST
+    [3, 1, '2026-06-21T00:00:00Z', 'Vancouver (BC Place)', 2],              // 02h CEST
+    [1, 2, '2026-06-26T03:00:00Z', 'Seattle (Lumen Field)', 3],             // 05h CEST
+    [3, 0, '2026-06-26T03:00:00Z', 'Vancouver (BC Place)', 3],              // 05h CEST
   ],
   H: [
-    [0, 1, '2026-06-15T17:00:00Z', 'Atlanta (Mercedes-Benz Stadium)', 1],
-    [2, 3, '2026-06-15T22:00:00Z', 'Miami (Hard Rock Stadium)', 1],
-    [0, 2, '2026-06-21T17:00:00Z', 'Atlanta (Mercedes-Benz Stadium)', 2],
-    [3, 1, '2026-06-21T22:00:00Z', 'Miami (Hard Rock Stadium)', 2],
-    [1, 2, '2026-06-26T01:00:00Z', 'Houston (NRG Stadium)', 3],
-    [3, 0, '2026-06-26T01:00:00Z', 'Guadalajara (Estadio Akron)', 3],
+    [0, 1, '2026-06-15T16:00:00Z', 'Atlanta (Mercedes-Benz Stadium)', 1],   // 18h CEST
+    [2, 3, '2026-06-15T21:00:00Z', 'Miami (Hard Rock Stadium)', 1],         // 23h CEST
+    [0, 2, '2026-06-21T16:00:00Z', 'Atlanta (Mercedes-Benz Stadium)', 2],   // 18h CEST
+    [3, 1, '2026-06-21T21:00:00Z', 'Miami (Hard Rock Stadium)', 2],         // 23h CEST
+    [1, 2, '2026-06-26T00:00:00Z', 'Houston (NRG Stadium)', 3],             // 02h CEST
+    [3, 0, '2026-06-26T00:00:00Z', 'Guadalajara (Estadio Akron)', 3],       // 02h CEST
   ],
   I: [
-    [0, 1, '2026-06-16T19:00:00Z', 'New Jersey (MetLife Stadium)', 1],
-    [2, 3, '2026-06-16T22:00:00Z', 'Boston (Gillette Stadium)', 1],
-    [0, 2, '2026-06-22T21:00:00Z', 'Philadelphie (Lincoln Financial Field)', 2],
-    [3, 1, '2026-06-22T00:00:00Z', 'New Jersey (MetLife Stadium)', 2],
-    [3, 0, '2026-06-26T19:00:00Z', 'Boston (Gillette Stadium)', 3],
-    [1, 2, '2026-06-26T19:00:00Z', 'Toronto (BMO Field)', 3],
+    [0, 1, '2026-06-16T18:00:00Z', 'New Jersey (MetLife Stadium)', 1],      // 20h CEST
+    [2, 3, '2026-06-16T21:00:00Z', 'Boston (Gillette Stadium)', 1],         // 23h CEST
+    [0, 2, '2026-06-22T20:00:00Z', 'Philadelphie (Lincoln Financial Field)', 2], // 22h CEST
+    [3, 1, '2026-06-21T23:00:00Z', 'New Jersey (MetLife Stadium)', 2],      // 01h CEST
+    [3, 0, '2026-06-26T18:00:00Z', 'Boston (Gillette Stadium)', 3],         // 20h CEST
+    [1, 2, '2026-06-26T18:00:00Z', 'Toronto (BMO Field)', 3],               // 20h CEST
   ],
   J: [
-    [0, 1, '2026-06-16T01:00:00Z', 'Kansas City (Arrowhead Stadium)', 1],
-    [2, 3, '2026-06-16T04:00:00Z', 'San Francisco (Levi\'s Stadium)', 1],
-    [0, 2, '2026-06-22T18:00:00Z', 'Dallas (AT&T Stadium)', 2],
-    [3, 1, '2026-06-22T04:00:00Z', 'San Francisco (Levi\'s Stadium)', 2],
-    [1, 2, '2026-06-27T03:00:00Z', 'Kansas City (Arrowhead Stadium)', 3],
-    [3, 0, '2026-06-27T03:00:00Z', 'Dallas (AT&T Stadium)', 3],
+    [0, 1, '2026-06-16T00:00:00Z', 'Kansas City (Arrowhead Stadium)', 1],   // 02h CEST
+    [2, 3, '2026-06-16T03:00:00Z', 'San Francisco (Levi\'s Stadium)', 1],   // 05h CEST
+    [0, 2, '2026-06-22T17:00:00Z', 'Dallas (AT&T Stadium)', 2],             // 19h CEST
+    [3, 1, '2026-06-22T03:00:00Z', 'San Francisco (Levi\'s Stadium)', 2],   // 05h CEST
+    [1, 2, '2026-06-27T02:00:00Z', 'Kansas City (Arrowhead Stadium)', 3],   // 04h CEST
+    [3, 0, '2026-06-27T02:00:00Z', 'Dallas (AT&T Stadium)', 3],             // 04h CEST
   ],
   K: [
-    [0, 1, '2026-06-17T18:00:00Z', 'Houston (NRG Stadium)', 1],
-    [2, 3, '2026-06-17T03:00:00Z', 'Mexico (Estadio Azteca)', 1],
-    [0, 2, '2026-06-23T18:00:00Z', 'Houston (NRG Stadium)', 2],
-    [3, 1, '2026-06-23T03:00:00Z', 'Guadalajara (Estadio Akron)', 2],
-    [3, 0, '2026-06-27T00:30:00Z', 'Miami (Hard Rock Stadium)', 3],
-    [1, 2, '2026-06-27T00:30:00Z', 'Atlanta (Mercedes-Benz Stadium)', 3],
+    [0, 1, '2026-06-17T17:00:00Z', 'Houston (NRG Stadium)', 1],             // 19h CEST
+    [2, 3, '2026-06-17T02:00:00Z', 'Mexico (Estadio Azteca)', 1],           // 04h CEST
+    [0, 2, '2026-06-23T17:00:00Z', 'Houston (NRG Stadium)', 2],             // 19h CEST
+    [3, 1, '2026-06-23T02:00:00Z', 'Guadalajara (Estadio Akron)', 2],       // 04h CEST
+    [3, 0, '2026-06-26T23:30:00Z', 'Miami (Hard Rock Stadium)', 3],         // 01h30 CEST
+    [1, 2, '2026-06-26T23:30:00Z', 'Atlanta (Mercedes-Benz Stadium)', 3],   // 01h30 CEST
   ],
   L: [
-    [0, 1, '2026-06-17T21:00:00Z', 'Dallas (AT&T Stadium)', 1],
-    [2, 3, '2026-06-17T23:00:00Z', 'Toronto (BMO Field)', 1],
-    [0, 2, '2026-06-23T21:00:00Z', 'Boston (Gillette Stadium)', 2],
-    [3, 1, '2026-06-23T23:00:00Z', 'Toronto (BMO Field)', 2],
-    [3, 0, '2026-06-27T22:00:00Z', 'New Jersey (MetLife Stadium)', 3],
-    [1, 2, '2026-06-27T22:00:00Z', 'Philadelphie (Lincoln Financial Field)', 3],
+    [0, 1, '2026-06-17T20:00:00Z', 'Dallas (AT&T Stadium)', 1],             // 22h CEST
+    [2, 3, '2026-06-17T22:00:00Z', 'Toronto (BMO Field)', 1],               // 00h CEST
+    [0, 2, '2026-06-23T20:00:00Z', 'Boston (Gillette Stadium)', 2],         // 22h CEST
+    [3, 1, '2026-06-23T22:00:00Z', 'Toronto (BMO Field)', 2],               // 00h CEST
+    [3, 0, '2026-06-27T21:00:00Z', 'New Jersey (MetLife Stadium)', 3],      // 23h CEST
+    [1, 2, '2026-06-27T21:00:00Z', 'Philadelphie (Lincoln Financial Field)', 3], // 23h CEST
   ],
 };
 
