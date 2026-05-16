@@ -6,7 +6,7 @@ Bienvenue dans le jeu de pronostics Coupe du Monde 2026 entre collègues ! 🇫�
 
 ## 📲 Comment s'inscrire ?
 
-1. Rends-toi sur le site des pronos.
+1. Rends-toi sur le site des pronos : **https://nicolaschaillot.github.io/wc2026-pronos/**
 2. Saisis le **pseudo** de ton choix et le **code** qui t'a été transmis personnellement.
 3. Clique sur **Rejoindre** — c'est tout !
 
