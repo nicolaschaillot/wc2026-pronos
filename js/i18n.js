@@ -72,6 +72,8 @@ const TRANSLATIONS = {
     'next.match.noprono':  '⚠ Non pronostiqué !',
     'next.match.prono':    'Mon prono',
     'next.match.in':       'dans',
+    'countdown.day':       'j',
+    'countdown.hour':      'h',
   },
   sq: {
     'header.title':        'Pronostikime · Kupa e Botës 2026',
@@ -145,6 +147,8 @@ const TRANSLATIONS = {
     'next.match.noprono':  '⚠ Ende nuk e ke pronostikuar!',
     'next.match.prono':    'Pronostikimi im',
     'next.match.in':       'pas',
+    'countdown.day':       'd',
+    'countdown.hour':      'o',
   },
 };
 

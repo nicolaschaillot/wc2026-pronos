@@ -119,8 +119,8 @@ function formatCountdown(diff) {
   const h  = Math.floor((diff % 86400000) / 3600000);
   const m  = Math.floor((diff % 3600000) / 60000);
   const s  = Math.floor((diff % 60000) / 1000);
-  if (d >= 1) return `${d}j ${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}min`;
-  if (h >= 1) return `${h}h ${String(m).padStart(2, '0')}min`;
+  if (d >= 1) return `${d}${t('countdown.day')} ${String(h).padStart(2, '0')}${t('countdown.hour')} ${String(m).padStart(2, '0')}min`;
+  if (h >= 1) return `${h}${t('countdown.hour')} ${String(m).padStart(2, '0')}min`;
   if (m >= 1) return `${m}min ${String(s).padStart(2, '0')}s`;
   return `${s}s`;
 }
@@ -538,8 +538,11 @@ function renderPredictions(pseudo) {
     sidebar.appendChild(koBtn);
   }
 
-  const defaultGroup = (currentGroupId && document.getElementById(`group-section-${currentGroupId}`))
-    ? currentGroupId : Object.keys(GROUPS)[0];
+  const defaultGroup = (() => {
+    if (currentGroupId && document.getElementById(`group-section-${currentGroupId}`)) return currentGroupId;
+    if (knockoutMatches.length > 0 && MATCHES.every(m => isLocked(m))) return 'KO';
+    return Object.keys(GROUPS)[0];
+  })();
   showGroup(defaultGroup);
   attachCardHandlers(content, pseudo);
   renderNextMatchBanner(pseudo);
