@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin · Pronos 2026</title>
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    main { max-width: 1000px; }
+    .admin-header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
+    .admin-header h1 { color: var(--gold); font-size: 1.3rem; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">⚙️</div>
+  <div class="header-title">
+    Admin — Pronos 2026
+    <small>Gestion des codes et des résultats</small>
+  </div>
+  <button class="btn-ghost" id="btn-admin-logout">Déconnexion</button>
+</header>
+
+<main>
+
+  <!-- ── Admin Login ─────────────────────────────────────────────────────── -->
+  <div id="admin-login" hidden>
+    <div class="login-card">
+      <div class="login-icon">🔐</div>
+      <h1>Accès Admin</h1>
+      <p>Mot de passe défini dans <code>js/firebase-config.js</code>.</p>
+      <form id="admin-login-form">
+        <div class="form-group">
+          <label for="admin-pwd">Mot de passe</label>
+          <input id="admin-pwd" type="password" required>
+        </div>
+        <button type="submit" class="btn-primary">Connexion</button>
+        <div class="error-msg" id="admin-login-error"></div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── Admin Panel ─────────────────────────────────────────────────────── -->
+  <div id="admin-panel" hidden>
+
+    <!-- Codes -->
+    <div class="admin-section">
+      <h2>🎟 Codes de participation</h2>
+      <div class="codes-controls">
+        <label for="code-count">Générer</label>
+        <input id="code-count" type="number" min="1" max="50" value="5">
+        <span>code(s)</span>
+        <button class="btn-sm" id="btn-add-codes">+ Ajouter</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Code</th><th>Utilisé par</th><th></th></tr>
+          </thead>
+          <tbody id="codes-body"></tbody>
+        </table>
+      </div>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:8px">
+        Transmets chaque code à un participant. Un code = un joueur.
+      </p>
+    </div>
+
+    <!-- Match results -->
+    <div class="admin-section">
+      <h2>📋 Résultats des matchs</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Gr.</th><th>Équipe 1</th><th>Équipe 2</th><th>Score</th><th>Action</th></tr>
+          </thead>
+          <tbody id="results-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- ── Result Modal ───────────────────────────────────────────────────────── -->
+<div id="result-modal" class="modal-backdrop" hidden>
+  <div class="modal">
+    <h3 id="modal-title"></h3>
+    <form id="result-form">
+      <input type="hidden" id="modal-match-id">
+      <div class="score-row">
+        <input type="number" id="modal-score1" min="0" max="20" placeholder="0" required>
+        <span style="font-size:1.4rem;color:var(--muted)">–</span>
+        <input type="number" id="modal-score2" min="0" max="20" placeholder="0" required>
+      </div>
+      <div class="modal-actions">
+        <button type="button" class="btn-ghost" id="btn-close-modal">Annuler</button>
+        <button type="submit" class="btn-primary" style="width:auto;padding:8px 24px">Enregistrer</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script type="module" src="js/admin.js"></script>
+</body>
+</html>

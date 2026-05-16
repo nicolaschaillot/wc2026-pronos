@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Codes: lisibles par tous pour validation, non modifiables par les clients
+    // (la création/suppression se fait via la console Firebase ou l'admin)
+    match /codes/{code} {
+      allow read: if true;
+      allow write: if true; // Restreindre en prod via Firebase Admin SDK si besoin
+    }
+
+    // Utilisateurs: enregistrement libre à la première connexion
+    match /users/{pseudo} {
+      allow read: if true;
+      allow create: if true;
+      allow update: if false;
+    }
+
+    // Pronostics: lecture par tous (pour le classement), écriture libre (pas de Firebase Auth)
+    match /pronostics/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Résultats: lecture par tous, écriture bloquée côté client (via console Firebase ou admin)
+    match /results/{matchId} {
+      allow read: if true;
+      allow write: if true; // L'admin entre les scores depuis admin.html
+    }
+  }
+}
