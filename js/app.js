@@ -199,7 +199,7 @@ function renderPredictions(pseudo) {
     btn.innerHTML = `
       <div class="gsb-header">
         <span class="gsb-letter">Groupe ${groupId}</span>
-        ${missing > 0 ? `<span class="gsb-badge">${missing}</span>` : '<span class="gsb-ok">✓</span>'}
+        ${missing > 0 ? `<span class="gsb-badge" title="${missing} pronostic${missing > 1 ? 's' : ''} manquant${missing > 1 ? 's' : ''}">${missing}</span>` : '<span class="gsb-ok" title="Tous les pronostics sont saisis">✓</span>'}
       </div>
       <div class="gsb-teams">
         ${GROUPS[groupId].teams.map(t => `<span class="gsb-team">${t.flag} ${t.name}</span>`).join('')}
@@ -246,7 +246,7 @@ function renderPredictions(pseudo) {
     koBtn.innerHTML = `
       <div class="gsb-header">
         <span class="gsb-letter">🏆 Élim.</span>
-        ${koMissing > 0 ? `<span class="gsb-badge">${koMissing}</span>` : '<span class="gsb-ok">✓</span>'}
+        ${koMissing > 0 ? `<span class="gsb-badge" title="${koMissing} pronostic${koMissing > 1 ? 's' : ''} manquant${koMissing > 1 ? 's' : ''}">${koMissing}</span>` : '<span class="gsb-ok" title="Tous les pronostics sont saisis">✓</span>'}
       </div>`;
     koBtn.addEventListener('click', () => showGroup('KO'));
     sidebar.appendChild(koBtn);
