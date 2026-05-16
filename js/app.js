@@ -69,6 +69,7 @@ async function handleLogin(e) {
 
 let userPronostics  = {};
 let knockoutMatches = [];
+let currentGroupId  = null;
 
 async function loadPronostics(pseudo) {
   const snap = await getDocs(collection(db, 'pronostics'));
@@ -163,34 +164,62 @@ function attachCardHandlers(container, pseudo) {
   });
 }
 
+function showGroup(groupId) {
+  currentGroupId = groupId;
+  document.querySelectorAll('#predictions-content > *').forEach(el => { el.hidden = true; });
+  const target = document.getElementById(`group-section-${groupId}`);
+  if (target) target.hidden = false;
+  document.querySelectorAll('.group-sidebar-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.group === groupId);
+  });
+}
+
 function renderPredictions(pseudo) {
-  const container = document.getElementById('predictions-list');
-  container.innerHTML = '';
+  const sidebar = document.getElementById('group-sidebar');
+  const content = document.getElementById('predictions-content');
+  sidebar.innerHTML = '';
+  content.innerHTML = '';
 
   // ── Phase de groupes ──────────────────────────────────────────────────────
   for (const [groupId] of Object.entries(GROUPS)) {
+    const groupMatches = MATCHES.filter(m => m.group === groupId);
+    const missing = groupMatches.filter(m => !isLocked(m) && !userPronostics[m.id]).length;
+
     const section = document.createElement('section');
     section.className = 'group-section';
+    section.id = `group-section-${groupId}`;
+    section.hidden = true;
     section.innerHTML = `<h2 class="group-title">Groupe ${groupId}</h2>`;
+    for (const match of groupMatches) section.appendChild(buildMatchCard(match, pseudo));
+    content.appendChild(section);
 
-    for (const match of MATCHES.filter(m => m.group === groupId)) {
-      section.appendChild(buildMatchCard(match, pseudo));
-    }
-    container.appendChild(section);
+    const btn = document.createElement('button');
+    btn.className = 'group-sidebar-btn';
+    btn.dataset.group = groupId;
+    btn.innerHTML = `
+      <div class="gsb-header">
+        <span class="gsb-letter">Groupe ${groupId}</span>
+        ${missing > 0 ? `<span class="gsb-badge">${missing}</span>` : '<span class="gsb-ok">✓</span>'}
+      </div>
+      <div class="gsb-teams">
+        ${GROUPS[groupId].teams.map(t => `<span class="gsb-team">${t.flag} ${t.name}</span>`).join('')}
+      </div>`;
+    btn.addEventListener('click', () => showGroup(groupId));
+    sidebar.appendChild(btn);
   }
 
   // ── Phase éliminatoire ────────────────────────────────────────────────────
   if (knockoutMatches.length > 0) {
-    const koHeader = document.createElement('div');
-    koHeader.className = 'ko-header';
-    koHeader.innerHTML = '<h2>🏆 Phase éliminatoire</h2>';
-    container.appendChild(koHeader);
+    const koMissing = knockoutMatches.filter(m => !isLocked(m) && !userPronostics[m.id]).length;
+
+    const koContainer = document.createElement('div');
+    koContainer.id = 'group-section-KO';
+    koContainer.hidden = true;
+    koContainer.innerHTML = `<div class="ko-header"><h2>🏆 Phase éliminatoire</h2></div>`;
 
     const ROUND_ORDER = ['1/32', '1/16', '1/4', '1/2', 'Petite finale', 'Finale'];
     const byRound = {};
-    knockoutMatches.forEach(m => {
-      (byRound[m.round] = byRound[m.round] || []).push(m);
-    });
+    knockoutMatches.forEach(m => { (byRound[m.round] = byRound[m.round] || []).push(m); });
 
     for (const round of ROUND_ORDER) {
       if (!byRound[round]) continue;
@@ -207,11 +236,26 @@ function renderPredictions(pseudo) {
         ${mult > 1 ? `<span class="round-mult-badge">×${mult} pts</span>` : ''}
       </h2>`;
       byRound[round].forEach(m => section.appendChild(buildMatchCard(m, pseudo, mult)));
-      container.appendChild(section);
+      koContainer.appendChild(section);
     }
+    content.appendChild(koContainer);
+
+    const koBtn = document.createElement('button');
+    koBtn.className = 'group-sidebar-btn gsb-ko';
+    koBtn.dataset.group = 'KO';
+    koBtn.innerHTML = `
+      <div class="gsb-header">
+        <span class="gsb-letter">🏆 Élim.</span>
+        ${koMissing > 0 ? `<span class="gsb-badge">${koMissing}</span>` : '<span class="gsb-ok">✓</span>'}
+      </div>`;
+    koBtn.addEventListener('click', () => showGroup('KO'));
+    sidebar.appendChild(koBtn);
   }
 
-  attachCardHandlers(container, pseudo);
+  const defaultGroup = (currentGroupId && document.getElementById(`group-section-${currentGroupId}`))
+    ? currentGroupId : Object.keys(GROUPS)[0];
+  showGroup(defaultGroup);
+  attachCardHandlers(content, pseudo);
 }
 
 async function savePronostic(pseudo, matchId) {
