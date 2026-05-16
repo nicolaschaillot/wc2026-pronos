@@ -442,6 +442,7 @@ td.detail { color: var(--muted); font-size: .8rem; }
   border-radius: 6px;
   padding: 5px 12px;
   font-size: .8rem;
+  line-height: 1.2;
   cursor: pointer;
   transition: all .2s;
 }
