@@ -153,26 +153,26 @@ const GROUP_SCHEDULE = {
     [1, 2, '2026-06-26T19:00:00Z', 'Toronto (BMO Field)', 3],               // 20h CEST
   ],
   J: [
-    [0, 1, '2026-06-16T00:00:00Z', 'Kansas City (Arrowhead Stadium)', 1],   // 02h CEST
-    [2, 3, '2026-06-16T03:00:00Z', 'San Francisco (Levi\'s Stadium)', 1],   // 05h CEST
+    [0, 1, '2026-06-17T01:00:00Z', 'Kansas City (Arrowhead Stadium)', 1],   // 02h CEST
+    [2, 3, '2026-06-17T04:00:00Z', 'San Francisco (Levi\'s Stadium)', 1],   // 05h CEST
     [0, 2, '2026-06-22T17:00:00Z', 'Dallas (AT&T Stadium)', 2],             // 19h CEST
-    [3, 1, '2026-06-22T03:00:00Z', 'San Francisco (Levi\'s Stadium)', 2],   // 05h CEST
-    [1, 2, '2026-06-27T02:00:00Z', 'Kansas City (Arrowhead Stadium)', 3],   // 04h CEST
-    [3, 0, '2026-06-27T02:00:00Z', 'Dallas (AT&T Stadium)', 3],             // 04h CEST
+    [3, 1, '2026-06-23T03:00:00Z', 'San Francisco (Levi\'s Stadium)', 2],   // 05h CEST
+    [1, 2, '2026-06-28T02:00:00Z', 'Kansas City (Arrowhead Stadium)', 3],   // 04h CEST
+    [3, 0, '2026-06-28T02:00:00Z', 'Dallas (AT&T Stadium)', 3],             // 04h CEST
   ],
   K: [
     [0, 1, '2026-06-17T17:00:00Z', 'Houston (NRG Stadium)', 1],             // 19h CEST
-    [2, 3, '2026-06-17T02:00:00Z', 'Mexico (Estadio Azteca)', 1],           // 04h CEST
+    [2, 3, '2026-06-18T02:00:00Z', 'Mexico (Estadio Azteca)', 1],           // 04h CEST
     [0, 2, '2026-06-23T17:00:00Z', 'Houston (NRG Stadium)', 2],             // 19h CEST
-    [3, 1, '2026-06-23T02:00:00Z', 'Guadalajara (Estadio Akron)', 2],       // 04h CEST
-    [3, 0, '2026-06-26T23:30:00Z', 'Miami (Hard Rock Stadium)', 3],         // 01h30 CEST
-    [1, 2, '2026-06-26T23:30:00Z', 'Atlanta (Mercedes-Benz Stadium)', 3],   // 01h30 CEST
+    [3, 1, '2026-06-24T02:00:00Z', 'Guadalajara (Estadio Akron)', 2],       // 04h CEST
+    [3, 0, '2026-06-27T23:30:00Z', 'Miami (Hard Rock Stadium)', 3],         // 01h30 CEST
+    [1, 2, '2026-06-27T23:30:00Z', 'Atlanta (Mercedes-Benz Stadium)', 3],   // 01h30 CEST
   ],
   L: [
     [0, 1, '2026-06-17T20:00:00Z', 'Dallas (AT&T Stadium)', 1],             // 22h CEST
-    [2, 3, '2026-06-17T22:00:00Z', 'Toronto (BMO Field)', 1],               // 00h CEST
+    [2, 3, '2026-06-17T23:00:00Z', 'Toronto (BMO Field)', 1],               // 00h CEST
     [0, 2, '2026-06-23T20:00:00Z', 'Boston (Gillette Stadium)', 2],         // 22h CEST
-    [3, 1, '2026-06-23T22:00:00Z', 'Toronto (BMO Field)', 2],               // 00h CEST
+    [3, 1, '2026-06-23T23:00:00Z', 'Toronto (BMO Field)', 2],               // 00h CEST
     [3, 0, '2026-06-27T21:00:00Z', 'New Jersey (MetLife Stadium)', 3],      // 23h CEST
     [1, 2, '2026-06-27T21:00:00Z', 'Philadelphie (Lincoln Financial Field)', 3], // 23h CEST
   ],
