@@ -70,7 +70,14 @@ async function handleLogin(e) {
 
 let userPronostics  = {};
 let knockoutMatches = [];
+let matchResults    = {};
 let currentGroupId  = null;
+
+async function loadResults() {
+  const snap = await getDocs(collection(db, 'results'));
+  matchResults = {};
+  snap.forEach(d => { matchResults[d.id] = d.data(); });
+}
 
 async function loadPronostics(pseudo) {
   const snap = await getDocs(collection(db, 'pronostics'));
@@ -107,6 +114,7 @@ function formatDate(isoStr) {
 
 function buildMatchCard(match, pseudo, multiplier = 1) {
   const prono  = userPronostics[match.id];
+  const result = matchResults[match.id];
   const locked = isLocked(match);
   const s1 = prono?.score1 ?? '';
   const s2 = prono?.score2 ?? '';
@@ -116,6 +124,24 @@ function buildMatchCard(match, pseudo, multiplier = 1) {
 
   const multBadge = multiplier > 1
     ? `<span class="multiplier-badge">×${multiplier}</span>` : '';
+
+  // ── Ligne résultat officiel + points ──────────────────────────────────────
+  let resultHtml = '';
+  if (locked && result) {
+    const basePts = prono ? calcPoints(prono, result) : null;
+    const pts     = basePts !== null ? basePts * multiplier : null;
+    const icon    = basePts === 3 ? '🎯' : basePts === 1 ? '✅' : basePts === 0 ? '❌' : '';
+    const cls     = basePts === 3 ? 'pts-exact' : basePts === 1 ? 'pts-correct' : basePts === 0 ? 'pts-wrong' : '';
+    const ptsText = pts !== null
+      ? `<span class="result-pts ${cls}">${icon} ${pts} ${t('lb.pts')}</span>`
+      : '';
+    resultHtml = `
+      <div class="result-row">
+        <span class="result-label">${t('result.label')} :</span>
+        <span class="result-score">${result.score1} – ${result.score2}</span>
+        ${ptsText}
+      </div>`;
+  }
 
   card.innerHTML = `
     <div class="match-meta">
@@ -145,6 +171,7 @@ function buildMatchCard(match, pseudo, multiplier = 1) {
         <span class="flag">${match.team2.flag}</span>
       </span>
     </div>
+    ${resultHtml}
     ${!locked ? `<div class="save-row">
       <button class="btn-save" data-match="${match.id}">${t('save')}</button>
       <span class="save-status" id="status-${match.id}"></span>
@@ -160,6 +187,12 @@ function attachCardHandlers(container, pseudo) {
   container.querySelectorAll('.score-input').forEach(input => {
     input.addEventListener('keydown', e => {
       if (e.key === 'Enter') savePronostic(pseudo, input.dataset.match);
+    });
+    input.addEventListener('blur', () => {
+      const matchId = input.dataset.match;
+      const i1 = container.querySelector(`.score-input[data-match="${matchId}"][data-side="1"]`);
+      const i2 = container.querySelector(`.score-input[data-match="${matchId}"][data-side="2"]`);
+      if (i1?.value !== '' && i2?.value !== '') savePronostic(pseudo, matchId);
     });
   });
 }
@@ -183,6 +216,8 @@ function renderPredictions(pseudo) {
   // ── Phase de groupes ──────────────────────────────────────────────────────
   for (const [groupId] of Object.entries(GROUPS)) {
     const groupMatches = MATCHES.filter(m => m.group === groupId);
+    const total   = groupMatches.length;
+    const saved   = groupMatches.filter(m => userPronostics[m.id]).length;
     const missing = groupMatches.filter(m => !isLocked(m) && !userPronostics[m.id]).length;
 
     const section = document.createElement('section');
@@ -193,13 +228,17 @@ function renderPredictions(pseudo) {
     for (const match of groupMatches) section.appendChild(buildMatchCard(match, pseudo));
     content.appendChild(section);
 
+    const progressBadge = missing > 0
+      ? `<span class="gsb-badge" title="${t('sidebar.missing', missing)}">${saved}/${total}</span>`
+      : `<span class="gsb-ok" title="${t('sidebar.complete')}">✓</span>`;
+
     const btn = document.createElement('button');
     btn.className = 'group-sidebar-btn';
     btn.dataset.group = groupId;
     btn.innerHTML = `
       <div class="gsb-header">
         <span class="gsb-letter">${t('group.label')} ${groupId}</span>
-        ${missing > 0 ? `<span class="gsb-badge" title="${t('sidebar.missing', missing)}">${missing}</span>` : `<span class="gsb-ok" title="${t('sidebar.complete')}">✓</span>`}
+        ${progressBadge}
       </div>
       <div class="gsb-teams">
         ${GROUPS[groupId].teams.map(team => `<span class="gsb-team">${team.flag} ${team.name}</span>`).join('')}
@@ -210,6 +249,8 @@ function renderPredictions(pseudo) {
 
   // ── Phase éliminatoire ────────────────────────────────────────────────────
   if (knockoutMatches.length > 0) {
+    const koTotal   = knockoutMatches.length;
+    const koSaved   = knockoutMatches.filter(m => userPronostics[m.id]).length;
     const koMissing = knockoutMatches.filter(m => !isLocked(m) && !userPronostics[m.id]).length;
 
     const koContainer = document.createElement('div');
@@ -242,7 +283,7 @@ function renderPredictions(pseudo) {
     koBtn.innerHTML = `
       <div class="gsb-header">
         <span class="gsb-letter">${t('ko.elim')}</span>
-        ${koMissing > 0 ? `<span class="gsb-badge" title="${t('sidebar.missing', koMissing)}">${koMissing}</span>` : `<span class="gsb-ok" title="${t('sidebar.complete')}">✓</span>`}
+        ${koMissing > 0 ? `<span class="gsb-badge" title="${t('sidebar.missing', koMissing)}">${koSaved}/${koTotal}</span>` : `<span class="gsb-ok" title="${t('sidebar.complete')}">✓</span>`}
       </div>`;
     koBtn.addEventListener('click', () => showGroup('KO'));
     sidebar.appendChild(koBtn);
@@ -371,7 +412,7 @@ async function initApp() {
   document.getElementById('btn-logout').hidden = false;
   showView('view-predictions');
 
-  await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches()]);
+  await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults()]);
   renderPredictions(user.pseudo);
 }
 
@@ -395,7 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (view === 'view-predictions') {
         const user = getSession();
         if (user) {
-          await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches()]);
+          await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults()]);
           renderPredictions(user.pseudo);
         }
       }
@@ -407,7 +448,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!user) return;
     const activeView = document.querySelector('.view:not([hidden])');
     if (activeView?.id === 'view-predictions') {
-      await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches()]);
+      await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults()]);
       renderPredictions(user.pseudo);
     } else if (activeView?.id === 'view-leaderboard') {
       await loadLeaderboard();

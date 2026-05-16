@@ -307,6 +307,26 @@ footer {
 
 .save-status { font-size: .8rem; color: var(--primary); min-width: 80px; }
 
+/* ── Résultat officiel sur carte verrouillée ───────────────────────────────── */
+.result-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: .8rem;
+  flex-wrap: wrap;
+}
+
+.result-label { color: var(--muted); }
+.result-score { font-weight: 700; color: var(--text); }
+
+.result-pts { font-weight: 700; }
+.result-pts.pts-exact   { color: var(--gold); }
+.result-pts.pts-correct { color: var(--primary); }
+.result-pts.pts-wrong   { color: var(--muted); }
+
 /* ── Knockout section ──────────────────────────────────────────────────────── */
 .ko-header {
   border-top: 2px solid var(--gold);
