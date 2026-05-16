@@ -368,6 +368,7 @@ async function initApp() {
 
   document.getElementById('username-display').textContent = user.pseudo;
   document.getElementById('nav').hidden = false;
+  document.getElementById('btn-logout').hidden = false;
   showView('view-predictions');
 
   await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches()]);
@@ -382,6 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-logout').addEventListener('click', () => {
     clearSession();
     document.getElementById('nav').hidden = true;
+    document.getElementById('btn-logout').hidden = true;
     showView('view-login');
   });
 

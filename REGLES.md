@@ -58,6 +58,16 @@ Les points sont multipliés selon le tour :
 
 ---
 
+## 🌍 Langue / Gjuha
+
+Le site est disponible en **français** et en **albanais**.  
+Utilise le bouton **🇦🇱 Shqip / 🇫🇷 Français** en haut à droite pour changer de langue à tout moment.
+
+Faqja është e disponueshme në **frëngjisht** dhe në **shqip**.  
+Përdor butonin **🇦🇱 Shqip / 🇫🇷 Français** në krye djathtas për të ndryshuar gjuhën.
+
+---
+
 ## 🏅 Classement
 
 Le classement est mis à jour **en temps réel** dès qu'un résultat est saisi.  
