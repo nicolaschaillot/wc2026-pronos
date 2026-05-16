@@ -111,6 +111,62 @@ async function loadAllPronostics() {
   });
 }
 
+let _nextMatchInterval = null;
+
+function formatCountdown(diff) {
+  const h  = Math.floor(diff / 3600000);
+  const m  = Math.floor((diff % 3600000) / 60000);
+  const s  = Math.floor((diff % 60000) / 1000);
+  if (h >= 1) return `${h}h ${String(m).padStart(2, '0')}min`;
+  if (m >= 1) return `${m}min ${String(s).padStart(2, '0')}s`;
+  return `${s}s`;
+}
+
+function renderNextMatchBanner(pseudo) {
+  const el = document.getElementById('next-match-banner');
+  if (!el) return;
+
+  if (_nextMatchInterval) { clearInterval(_nextMatchInterval); _nextMatchInterval = null; }
+
+  const next = [...MATCHES, ...knockoutMatches]
+    .filter(m => new Date(m.date) > new Date())
+    .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
+
+  if (!next) { el.hidden = true; return; }
+
+  const prono    = userPronostics[next.id];
+  const pronoTxt = prono
+    ? `<span class="nm-prono-ok">${t('next.match.prono')} : ${prono.score1} – ${prono.score2}</span>`
+    : `<span class="nm-prono-warn">${t('next.match.noprono')}</span>`;
+
+  el.hidden = false;
+  el.className = `next-match-banner ${prono ? '' : 'nm-warn'}`;
+  el.innerHTML = `
+    <div class="nm-label">${t('next.match')}</div>
+    <div class="nm-teams">
+      <span>${next.team1.flag} ${next.team1.name}</span>
+      <span class="nm-vs">vs</span>
+      <span>${next.team2.flag} ${next.team2.name}</span>
+    </div>
+    <div class="nm-meta">${formatDate(next.date)} · 📍 ${next.venue}</div>
+    <div class="nm-countdown" id="nm-countdown"></div>
+    <div class="nm-prono">${pronoTxt}</div>`;
+
+  const countdownEl = document.getElementById('nm-countdown');
+  const tick = () => {
+    const diff = new Date(next.date) - Date.now();
+    if (diff <= 0) {
+      countdownEl.textContent = '🔒';
+      clearInterval(_nextMatchInterval);
+      _nextMatchInterval = null;
+    } else {
+      countdownEl.textContent = `dans ${formatCountdown(diff)}`;
+    }
+  };
+  tick();
+  _nextMatchInterval = setInterval(tick, 1000);
+}
+
 function renderUrgentBanner(pseudo) {
   const banner = document.getElementById('urgent-banner');
   if (!banner) return;
@@ -463,6 +519,7 @@ function renderPredictions(pseudo) {
     ? currentGroupId : Object.keys(GROUPS)[0];
   showGroup(defaultGroup);
   attachCardHandlers(content, pseudo);
+  renderNextMatchBanner(pseudo);
   renderUrgentBanner(pseudo);
   updateCountdowns();
 }
@@ -755,6 +812,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('btn-logout').addEventListener('click', () => {
     clearSession();
+    if (_nextMatchInterval) { clearInterval(_nextMatchInterval); _nextMatchInterval = null; }
     document.getElementById('nav').hidden = true;
     document.getElementById('btn-logout').hidden = true;
     showView('view-login');
