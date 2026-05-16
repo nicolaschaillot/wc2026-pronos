@@ -77,14 +77,8 @@ header {
 .header-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
 .header-user  { font-size: .85rem; color: var(--primary); font-weight: 600; }
 
-.btn-lang {
-  font-size: .78rem;
-  padding: 4px 10px;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  opacity: .85;
-}
-.btn-lang:hover { opacity: 1; border-color: var(--muted); }
+.btn-lang { opacity: .85; }
+.btn-lang:hover { opacity: 1; }
 
 /* ── Navigation tabs ───────────────────────────────────────────────────────── */
 nav {
