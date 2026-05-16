@@ -165,6 +165,7 @@ function renderNextMatchBanner(pseudo) {
           <span class="nm-vs">vs</span>
           <span>${next.team2.flag} ${next.team2.name}</span>
         </div>
+        <div class="nm-date">📅 ${formatDate(next.date)}</div>
         <div id="nm-prono">${_pronoHtml(prono)}</div>
       </div>
       <div class="nm-countdown-box">
@@ -180,7 +181,7 @@ function renderNextMatchBanner(pseudo) {
       clearInterval(_nextMatchInterval);
       _nextMatchInterval = null;
     } else {
-      countdownEl.textContent = `dans ${formatCountdown(diff)}`;
+      countdownEl.textContent = `${t('next.match.in')} ${formatCountdown(diff)}`;
     }
   };
   tick();

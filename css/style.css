@@ -411,6 +411,7 @@ tr.own-row td { color: var(--primary); font-weight: 600; }
 .nm-left    { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .nm-teams   { font-size: .95rem; font-weight: 700; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
 .nm-vs      { color: var(--muted); font-size: .8rem; font-weight: 400; }
+.nm-date    { font-size: .75rem; color: var(--muted); }
 .nm-countdown-box {
   background: var(--surface);
   border-radius: 8px;
