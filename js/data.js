@@ -124,17 +124,17 @@ const GROUP_SCHEDULE = {
     [0, 1, '2026-06-14T20:00:00Z', 'Dallas (AT&T Stadium)', 1],             // 22h CEST
     [2, 3, '2026-06-15T02:00:00Z', 'Monterrey (Estadio BBVA)', 1],          // 04h CEST
     [0, 2, '2026-06-20T17:00:00Z', 'Houston (NRG Stadium)', 2],             // 19h CEST
-    [3, 1, '2026-06-20T04:00:00Z', 'Monterrey (Estadio BBVA)', 2],          // 06h CEST
-    [1, 2, '2026-06-26T00:00:00Z', 'Dallas (AT&T Stadium)', 3],             // 02h CEST
-    [3, 0, '2026-06-26T00:00:00Z', 'Kansas City (Arrowhead Stadium)', 3],   // 02h CEST
+    [3, 1, '2026-06-21T04:00:00Z', 'Monterrey (Estadio BBVA)', 2],          // 06h CEST
+    [1, 2, '2026-06-25T23:00:00Z', 'Dallas (AT&T Stadium)', 3],             // 02h CEST
+    [3, 0, '2026-06-25T23:00:00Z', 'Kansas City (Arrowhead Stadium)', 3],   // 02h CEST
   ],
   G: [
-    [2, 3, '2026-06-15T01:00:00Z', 'Los Angeles (SoFi Stadium)', 1],        // 03h CEST
-    [0, 1, '2026-06-15T18:00:00Z', 'Seattle (Lumen Field)', 1],             // 20h CEST
+    [0, 1, '2026-06-15T19:00:00Z', 'Seattle (Lumen Field)', 1],             // 20h CEST
+    [2, 3, '2026-06-16T01:00:00Z', 'Los Angeles (SoFi Stadium)', 1],        // 03h CEST
     [0, 2, '2026-06-21T18:00:00Z', 'Los Angeles (SoFi Stadium)', 2],        // 20h CEST
-    [3, 1, '2026-06-21T00:00:00Z', 'Vancouver (BC Place)', 2],              // 02h CEST
-    [1, 2, '2026-06-26T03:00:00Z', 'Seattle (Lumen Field)', 3],             // 05h CEST
-    [3, 0, '2026-06-26T03:00:00Z', 'Vancouver (BC Place)', 3],              // 05h CEST
+    [3, 1, '2026-06-22T01:00:00Z', 'Vancouver (BC Place)', 2],              // 02h CEST
+    [1, 2, '2026-06-27T03:00:00Z', 'Seattle (Lumen Field)', 3],             // 05h CEST
+    [3, 0, '2026-06-27T03:00:00Z', 'Vancouver (BC Place)', 3],              // 05h CEST
   ],
   H: [
     [0, 1, '2026-06-15T16:00:00Z', 'Atlanta (Mercedes-Benz Stadium)', 1],   // 18h CEST
