@@ -393,6 +393,7 @@ footer {
 .leaderboard-header { margin-bottom: 16px; }
 .leaderboard-header h2 { font-size: 1.1rem; color: var(--gold); }
 .leaderboard-header p  { font-size: .8rem; color: var(--muted); }
+.last-update-info { font-size: .75rem; color: var(--muted); margin-top: 4px; font-style: italic; }
 
 .scoring-legend {
   background: var(--surface);

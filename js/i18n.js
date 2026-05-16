@@ -63,6 +63,8 @@ const TRANSLATIONS = {
     'lang.switch.title':   'Kaloni në shqip',
     'nav.rules':           '📖 Règles',
     'rules.back':          '← Retour à la connexion',
+    'last.update':         'Dernière mise à jour',
+    'last.update.none':    'Aucun résultat saisi pour l\'instant',
   },
   sq: {
     'header.title':        'Pronostikime · Kupa e Botës 2026',
@@ -127,6 +129,8 @@ const TRANSLATIONS = {
     'lang.switch.title':   'Passer en français',
     'nav.rules':           '📖 Rregullat',
     'rules.back':          '← Kthehu te hyrja',
+    'last.update':         'Përditësimi i fundit',
+    'last.update.none':    'Asnjë rezultat i regjistruar për momentin',
   },
 };
 

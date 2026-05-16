@@ -79,15 +79,32 @@ async function handleLogin(e) {
 
 // ─── Predictions ─────────────────────────────────────────────────────────────
 
-let userPronostics  = {};
-let knockoutMatches = [];
-let matchResults    = {};
-let currentGroupId  = null;
+let userPronostics   = {};
+let knockoutMatches  = [];
+let matchResults     = {};
+let currentGroupId   = null;
+let lastResultUpdate = null;
 
 async function loadResults() {
   const snap = await getDocs(collection(db, 'results'));
   matchResults = {};
-  snap.forEach(d => { matchResults[d.id] = d.data(); });
+  lastResultUpdate = null;
+  snap.forEach(d => {
+    const data = d.data();
+    matchResults[d.id] = data;
+    const ts = data.updatedAt;
+    if (ts) {
+      const ms = ts.toMillis ? ts.toMillis() : ts.seconds * 1000;
+      if (!lastResultUpdate || ms > lastResultUpdate) lastResultUpdate = ms;
+    }
+  });
+}
+
+function renderLastUpdate() {
+  const text = lastResultUpdate
+    ? `${t('last.update')} : ${(FMT[getLang()] || FMT.fr).format(new Date(lastResultUpdate))}`
+    : t('last.update.none');
+  document.querySelectorAll('.last-update-info').forEach(el => { el.textContent = text; });
 }
 
 async function loadPronostics(pseudo) {
@@ -466,6 +483,7 @@ function renderMyResults() {
   totalEl.className = 'results-total';
   totalEl.innerHTML = `<span>${t('results.total')} :</span> <strong>${grandTotal} ${t('lb.pts')}</strong>`;
   content.appendChild(totalEl);
+  renderLastUpdate();
 }
 
 // ─── Leaderboard ─────────────────────────────────────────────────────────────
@@ -483,7 +501,15 @@ async function loadLeaderboard() {
     ]);
 
     const results = {};
-    resultSnap.forEach(d => { results[d.id] = d.data(); });
+    resultSnap.forEach(d => {
+      const data = d.data();
+      results[d.id] = data;
+      const ts = data.updatedAt;
+      if (ts) {
+        const ms = ts.toMillis ? ts.toMillis() : ts.seconds * 1000;
+        if (!lastResultUpdate || ms > lastResultUpdate) lastResultUpdate = ms;
+      }
+    });
 
     // Multiplicateurs pour les matchs éliminatoires
     const multipliers = {};
@@ -534,6 +560,7 @@ async function loadLeaderboard() {
         <td class="detail">${r.exact} ${t('lb.exacts')} / ${r.pred} ${t('lb.pronos')}</td>
       </tr>
     `).join('');
+    renderLastUpdate();
   } catch (err) {
     console.error(err);
     container.innerHTML = `<tr><td colspan="4">${t('lb.error')}</td></tr>`;
