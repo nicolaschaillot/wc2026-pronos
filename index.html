@@ -32,6 +32,7 @@
   <button data-view="view-predictions" class="active" data-i18n="nav.pronos">⚽ Mes pronos</button>
   <button data-view="view-results" data-i18n="nav.results">📊 Mes résultats</button>
   <button data-view="view-leaderboard" data-i18n="nav.leaderboard">🏅 Classement</button>
+  <button data-view="view-rules" data-i18n="nav.rules">📖 Règles</button>
 </nav>
 
 <main>
@@ -60,6 +61,9 @@
         <button type="submit" class="btn-primary" data-i18n="login.submit">Rejoindre →</button>
         <div class="error-msg" id="login-error"></div>
       </form>
+      <div class="login-rules-link">
+        <a href="#" id="btn-show-rules" data-i18n="nav.rules">📖 Règles</a>
+      </div>
     </div>
   </div>
 
@@ -79,6 +83,15 @@
       <p data-i18n="results.subtitle">Récapitulatif de tes pronostics sur les matchs terminés.</p>
     </div>
     <div id="results-content"></div>
+  </div>
+
+  <!-- ── Rules ─────────────────────────────────────────────────────────── -->
+  <div id="view-rules" class="view" hidden>
+    <div class="leaderboard-header">
+      <h2 data-i18n="nav.rules">📖 Règles</h2>
+    </div>
+    <button id="btn-rules-back" class="btn-ghost" data-i18n="rules.back" hidden>← Retour à la connexion</button>
+    <div id="rules-content" class="rules-body"></div>
   </div>
 
   <!-- ── Leaderboard ─────────────────────────────────────────────────────── -->

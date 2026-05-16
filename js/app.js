@@ -1,6 +1,7 @@
 import { db } from './firebase-config.js';
 import { GROUPS, MATCHES, ROUND_MULTIPLIERS, calcPoints } from './data.js';
 import { t, getLang, initI18n } from './i18n.js';
+import { RULES_HTML } from './rules-content.js';
 import {
   doc, getDoc, setDoc, getDocs, deleteDoc, collection, serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
@@ -14,6 +15,11 @@ function saveSession(u) { sessionStorage.setItem('wc26_user', JSON.stringify(u))
 function clearSession() { sessionStorage.removeItem('wc26_user'); }
 
 // ─── Navigation ──────────────────────────────────────────────────────────────
+
+function renderRules() {
+  document.getElementById('rules-content').innerHTML = RULES_HTML[getLang()] || RULES_HTML.fr;
+  document.getElementById('btn-rules-back').hidden = !!getSession();
+}
 
 function showView(id) {
   document.querySelectorAll('.view').forEach(v => v.hidden = true);
@@ -562,6 +568,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('login-form').addEventListener('submit', handleLogin);
 
+  document.getElementById('btn-show-rules').addEventListener('click', e => {
+    e.preventDefault();
+    showView('view-rules');
+    renderRules();
+  });
+
+  document.getElementById('btn-rules-back').addEventListener('click', () => {
+    showView('view-login');
+  });
+
   document.getElementById('btn-logout').addEventListener('click', () => {
     clearSession();
     document.getElementById('nav').hidden = true;
@@ -573,6 +589,7 @@ document.addEventListener('DOMContentLoaded', () => {
     btn.addEventListener('click', async () => {
       const view = btn.dataset.view;
       showView(view);
+      if (view === 'view-rules') { renderRules(); return; }
       if (view === 'view-leaderboard') await loadLeaderboard();
       if (view === 'view-results') {
         const user = getSession();
@@ -603,6 +620,8 @@ document.addEventListener('DOMContentLoaded', () => {
       renderMyResults();
     } else if (activeView?.id === 'view-leaderboard') {
       await loadLeaderboard();
+    } else if (activeView?.id === 'view-rules') {
+      renderRules();
     }
   });
 

@@ -670,6 +670,28 @@ td.detail { color: var(--muted); font-size: .8rem; }
 }
 .results-total strong { color: var(--gold); font-size: 1.1rem; margin-left: 4px; }
 
+/* ── Rules view ─────────────────────────────────────────────────────────────── */
+.rules-body { max-width: 700px; line-height: 1.75; }
+.rules-body h2 { font-size: 1.15rem; color: var(--gold); margin: 0 0 12px; }
+.rules-body h3 { font-size: .95rem; color: var(--primary); margin: 24px 0 10px; border-bottom: 1px solid var(--border); padding-bottom: 6px; }
+.rules-body h4 { font-size: .875rem; color: var(--text); margin: 16px 0 8px; }
+.rules-body p  { margin-bottom: 10px; color: var(--text); }
+.rules-body ol, .rules-body ul { padding-left: 22px; margin-bottom: 12px; }
+.rules-body li { margin-bottom: 6px; }
+.rules-body blockquote {
+  background: var(--surface-2); border-left: 3px solid var(--primary);
+  padding: 10px 14px; border-radius: 0 var(--radius) var(--radius) 0;
+  margin: 12px 0; font-size: .875rem; color: var(--text);
+}
+.rules-body table { border-collapse: collapse; width: 100%; margin: 10px 0; }
+.rules-body th, .rules-body td { border: 1px solid var(--border); padding: 8px 12px; font-size: .85rem; text-align: left; }
+.rules-body th { background: var(--surface-2); color: var(--gold); }
+.rules-welcome { color: var(--muted) !important; margin-bottom: 4px !important; }
+#btn-rules-back { margin-bottom: 20px; }
+.login-rules-link { text-align: center; margin-top: 16px; }
+.login-rules-link a { color: var(--muted); font-size: .85rem; text-decoration: none; transition: color .15s; }
+.login-rules-link a:hover { color: var(--primary); }
+
 /* ── Responsive ────────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
   .name { font-size: .8rem; }

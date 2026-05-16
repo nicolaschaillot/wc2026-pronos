@@ -61,6 +61,8 @@ const TRANSLATIONS = {
     'footer.right':        '⚽ Coupe du Monde 2026',
     'lang.switch':         '🇦🇱 Shqip',
     'lang.switch.title':   'Kaloni në shqip',
+    'nav.rules':           '📖 Règles',
+    'rules.back':          '← Retour à la connexion',
   },
   sq: {
     'header.title':        'Pronostikime · Kupa e Botës 2026',
@@ -123,6 +125,8 @@ const TRANSLATIONS = {
     'footer.right':        '⚽ Kupa e Botës 2026',
     'lang.switch':         '🇫🇷 Français',
     'lang.switch.title':   'Passer en français',
+    'nav.rules':           '📖 Rregullat',
+    'rules.back':          '← Kthehu te hyrja',
   },
 };
 
