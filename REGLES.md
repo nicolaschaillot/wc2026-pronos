@@ -56,6 +56,16 @@ Les points sont multipliés selon le tour :
 - **Phase de groupes** : les 72 matchs sont disponibles dès l'ouverture du site. Tu peux pronostiquer tous les matchs à l'avance.
 - **Phase éliminatoire** : les matchs sont ajoutés au fur et à mesure par l'admin, une fois les qualifiés connus. L'admin te préviendra quand de nouveaux matchs sont disponibles.
 
+### ⏱️ Score de référence en phase éliminatoire
+
+En cas de match nul à la fin du temps réglementaire (90 min), le match se poursuit en prolongations, puis éventuellement aux tirs au but.
+
+> **Le score retenu pour les pronostics est celui à la fin des prolongations (120 min), hors tirs au but.**
+
+Exemples :
+- Match nul 1-1 à 90 min → prolongations → France gagne 2-1 à 120 min : le score de référence est **2-1**
+- Match nul 1-1 à 90 min → prolongations → 1-1 à 120 min → France gagne aux tirs : le score de référence est **1-1**
+
 ---
 
 ## 🌍 Langue / Gjuha

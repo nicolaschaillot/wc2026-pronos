@@ -453,6 +453,26 @@ td.detail { color: var(--muted); font-size: .8rem; }
 .btn-ghost:hover { color: var(--text); border-color: var(--text); }
 
 /* ── Admin styles ──────────────────────────────────────────────────────────── */
+#admin-nav {
+  display: flex;
+  gap: 4px;
+  padding: 16px 0 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 24px;
+}
+#admin-nav button {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: .9rem;
+  padding: 8px 18px 10px;
+  transition: color .15s, border-color .15s;
+}
+#admin-nav button:hover { color: var(--text); }
+#admin-nav button.active { color: var(--primary); border-bottom-color: var(--primary); }
+
 .admin-section { margin-bottom: 36px; }
 .admin-section h2 { font-size: 1rem; color: var(--gold); margin-bottom: 14px; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
 

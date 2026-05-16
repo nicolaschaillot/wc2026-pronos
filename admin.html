@@ -50,96 +50,108 @@
   <!-- ── Panel admin ─────────────────────────────────────────────────────── -->
   <div id="admin-panel" hidden>
 
-    <!-- Codes -->
-    <div class="admin-section">
-      <h2>🎟 Codes de participation</h2>
-      <div class="codes-controls">
-        <label for="code-count">Générer</label>
-        <input id="code-count" type="number" min="1" max="50" value="5">
-        <span>code(s)</span>
-        <button class="btn-sm" id="btn-add-codes">+ Ajouter</button>
-      </div>
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>Code</th><th>Utilisé par</th><th></th></tr></thead>
-          <tbody id="codes-body"></tbody>
-        </table>
-      </div>
-      <p style="font-size:.75rem;color:var(--muted);margin-top:8px">
-        Un code = un joueur. Transmets chaque code à son destinataire.
-      </p>
-    </div>
+    <nav id="admin-nav">
+      <button data-tab="tab-codes" class="active">🎟 Codes</button>
+      <button data-tab="tab-results">📋 Résultats groupes</button>
+      <button data-tab="tab-ko">🏆 Phase éliminatoire</button>
+    </nav>
 
-    <!-- Résultats phase de groupes -->
-    <div class="admin-section">
-      <h2>📋 Résultats — Phase de groupes</h2>
-      <div class="table-wrap">
-        <table>
-          <thead>
-            <tr><th>Gr.</th><th>Équipe 1</th><th>Équipe 2</th><th>Score</th><th>Action</th></tr>
-          </thead>
-          <tbody id="results-body"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <!-- Matchs éliminatoires -->
-    <div class="admin-section">
-      <h2>🏆 Phase éliminatoire — Ajouter un match</h2>
-      <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px">
-        Saisir l'heure en heure locale <strong>France / Albanie (UTC+2 en été)</strong>.
-        Les pronos se verrouillent automatiquement au coup d'envoi.
-      </p>
-      <form id="ko-form" class="ko-form">
-        <div class="ko-form-row">
-          <div class="form-group" style="flex:0 0 190px">
-            <label>Tour</label>
-            <select id="ko-round" class="ko-select">
-              <option value="1/32">1/32 de finale (×1)</option>
-              <option value="1/16">1/16 de finale (×1)</option>
-              <option value="1/4">Quart de finale (×2)</option>
-              <option value="1/2">Demi-finale (×3)</option>
-              <option value="Petite finale">Petite finale (×2)</option>
-              <option value="Finale">Finale (×4)</option>
-            </select>
-          </div>
-          <div class="form-group" style="flex:1">
-            <label>Équipe 1</label>
-            <select id="ko-team1" class="ko-select" required>
-              <option value="">— Sélectionner —</option>
-            </select>
-          </div>
-          <div style="align-self:flex-end;padding-bottom:8px;color:var(--muted);font-weight:700">vs</div>
-          <div class="form-group" style="flex:1">
-            <label>Équipe 2</label>
-            <select id="ko-team2" class="ko-select" required>
-              <option value="">— Sélectionner —</option>
-            </select>
-          </div>
-          <div class="form-group" style="flex:0 0 190px">
-            <label>Date &amp; heure (heure FR/AL)</label>
-            <input id="ko-datetime" type="datetime-local" required>
-          </div>
-          <div class="form-group" style="flex:1">
-            <label>Stade</label>
-            <input id="ko-venue" type="text" placeholder="Dallas (AT&T Stadium)" required>
-          </div>
-          <div class="form-group" style="flex:0 0 auto;align-self:flex-end">
-            <button type="submit" class="btn-primary" style="width:auto;padding:9px 20px">
-              + Ajouter
-            </button>
-          </div>
+    <!-- Tab — Codes -->
+    <div id="tab-codes" class="admin-tab">
+      <div class="admin-section">
+        <h2>🎟 Codes de participation</h2>
+        <div class="codes-controls">
+          <label for="code-count">Générer</label>
+          <input id="code-count" type="number" min="1" max="50" value="5">
+          <span>code(s)</span>
+          <button class="btn-sm" id="btn-add-codes">+ Ajouter</button>
         </div>
-        <div class="error-msg" id="ko-error"></div>
-      </form>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Code</th><th>Utilisé par</th><th></th></tr></thead>
+            <tbody id="codes-body"></tbody>
+          </table>
+        </div>
+        <p style="font-size:.75rem;color:var(--muted);margin-top:8px">
+          Un code = un joueur. Transmets chaque code à son destinataire.
+        </p>
+      </div>
+    </div>
 
-      <div class="table-wrap" style="margin-top:16px">
-        <table>
-          <thead>
-            <tr><th>Tour</th><th>Équipe 1</th><th>Équipe 2</th><th>Date / Stade</th><th>Score</th><th>Actions</th></tr>
-          </thead>
-          <tbody id="ko-body"></tbody>
-        </table>
+    <!-- Tab — Résultats phase de groupes -->
+    <div id="tab-results" class="admin-tab" hidden>
+      <div class="admin-section">
+        <h2>📋 Résultats — Phase de groupes</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Gr.</th><th>Équipe 1</th><th>Équipe 2</th><th>Score</th><th>Action</th></tr>
+            </thead>
+            <tbody id="results-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab — Phase éliminatoire -->
+    <div id="tab-ko" class="admin-tab" hidden>
+      <div class="admin-section">
+        <h2>🏆 Phase éliminatoire — Ajouter un match</h2>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px">
+          Saisir l'heure en heure locale <strong>France / Albanie (UTC+2 en été)</strong>.
+          Les pronos se verrouillent automatiquement au coup d'envoi.
+        </p>
+        <form id="ko-form" class="ko-form">
+          <div class="ko-form-row">
+            <div class="form-group" style="flex:0 0 190px">
+              <label>Tour</label>
+              <select id="ko-round" class="ko-select">
+                <option value="1/32">1/32 de finale (×1)</option>
+                <option value="1/16">1/16 de finale (×1)</option>
+                <option value="1/4">Quart de finale (×2)</option>
+                <option value="1/2">Demi-finale (×3)</option>
+                <option value="Petite finale">Petite finale (×2)</option>
+                <option value="Finale">Finale (×4)</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex:1">
+              <label>Équipe 1</label>
+              <select id="ko-team1" class="ko-select" required>
+                <option value="">— Sélectionner —</option>
+              </select>
+            </div>
+            <div style="align-self:flex-end;padding-bottom:8px;color:var(--muted);font-weight:700">vs</div>
+            <div class="form-group" style="flex:1">
+              <label>Équipe 2</label>
+              <select id="ko-team2" class="ko-select" required>
+                <option value="">— Sélectionner —</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex:0 0 190px">
+              <label>Date &amp; heure (heure FR/AL)</label>
+              <input id="ko-datetime" type="datetime-local" required>
+            </div>
+            <div class="form-group" style="flex:1">
+              <label>Stade</label>
+              <input id="ko-venue" type="text" placeholder="Dallas (AT&T Stadium)" required>
+            </div>
+            <div class="form-group" style="flex:0 0 auto;align-self:flex-end">
+              <button type="submit" class="btn-primary" style="width:auto;padding:9px 20px">
+                + Ajouter
+              </button>
+            </div>
+          </div>
+          <div class="error-msg" id="ko-error"></div>
+        </form>
+
+        <div class="table-wrap" style="margin-top:16px">
+          <table>
+            <thead>
+              <tr><th>Tour</th><th>Équipe 1</th><th>Équipe 2</th><th>Date / Stade</th><th>Score</th><th>Actions</th></tr>
+            </thead>
+            <tbody id="ko-body"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -147,7 +159,7 @@
 </main>
 
 <footer>
-  <span>🇫🇷 🇦🇱 Pronos entre amis · Keendoo</span>
+  <span>🇫🇷 🇦🇱 Pronos entre collègues · Keendoo</span>
   <span>⚙️ Interface Admin</span>
 </footer>
 

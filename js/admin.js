@@ -32,10 +32,22 @@ async function handleAdminLogin(e) {
 function showAdminPanel() {
   document.getElementById('admin-login').hidden = true;
   document.getElementById('admin-panel').hidden = false;
+  initAdminTabs();
   buildTeamSelects();
   renderMatchResults();
   loadCodes();
   renderKnockoutMatches();
+}
+
+function initAdminTabs() {
+  document.querySelectorAll('#admin-nav button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#admin-nav button').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.admin-tab').forEach(t => { t.hidden = true; });
+      btn.classList.add('active');
+      document.getElementById(btn.dataset.tab).hidden = false;
+    });
+  });
 }
 
 function buildTeamSelects() {
