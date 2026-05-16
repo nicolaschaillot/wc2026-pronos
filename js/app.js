@@ -115,9 +115,11 @@ let _nextMatchInterval = null;
 let _nextMatchId       = null;
 
 function formatCountdown(diff) {
-  const h  = Math.floor(diff / 3600000);
+  const d  = Math.floor(diff / 86400000);
+  const h  = Math.floor((diff % 86400000) / 3600000);
   const m  = Math.floor((diff % 3600000) / 60000);
   const s  = Math.floor((diff % 60000) / 1000);
+  if (d >= 1) return `${d}j ${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}min`;
   if (h >= 1) return `${h}h ${String(m).padStart(2, '0')}min`;
   if (m >= 1) return `${m}min ${String(s).padStart(2, '0')}s`;
   return `${s}s`;
@@ -216,7 +218,7 @@ function renderUrgentBanner(pseudo) {
 function updateCountdowns() {
   document.querySelectorAll('.countdown[data-date]').forEach(el => {
     const diff = new Date(el.dataset.date) - Date.now();
-    if (diff <= 0 || diff > 48 * 3600 * 1000) { el.textContent = ''; return; }
+    if (diff <= 0) { el.textContent = ''; return; }
     const h = Math.floor(diff / 3600000);
     const m = Math.floor((diff % 3600000) / 60000);
     el.textContent = h >= 1
