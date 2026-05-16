@@ -98,11 +98,11 @@ const GROUP_SCHEDULE = {
   ],
   C: [
     [2, 3, '2026-06-14T01:00:00Z', 'Boston (Gillette Stadium)', 1],         // 03h CEST
-    [0, 1, '2026-06-14T22:00:00Z', 'New Jersey (MetLife Stadium)', 1],      // 00h CEST
+    [0, 1, '2026-06-13T22:00:00Z', 'New Jersey (MetLife Stadium)', 1],      // 00h CEST (14 juin)
     [0, 2, '2026-06-20T01:00:00Z', 'Philadelphie (Lincoln Financial Field)', 2], // 03h CEST
-    [3, 1, '2026-06-20T22:00:00Z', 'Boston (Gillette Stadium)', 2],         // 00h CEST
-    [1, 2, '2026-06-25T01:00:00Z', 'Atlanta (Mercedes-Benz Stadium)', 3],   // 03h CEST
-    [3, 0, '2026-06-25T22:00:00Z', 'Miami (Hard Rock Stadium)', 3],         // 00h CEST
+    [3, 1, '2026-06-19T22:00:00Z', 'Boston (Gillette Stadium)', 2],         // 00h CEST
+    [1, 2, '2026-06-24T22:00:00Z', 'Atlanta (Mercedes-Benz Stadium)', 3],   // 03h CEST
+    [3, 0, '2026-06-24T22:00:00Z', 'Miami (Hard Rock Stadium)', 3],         // 00h CEST
   ],
   D: [
     [0, 1, '2026-06-13T01:00:00Z', 'Los Angeles (SoFi Stadium)', 1],        // 03h CEST
