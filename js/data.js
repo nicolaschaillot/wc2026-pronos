@@ -83,8 +83,8 @@ const GROUP_SCHEDULE = {
   A: [
     [0, 1, '2026-06-11T19:00:00Z', 'Mexico (Estadio Azteca)', 1],           // 21h CEST
     [2, 3, '2026-06-12T02:00:00Z', 'Guadalajara (Estadio Akron)', 1],       // 04h CEST
-    [0, 2, '2026-06-19T01:00:00Z', 'Guadalajara (Estadio Akron)', 2],       // 03h CEST
     [3, 1, '2026-06-18T16:00:00Z', 'Atlanta (Mercedes-Benz Stadium)', 2],   // 18h CEST
+    [0, 2, '2026-06-19T01:00:00Z', 'Guadalajara (Estadio Akron)', 2],       // 03h CEST
     [3, 0, '2026-06-25T01:00:00Z', 'Mexico (Estadio Azteca)', 3],           // 03h CEST
     [1, 2, '2026-06-25T01:00:00Z', 'Monterrey (Estadio BBVA)', 3],          // 03h CEST
   ],
@@ -97,18 +97,18 @@ const GROUP_SCHEDULE = {
     [1, 2, '2026-06-24T19:00:00Z', 'Seattle (Lumen Field)', 3],             // 21h CEST
   ],
   C: [
-    [2, 3, '2026-06-14T01:00:00Z', 'Boston (Gillette Stadium)', 1],         // 03h CEST
     [0, 1, '2026-06-13T22:00:00Z', 'New Jersey (MetLife Stadium)', 1],      // 00h CEST (14 juin)
-    [0, 2, '2026-06-20T01:00:00Z', 'Philadelphie (Lincoln Financial Field)', 2], // 03h CEST
+    [2, 3, '2026-06-14T01:00:00Z', 'Boston (Gillette Stadium)', 1],         // 03h CEST
     [3, 1, '2026-06-19T22:00:00Z', 'Boston (Gillette Stadium)', 2],         // 00h CEST
+    [0, 2, '2026-06-20T01:00:00Z', 'Philadelphie (Lincoln Financial Field)', 2], // 03h CEST
     [1, 2, '2026-06-24T22:00:00Z', 'Atlanta (Mercedes-Benz Stadium)', 3],   // 03h CEST
     [3, 0, '2026-06-24T22:00:00Z', 'Miami (Hard Rock Stadium)', 3],         // 00h CEST
   ],
   D: [
     [0, 1, '2026-06-13T01:00:00Z', 'Los Angeles (SoFi Stadium)', 1],        // 03h CEST
-    [2, 3, '2026-06-13T04:00:00Z', 'Vancouver (BC Place)', 1],              // 06h CEST
-    [3, 1, '2026-06-19T04:00:00Z', 'San Francisco (Levi\'s Stadium)', 2],   // 06h CEST
+    [2, 3, '2026-06-14T04:00:00Z', 'Vancouver (BC Place)', 1],              // 06h CEST
     [0, 2, '2026-06-19T19:00:00Z', 'Seattle (Lumen Field)', 2],             // 21h CEST
+    [3, 1, '2026-06-20T04:00:00Z', 'San Francisco (Levi\'s Stadium)', 2],   // 06h CEST
     [3, 0, '2026-06-26T02:00:00Z', 'Los Angeles (SoFi Stadium)', 3],        // 04h CEST
     [1, 2, '2026-06-26T02:00:00Z', 'San Francisco (Levi\'s Stadium)', 3],   // 04h CEST
   ],
