@@ -112,6 +112,7 @@ async function loadAllPronostics() {
 }
 
 let _nextMatchInterval = null;
+let _nextMatchId       = null;
 
 function formatCountdown(diff) {
   const h  = Math.floor(diff / 3600000);
@@ -120,6 +121,22 @@ function formatCountdown(diff) {
   if (h >= 1) return `${h}h ${String(m).padStart(2, '0')}min`;
   if (m >= 1) return `${m}min ${String(s).padStart(2, '0')}s`;
   return `${s}s`;
+}
+
+function _pronoHtml(prono) {
+  return prono
+    ? `<span class="nm-prono-ok">✓ ${prono.score1} – ${prono.score2}</span>`
+    : `<span class="nm-prono-warn">${t('next.match.noprono')}</span>`;
+}
+
+function refreshNextMatchProno(matchId) {
+  if (matchId !== _nextMatchId) return;
+  const pronoEl  = document.getElementById('nm-prono');
+  const bannerEl = document.getElementById('next-match-banner');
+  if (!pronoEl) return;
+  const prono = userPronostics[matchId];
+  pronoEl.innerHTML = _pronoHtml(prono);
+  if (bannerEl) bannerEl.className = `next-match-banner ${prono ? '' : 'nm-warn'}`;
 }
 
 function renderNextMatchBanner(pseudo) {
@@ -132,25 +149,27 @@ function renderNextMatchBanner(pseudo) {
     .filter(m => new Date(m.date) > new Date())
     .sort((a, b) => new Date(a.date) - new Date(b.date))[0];
 
-  if (!next) { el.hidden = true; return; }
+  if (!next) { el.hidden = true; _nextMatchId = null; return; }
 
-  const prono    = userPronostics[next.id];
-  const pronoTxt = prono
-    ? `<span class="nm-prono-ok">${t('next.match.prono')} : ${prono.score1} – ${prono.score2}</span>`
-    : `<span class="nm-prono-warn">${t('next.match.noprono')}</span>`;
+  _nextMatchId = next.id;
+  const prono = userPronostics[next.id];
 
   el.hidden = false;
   el.className = `next-match-banner ${prono ? '' : 'nm-warn'}`;
   el.innerHTML = `
     <div class="nm-label">${t('next.match')}</div>
-    <div class="nm-teams">
-      <span>${next.team1.flag} ${next.team1.name}</span>
-      <span class="nm-vs">vs</span>
-      <span>${next.team2.flag} ${next.team2.name}</span>
-    </div>
-    <div class="nm-bottom">
-      <div class="nm-countdown" id="nm-countdown"></div>
-      <div class="nm-prono">${pronoTxt}</div>
+    <div class="nm-main">
+      <div class="nm-left">
+        <div class="nm-teams">
+          <span>${next.team1.flag} ${next.team1.name}</span>
+          <span class="nm-vs">vs</span>
+          <span>${next.team2.flag} ${next.team2.name}</span>
+        </div>
+        <div id="nm-prono">${_pronoHtml(prono)}</div>
+      </div>
+      <div class="nm-countdown-box">
+        <div class="nm-countdown" id="nm-countdown"></div>
+      </div>
     </div>`;
 
   const countdownEl = document.getElementById('nm-countdown');
@@ -538,6 +557,7 @@ async function savePronostic(pseudo, matchId) {
         await deleteDoc(doc(db, 'pronostics', `${pseudo}_${matchId}`));
         delete userPronostics[matchId];
         updateSidebarBadge(matchId);
+        refreshNextMatchProno(matchId);
       } catch (err) { console.error(err); }
     }
     return;
@@ -559,6 +579,7 @@ async function savePronostic(pseudo, matchId) {
     });
     userPronostics[matchId] = { userId: pseudo, matchId, score1: s1, score2: s2 };
     updateSidebarBadge(matchId);
+    refreshNextMatchProno(matchId);
     status.textContent = t('saved');
     setTimeout(() => { status.textContent = ''; }, 2000);
   } catch (err) {
