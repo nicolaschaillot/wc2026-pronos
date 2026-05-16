@@ -30,6 +30,7 @@
 
 <nav id="nav" hidden>
   <button data-view="view-predictions" class="active" data-i18n="nav.pronos">⚽ Mes pronos</button>
+  <button data-view="view-results" data-i18n="nav.results">📊 Mes résultats</button>
   <button data-view="view-leaderboard" data-i18n="nav.leaderboard">🏅 Classement</button>
 </nav>
 
@@ -69,6 +70,15 @@
       <aside id="group-sidebar" class="group-sidebar"></aside>
       <div id="predictions-content" class="predictions-content"></div>
     </div>
+  </div>
+
+  <!-- ── My results ────────────────────────────────────────────────────────── -->
+  <div id="view-results" class="view" hidden>
+    <div class="leaderboard-header">
+      <h2 data-i18n="results.title">📊 Mes résultats</h2>
+      <p data-i18n="results.subtitle">Récapitulatif de tes pronostics sur les matchs terminés.</p>
+    </div>
+    <div id="results-content"></div>
   </div>
 
   <!-- ── Leaderboard ─────────────────────────────────────────────────────── -->

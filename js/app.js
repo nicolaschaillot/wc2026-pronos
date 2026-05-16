@@ -2,7 +2,7 @@ import { db } from './firebase-config.js';
 import { GROUPS, MATCHES, ROUND_MULTIPLIERS, calcPoints } from './data.js';
 import { t, getLang, initI18n } from './i18n.js';
 import {
-  doc, getDoc, setDoc, getDocs, collection, serverTimestamp,
+  doc, getDoc, setDoc, getDocs, deleteDoc, collection, serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
 // ─── Session ─────────────────────────────────────────────────────────────────
@@ -197,7 +197,9 @@ function attachCardHandlers(container, pseudo) {
       const matchId = input.dataset.match;
       const i1 = container.querySelector(`.score-input[data-match="${matchId}"][data-side="1"]`);
       const i2 = container.querySelector(`.score-input[data-match="${matchId}"][data-side="2"]`);
-      if (i1?.value !== '' && i2?.value !== '') savePronostic(pseudo, matchId);
+      const v1 = i1?.value ?? '', v2 = i2?.value ?? '';
+      // Sauvegarder si les deux sont remplis, supprimer si les deux sont vides
+      if ((v1 !== '' && v2 !== '') || (v1 === '' && v2 === '')) savePronostic(pseudo, matchId);
     });
   });
 }
@@ -306,10 +308,25 @@ async function savePronostic(pseudo, matchId) {
   const status = document.getElementById(`status-${matchId}`);
   if (!i1 || !i2) return;
 
+  // Les deux champs vides → suppression du prono
+  if (i1.value === '' && i2.value === '') {
+    if (userPronostics[matchId]) {
+      try {
+        await deleteDoc(doc(db, 'pronostics', `${pseudo}_${matchId}`));
+        delete userPronostics[matchId];
+        updateSidebarBadge(matchId);
+      } catch (err) { console.error(err); }
+    }
+    return;
+  }
+
+  // Un seul champ vide → on attend que l'utilisateur finisse
+  if (i1.value === '' || i2.value === '') return;
+
   const s1 = parseInt(i1.value, 10);
   const s2 = parseInt(i2.value, 10);
   if (isNaN(s1) || isNaN(s2) || s1 < 0 || s2 < 0) {
-    status.textContent = t('score.invalid'); return;
+    if (status) status.textContent = t('score.invalid'); return;
   }
 
   status.textContent = '…';
@@ -352,6 +369,97 @@ function updateSidebarBadge(matchId) {
     badge.title       = t('sidebar.complete');
     badge.textContent = '✓';
   }
+}
+
+// ─── My Results ──────────────────────────────────────────────────────────────
+
+function renderMyResults() {
+  const content = document.getElementById('results-content');
+  content.innerHTML = '';
+
+  let grandTotal = 0;
+  let hasAny = false;
+
+  function buildSection(title, matches, getMultiplier) {
+    const finished = matches.filter(m => matchResults[m.id]);
+    if (finished.length === 0) return null;
+    hasAny = true;
+
+    let sectionPts = 0;
+    const rows = finished.map(m => {
+      const result   = matchResults[m.id];
+      const prono    = userPronostics[m.id];
+      const mult     = getMultiplier(m);
+      const basePts  = prono ? calcPoints(prono, result) : null;
+      const pts      = basePts !== null ? basePts * mult : null;
+      if (pts !== null) sectionPts += pts;
+
+      const pronoStr = prono ? `${prono.score1} – ${prono.score2}` : `<span class="muted">–</span>`;
+      const icon     = basePts === 3 ? '🎯' : basePts === 1 ? '✅' : basePts === 0 ? '❌' : '';
+      const cls      = basePts === 3 ? 'pts-exact' : basePts === 1 ? 'pts-correct' : basePts === 0 ? 'pts-wrong' : '';
+      const ptsStr   = pts !== null
+        ? `<span class="result-pts ${cls}">${icon} ${pts}</span>`
+        : `<span class="muted">–</span>`;
+
+      return `<tr>
+        <td class="res-match">${m.team1.flag} ${m.team1.name} – ${m.team2.flag} ${m.team2.name}</td>
+        <td class="res-prono">${pronoStr}</td>
+        <td class="res-result"><strong>${result.score1} – ${result.score2}</strong></td>
+        <td class="res-pts">${ptsStr}</td>
+      </tr>`;
+    }).join('');
+
+    grandTotal += sectionPts;
+
+    const section = document.createElement('div');
+    section.className = 'results-section';
+    section.innerHTML = `
+      <h3 class="results-group-title">${title}</h3>
+      <div class="table-wrap">
+        <table class="results-table">
+          <thead><tr>
+            <th>Match</th>
+            <th>${t('results.col.prono')}</th>
+            <th>${t('results.col.result')}</th>
+            <th>${t('results.col.pts')}</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>`;
+    return section;
+  }
+
+  // Phase de groupes
+  for (const [groupId] of Object.entries(GROUPS)) {
+    const groupMatches = MATCHES.filter(m => m.group === groupId);
+    const section = buildSection(`${t('group.label')} ${groupId}`, groupMatches, () => 1);
+    if (section) content.appendChild(section);
+  }
+
+  // Phase éliminatoire par tour
+  if (knockoutMatches.length > 0) {
+    const ROUND_ORDER = ['1/32', '1/16', '1/4', '1/2', 'Petite finale', 'Finale'];
+    const byRound = {};
+    knockoutMatches.forEach(m => { (byRound[m.round] = byRound[m.round] || []).push(m); });
+
+    for (const round of ROUND_ORDER) {
+      if (!byRound[round]) continue;
+      const mult = ROUND_MULTIPLIERS[round] || 1;
+      const label = t(`round.${round}`) + (mult > 1 ? ` ×${mult}` : '');
+      const section = buildSection(label, byRound[round], () => mult);
+      if (section) content.appendChild(section);
+    }
+  }
+
+  if (!hasAny) {
+    content.innerHTML = `<p class="muted" style="text-align:center;padding:32px">${t('results.empty')}</p>`;
+    return;
+  }
+
+  const totalEl = document.createElement('div');
+  totalEl.className = 'results-total';
+  totalEl.innerHTML = `<span>${t('results.total')} :</span> <strong>${grandTotal} ${t('lb.pts')}</strong>`;
+  content.appendChild(totalEl);
 }
 
 // ─── Leaderboard ─────────────────────────────────────────────────────────────
@@ -466,6 +574,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const view = btn.dataset.view;
       showView(view);
       if (view === 'view-leaderboard') await loadLeaderboard();
+      if (view === 'view-results') {
+        const user = getSession();
+        if (user) {
+          await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults()]);
+          renderMyResults();
+        }
+      }
       if (view === 'view-predictions') {
         const user = getSession();
         if (user) {
@@ -483,6 +598,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (activeView?.id === 'view-predictions') {
       await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults()]);
       renderPredictions(user.pseudo);
+    } else if (activeView?.id === 'view-results') {
+      await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults()]);
+      renderMyResults();
     } else if (activeView?.id === 'view-leaderboard') {
       await loadLeaderboard();
     }
