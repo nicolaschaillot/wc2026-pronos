@@ -138,19 +138,19 @@ const GROUP_SCHEDULE = {
   ],
   H: [
     [0, 1, '2026-06-15T16:00:00Z', 'Atlanta (Mercedes-Benz Stadium)', 1],   // 18h CEST
-    [2, 3, '2026-06-15T21:00:00Z', 'Miami (Hard Rock Stadium)', 1],         // 23h CEST
+    [2, 3, '2026-06-15T22:00:00Z', 'Miami (Hard Rock Stadium)', 1],         // 23h CEST
     [0, 2, '2026-06-21T16:00:00Z', 'Atlanta (Mercedes-Benz Stadium)', 2],   // 18h CEST
-    [3, 1, '2026-06-21T21:00:00Z', 'Miami (Hard Rock Stadium)', 2],         // 23h CEST
-    [1, 2, '2026-06-26T00:00:00Z', 'Houston (NRG Stadium)', 3],             // 02h CEST
-    [3, 0, '2026-06-26T00:00:00Z', 'Guadalajara (Estadio Akron)', 3],       // 02h CEST
+    [3, 1, '2026-06-21T22:00:00Z', 'Miami (Hard Rock Stadium)', 2],         // 23h CEST
+    [1, 2, '2026-06-27T00:00:00Z', 'Houston (NRG Stadium)', 3],             // 02h CEST
+    [3, 0, '2026-06-27T00:00:00Z', 'Guadalajara (Estadio Akron)', 3],       // 02h CEST
   ],
   I: [
-    [0, 1, '2026-06-16T18:00:00Z', 'New Jersey (MetLife Stadium)', 1],      // 20h CEST
-    [2, 3, '2026-06-16T21:00:00Z', 'Boston (Gillette Stadium)', 1],         // 23h CEST
-    [0, 2, '2026-06-22T20:00:00Z', 'Philadelphie (Lincoln Financial Field)', 2], // 22h CEST
-    [3, 1, '2026-06-21T23:00:00Z', 'New Jersey (MetLife Stadium)', 2],      // 01h CEST
-    [3, 0, '2026-06-26T18:00:00Z', 'Boston (Gillette Stadium)', 3],         // 20h CEST
-    [1, 2, '2026-06-26T18:00:00Z', 'Toronto (BMO Field)', 3],               // 20h CEST
+    [0, 1, '2026-06-16T19:00:00Z', 'New Jersey (MetLife Stadium)', 1],      // 20h CEST
+    [2, 3, '2026-06-16T22:00:00Z', 'Boston (Gillette Stadium)', 1],         // 23h CEST
+    [0, 2, '2026-06-22T21:00:00Z', 'Philadelphie (Lincoln Financial Field)', 2], // 22h CEST
+    [3, 1, '2026-06-23T01:00:00Z', 'New Jersey (MetLife Stadium)', 2],      // 01h CEST
+    [3, 0, '2026-06-26T19:00:00Z', 'Boston (Gillette Stadium)', 3],         // 20h CEST
+    [1, 2, '2026-06-26T19:00:00Z', 'Toronto (BMO Field)', 3],               // 20h CEST
   ],
   J: [
     [0, 1, '2026-06-16T00:00:00Z', 'Kansas City (Arrowhead Stadium)', 1],   // 02h CEST
