@@ -318,11 +318,39 @@ async function savePronostic(pseudo, matchId) {
       userId: pseudo, matchId, score1: s1, score2: s2, submittedAt: serverTimestamp(),
     });
     userPronostics[matchId] = { userId: pseudo, matchId, score1: s1, score2: s2 };
+    updateSidebarBadge(matchId);
     status.textContent = t('saved');
     setTimeout(() => { status.textContent = ''; }, 2000);
   } catch (err) {
     console.error(err);
     status.textContent = t('save.error');
+  }
+}
+
+function updateSidebarBadge(matchId) {
+  const groupId = MATCHES.find(m => m.id === matchId)?.group ?? 'KO';
+  const btn = document.querySelector(`.group-sidebar-btn[data-group="${groupId}"]`);
+  if (!btn) return;
+
+  const matches = groupId === 'KO'
+    ? knockoutMatches
+    : MATCHES.filter(m => m.group === groupId);
+
+  const total   = matches.length;
+  const saved   = matches.filter(m => userPronostics[m.id]).length;
+  const missing = matches.filter(m => !isLocked(m) && !userPronostics[m.id]).length;
+
+  const badge = btn.querySelector('.gsb-badge, .gsb-ok');
+  if (!badge) return;
+
+  if (missing > 0) {
+    badge.className   = 'gsb-badge';
+    badge.title       = t('sidebar.missing', missing);
+    badge.textContent = `${saved}/${total}`;
+  } else {
+    badge.className   = 'gsb-ok';
+    badge.title       = t('sidebar.complete');
+    badge.textContent = '✓';
   }
 }
 
