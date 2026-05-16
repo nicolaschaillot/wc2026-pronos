@@ -51,6 +51,11 @@ async function handleLogin(e) {
     }
 
     if (!codeData.pseudo) {
+      const userSnap = await getDoc(doc(db, 'users', pseudo));
+      if (userSnap.exists() && userSnap.data().code !== code) {
+        errEl.textContent = t('login.err.pseudo_taken');
+        return;
+      }
       await setDoc(codeRef, { pseudo, usedAt: serverTimestamp() }, { merge: true });
       await setDoc(doc(db, 'users', pseudo), { pseudo, code, joinedAt: serverTimestamp() });
     }
