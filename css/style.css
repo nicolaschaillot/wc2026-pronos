@@ -229,8 +229,13 @@ footer {
   align-items: center;
   gap: 6px;
   font-size: .9rem;
+  flex-direction: row-reverse;  /* flag côté score, nom vers l'extérieur */
+  justify-content: flex-start;  /* flex-start en row-reverse = aligné à droite */
 }
-.team.right { justify-content: flex-end; flex-direction: row-reverse; }
+.team.right {
+  flex-direction: row-reverse;  /* flag côté score, nom vers l'extérieur */
+  justify-content: flex-end;    /* flex-end en row-reverse = aligné à gauche */
+}
 
 .flag { font-size: 1.3rem; line-height: 1; }
 .name { font-weight: 500; }
