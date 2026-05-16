@@ -29,8 +29,18 @@ const firebaseConfig = {
   appId:             '1:123...',
 };
 
-export const ADMIN_PASSWORD = 'ton-mot-de-passe-admin';
+export const ADMIN_PASSWORD_HASH = 'le-hash-de-ton-mot-de-passe';
 ```
+
+Le mot de passe n'est **jamais stocké en clair** — seul son hash SHA-256 figure dans le code. Pour générer le hash de ton mot de passe :
+
+```bash
+echo -n 'ton-mot-de-passe' | sha256sum
+```
+
+Copie le résultat (la suite de caractères avant l'espace) dans `ADMIN_PASSWORD_HASH`.
+
+> Pour changer de mot de passe à l'avenir : relance la même commande avec le nouveau mot de passe et mets à jour `firebase-config.js`.
 
 ### 3. Déployer les règles Firestore
 
@@ -51,10 +61,10 @@ Puis dans GitHub → **Settings** → **Pages** → Source : **main / root** →
 
 Ton site sera accessible à `https://TON_USER.github.io/wc2026-pronos/`
 
-### 5. Vérifier les groupes
+### 5. Groupes et calendrier
 
-> ⚠️ Les groupes dans `js/data.js` sont **approximatifs**.  
-> Vérifie-les sur [fifa.com](https://www.fifa.com) et mets à jour le fichier si nécessaire.
+Les groupes et le calendrier dans `js/data.js` sont les données **officielles FIFA** (mai 2026).  
+En cas de modification de dernière minute, mets à jour les équipes dans `GROUPS` et les dates dans `GROUP_SCHEDULE`.
 
 ---
 

@@ -1,4 +1,4 @@
-import { db, ADMIN_PASSWORD } from './firebase-config.js';
+import { db, ADMIN_PASSWORD_HASH } from './firebase-config.js';
 import { MATCHES } from './data.js';
 import {
   doc, getDoc, setDoc, getDocs, addDoc,
@@ -11,15 +11,26 @@ function isAdminSession() {
   return sessionStorage.getItem('wc26_admin') === '1';
 }
 
-function handleAdminLogin(e) {
+async function sha256(str) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function handleAdminLogin(e) {
   e.preventDefault();
   const pwd = document.getElementById('admin-pwd').value;
   const err = document.getElementById('admin-login-error');
-  if (pwd === ADMIN_PASSWORD) {
+  const btn = e.target.querySelector('button');
+
+  btn.disabled = true;
+  const hash = await sha256(pwd);
+
+  if (hash === ADMIN_PASSWORD_HASH) {
     sessionStorage.setItem('wc26_admin', '1');
     showAdminPanel();
   } else {
     err.textContent = 'Mot de passe incorrect.';
+    btn.disabled = false;
   }
 }
 
