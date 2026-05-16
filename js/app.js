@@ -1,5 +1,6 @@
 import { db } from './firebase-config.js';
 import { GROUPS, MATCHES, ROUND_MULTIPLIERS, calcPoints } from './data.js';
+import { t, getLang, initI18n } from './i18n.js';
 import {
   doc, getDoc, setDoc, getDocs, collection, serverTimestamp,
 } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
@@ -31,21 +32,21 @@ async function handleLogin(e) {
   const errEl  = document.getElementById('login-error');
   const btn    = e.target.querySelector('button');
 
-  if (!pseudo || !code) { errEl.textContent = 'Remplis tous les champs.'; return; }
+  if (!pseudo || !code) { errEl.textContent = t('login.err.empty'); return; }
 
   btn.disabled = true;
-  btn.textContent = 'Vérification…';
+  btn.textContent = t('login.checking');
   errEl.textContent = '';
 
   try {
     const codeRef  = doc(db, 'codes', code);
     const codeSnap = await getDoc(codeRef);
 
-    if (!codeSnap.exists()) { errEl.textContent = 'Code invalide.'; return; }
+    if (!codeSnap.exists()) { errEl.textContent = t('login.err.invalid'); return; }
 
     const codeData = codeSnap.data();
     if (codeData.pseudo && codeData.pseudo !== pseudo) {
-      errEl.textContent = 'Ce code est déjà utilisé par quelqu\'un d\'autre.';
+      errEl.textContent = t('login.err.taken');
       return;
     }
 
@@ -58,10 +59,10 @@ async function handleLogin(e) {
     initApp();
   } catch (err) {
     console.error(err);
-    errEl.textContent = 'Erreur réseau. Réessaie.';
+    errEl.textContent = t('login.err.network');
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Rejoindre';
+    btn.textContent = t('login.submit');
   }
 }
 
@@ -93,16 +94,15 @@ function isLocked(match) {
   return new Date() >= new Date(match.date);
 }
 
-// France et Albanie partagent UTC+2 en été (CEST / CEST).
-// On fixe Europe/Paris pour que l'heure affichée soit identique pour tous.
-const FMT_DATE = new Intl.DateTimeFormat('fr-FR', {
-  timeZone: 'Europe/Paris',
-  day: '2-digit', month: 'short',
-  hour: '2-digit', minute: '2-digit',
-});
+// France et Albanie partagent UTC+2 en été — on fixe Europe/Paris.
+// Deux formateurs pour que les noms de mois s'affichent dans la bonne langue.
+const FMT = {
+  fr: new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Paris', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }),
+  sq: new Intl.DateTimeFormat('sq',    { timeZone: 'Europe/Paris', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' }),
+};
 
 function formatDate(isoStr) {
-  return FMT_DATE.format(new Date(isoStr));
+  return (FMT[getLang()] || FMT.fr).format(new Date(isoStr));
 }
 
 function buildMatchCard(match, pseudo, multiplier = 1) {
@@ -146,7 +146,7 @@ function buildMatchCard(match, pseudo, multiplier = 1) {
       </span>
     </div>
     ${!locked ? `<div class="save-row">
-      <button class="btn-save" data-match="${match.id}">Enregistrer</button>
+      <button class="btn-save" data-match="${match.id}">${t('save')}</button>
       <span class="save-status" id="status-${match.id}"></span>
     </div>` : ''}
   `;
@@ -189,7 +189,7 @@ function renderPredictions(pseudo) {
     section.className = 'group-section';
     section.id = `group-section-${groupId}`;
     section.hidden = true;
-    section.innerHTML = `<h2 class="group-title">Groupe ${groupId}</h2>`;
+    section.innerHTML = `<h2 class="group-title">${t('group.label')} ${groupId}</h2>`;
     for (const match of groupMatches) section.appendChild(buildMatchCard(match, pseudo));
     content.appendChild(section);
 
@@ -198,11 +198,11 @@ function renderPredictions(pseudo) {
     btn.dataset.group = groupId;
     btn.innerHTML = `
       <div class="gsb-header">
-        <span class="gsb-letter">Groupe ${groupId}</span>
-        ${missing > 0 ? `<span class="gsb-badge" title="${missing} pronostic${missing > 1 ? 's' : ''} manquant${missing > 1 ? 's' : ''}">${missing}</span>` : '<span class="gsb-ok" title="Tous les pronostics sont saisis">✓</span>'}
+        <span class="gsb-letter">${t('group.label')} ${groupId}</span>
+        ${missing > 0 ? `<span class="gsb-badge" title="${t('sidebar.missing', missing)}">${missing}</span>` : `<span class="gsb-ok" title="${t('sidebar.complete')}">✓</span>`}
       </div>
       <div class="gsb-teams">
-        ${GROUPS[groupId].teams.map(t => `<span class="gsb-team">${t.flag} ${t.name}</span>`).join('')}
+        ${GROUPS[groupId].teams.map(team => `<span class="gsb-team">${team.flag} ${team.name}</span>`).join('')}
       </div>`;
     btn.addEventListener('click', () => showGroup(groupId));
     sidebar.appendChild(btn);
@@ -215,7 +215,7 @@ function renderPredictions(pseudo) {
     const koContainer = document.createElement('div');
     koContainer.id = 'group-section-KO';
     koContainer.hidden = true;
-    koContainer.innerHTML = `<div class="ko-header"><h2>🏆 Phase éliminatoire</h2></div>`;
+    koContainer.innerHTML = `<div class="ko-header"><h2>${t('ko.title')}</h2></div>`;
 
     const ROUND_ORDER = ['1/32', '1/16', '1/4', '1/2', 'Petite finale', 'Finale'];
     const byRound = {};
@@ -226,11 +226,7 @@ function renderPredictions(pseudo) {
       const mult = ROUND_MULTIPLIERS[round] || 1;
       const section = document.createElement('section');
       section.className = 'group-section';
-      const label = round === '1/4' ? 'Quarts de finale'
-        : round === '1/2' ? 'Demi-finales'
-        : round === '1/32' ? '1/32 de finale'
-        : round === '1/16' ? '1/16 de finale'
-        : round;
+      const label = t(`round.${round}`) || round;
       section.innerHTML = `<h2 class="group-title">
         ${label}
         ${mult > 1 ? `<span class="round-mult-badge">×${mult} pts</span>` : ''}
@@ -245,8 +241,8 @@ function renderPredictions(pseudo) {
     koBtn.dataset.group = 'KO';
     koBtn.innerHTML = `
       <div class="gsb-header">
-        <span class="gsb-letter">🏆 Élim.</span>
-        ${koMissing > 0 ? `<span class="gsb-badge" title="${koMissing} pronostic${koMissing > 1 ? 's' : ''} manquant${koMissing > 1 ? 's' : ''}">${koMissing}</span>` : '<span class="gsb-ok" title="Tous les pronostics sont saisis">✓</span>'}
+        <span class="gsb-letter">${t('ko.elim')}</span>
+        ${koMissing > 0 ? `<span class="gsb-badge" title="${t('sidebar.missing', koMissing)}">${koMissing}</span>` : `<span class="gsb-ok" title="${t('sidebar.complete')}">✓</span>`}
       </div>`;
     koBtn.addEventListener('click', () => showGroup('KO'));
     sidebar.appendChild(koBtn);
@@ -267,7 +263,7 @@ async function savePronostic(pseudo, matchId) {
   const s1 = parseInt(i1.value, 10);
   const s2 = parseInt(i2.value, 10);
   if (isNaN(s1) || isNaN(s2) || s1 < 0 || s2 < 0) {
-    status.textContent = '⚠ Score invalide'; return;
+    status.textContent = t('score.invalid'); return;
   }
 
   status.textContent = '…';
@@ -276,11 +272,11 @@ async function savePronostic(pseudo, matchId) {
       userId: pseudo, matchId, score1: s1, score2: s2, submittedAt: serverTimestamp(),
     });
     userPronostics[matchId] = { userId: pseudo, matchId, score1: s1, score2: s2 };
-    status.textContent = '✓ Sauvegardé';
+    status.textContent = t('saved');
     setTimeout(() => { status.textContent = ''; }, 2000);
   } catch (err) {
     console.error(err);
-    status.textContent = '✗ Erreur';
+    status.textContent = t('save.error');
   }
 }
 
@@ -288,7 +284,7 @@ async function savePronostic(pseudo, matchId) {
 
 async function loadLeaderboard() {
   const container = document.getElementById('leaderboard-body');
-  container.innerHTML = '<tr><td colspan="4">Chargement…</td></tr>';
+  container.innerHTML = `<tr><td colspan="4">${t('lb.loading')}</td></tr>`;
 
   try {
     const [pronoSnap, resultSnap, usersSnap, koSnap] = await Promise.all([
@@ -338,7 +334,7 @@ async function loadLeaderboard() {
       }));
 
     if (ranked.length === 0) {
-      container.innerHTML = '<tr><td colspan="4">Aucun participant pour l\'instant.</td></tr>';
+      container.innerHTML = `<tr><td colspan="4">${t('lb.empty')}</td></tr>`;
       return;
     }
 
@@ -346,13 +342,13 @@ async function loadLeaderboard() {
       <tr class="${r.rank <= 3 ? 'top-' + r.rank : ''}">
         <td class="rank">${r.rank === 1 ? '🥇' : r.rank === 2 ? '🥈' : r.rank === 3 ? '🥉' : r.rank}</td>
         <td class="pseudo">${escapeHtml(r.pseudo)}</td>
-        <td class="pts"><strong>${r.pts}</strong> pts</td>
-        <td class="detail">${r.exact} exacts / ${r.pred} pronos</td>
+        <td class="pts"><strong>${r.pts}</strong> ${t('lb.pts')}</td>
+        <td class="detail">${r.exact} ${t('lb.exacts')} / ${r.pred} ${t('lb.pronos')}</td>
       </tr>
     `).join('');
   } catch (err) {
     console.error(err);
-    container.innerHTML = '<tr><td colspan="4">Erreur de chargement.</td></tr>';
+    container.innerHTML = `<tr><td colspan="4">${t('lb.error')}</td></tr>`;
   }
 }
 
@@ -379,6 +375,8 @@ async function initApp() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  initI18n();
+
   document.getElementById('login-form').addEventListener('submit', handleLogin);
 
   document.getElementById('btn-logout').addEventListener('click', () => {
@@ -400,6 +398,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
       }
     });
+  });
+
+  window.addEventListener('wc26:langchange', async () => {
+    const user = getSession();
+    if (!user) return;
+    const activeView = document.querySelector('.view:not([hidden])');
+    if (activeView?.id === 'view-predictions') {
+      await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches()]);
+      renderPredictions(user.pseudo);
+    } else if (activeView?.id === 'view-leaderboard') {
+      await loadLeaderboard();
+    }
   });
 
   initApp();

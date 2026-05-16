@@ -16,20 +16,21 @@
     <span class="keendoo-text" style="display:none">Keendoo</span>
   </a>
   <div class="header-title">
-    Pronos Coupe du Monde 2026
+    <span data-i18n="header.title">Pronos Coupe du Monde 2026</span>
     <small>🇫🇷 France &amp; 🇦🇱 Albanie · USA / Canada / Mexique</small>
   </div>
   <div class="header-right">
     <span class="header-user" id="header-user">
       <span id="username-display"></span>
     </span>
-    <button class="btn-ghost" id="btn-logout">Déconnexion</button>
+    <button class="btn-ghost btn-lang" data-i18n-lang title="Kaloni në shqip">🇦🇱 Shqip</button>
+    <button class="btn-ghost" id="btn-logout" data-i18n="nav.logout">Déconnexion</button>
   </div>
 </header>
 
 <nav id="nav" hidden>
-  <button data-view="view-predictions" class="active">⚽ Mes pronos</button>
-  <button data-view="view-leaderboard">🏅 Classement</button>
+  <button data-view="view-predictions" class="active" data-i18n="nav.pronos">⚽ Mes pronos</button>
+  <button data-view="view-leaderboard" data-i18n="nav.leaderboard">🏅 Classement</button>
 </nav>
 
 <main>
@@ -42,20 +43,20 @@
              onerror="this.onerror=null; this.style.display='none'">
       </div>
       <div class="login-icon">🏆</div>
-      <h1>Pronos Coupe du Monde 2026</h1>
+      <h1 data-i18n="login.title">Pronos Coupe du Monde 2026</h1>
       <p class="login-flags">🇫🇷 France &nbsp;·&nbsp; 🇦🇱 Albanie</p>
-      <p>Entre ton pseudo et le code reçu pour participer.</p>
+      <p data-i18n="login.subtitle">Entre ton pseudo et le code reçu pour participer.</p>
       <form id="login-form">
         <div class="form-group">
-          <label for="input-pseudo">Ton pseudo</label>
+          <label for="input-pseudo" data-i18n="login.pseudo">Ton pseudo</label>
           <input id="input-pseudo" type="text" placeholder="ex : sudo_champion" autocomplete="off" required>
         </div>
         <div class="form-group">
-          <label for="input-code">Code de participation</label>
+          <label for="input-code" data-i18n="login.code">Code de participation</label>
           <input id="input-code" type="text" placeholder="ex : XK7P3Q" autocomplete="off"
                  maxlength="8" style="text-transform:uppercase" required>
         </div>
-        <button type="submit" class="btn-primary">Rejoindre →</button>
+        <button type="submit" class="btn-primary" data-i18n="login.submit">Rejoindre →</button>
         <div class="error-msg" id="login-error"></div>
       </form>
     </div>
@@ -63,7 +64,7 @@
 
   <!-- ── Predictions ─────────────────────────────────────────────────────── -->
   <div id="view-predictions" class="view" hidden>
-    <p class="tz-note">🕐 Heures affichées en heure locale France / Albanie (UTC+2 en été)</p>
+    <p class="tz-note" data-i18n="tz.note">🕐 Heures affichées en heure locale France / Albanie (UTC+2 en été)</p>
     <div class="predictions-layout">
       <aside id="group-sidebar" class="group-sidebar"></aside>
       <div id="predictions-content" class="predictions-content"></div>
@@ -73,22 +74,27 @@
   <!-- ── Leaderboard ─────────────────────────────────────────────────────── -->
   <div id="view-leaderboard" class="view" hidden>
     <div class="leaderboard-header">
-      <h2>🏅 Classement</h2>
-      <p>Mis à jour en temps réel après chaque résultat saisi.</p>
+      <h2 data-i18n="lb.title">🏅 Classement</h2>
+      <p data-i18n="lb.subtitle">Mis à jour en temps réel après chaque résultat saisi.</p>
     </div>
     <div class="scoring-legend">
-      <div>🎯 Score exact → <span>3 pts</span></div>
-      <div>✅ Bon résultat → <span>1 pt</span></div>
-      <div>❌ Mauvais → <span>0 pt</span></div>
-      <div>🏆 Phases finales → <span>×2 / ×3 / ×4</span></div>
+      <div><span data-i18n="lb.legend.exact">🎯 Score exact</span> → <span>3 pts</span></div>
+      <div><span data-i18n="lb.legend.correct">✅ Bon résultat</span> → <span>1 pt</span></div>
+      <div><span data-i18n="lb.legend.wrong">❌ Mauvais</span> → <span>0 pt</span></div>
+      <div><span data-i18n="lb.legend.phases">🏆 Phases finales</span> → <span>×2 / ×3 / ×4</span></div>
     </div>
     <div class="table-wrap">
       <table>
         <thead>
-          <tr><th>Rang</th><th>Pseudo</th><th>Points</th><th>Détail</th></tr>
+          <tr>
+            <th data-i18n="lb.col.rank">Rang</th>
+            <th data-i18n="lb.col.pseudo">Pseudo</th>
+            <th data-i18n="lb.col.points">Points</th>
+            <th data-i18n="lb.col.detail">Détail</th>
+          </tr>
         </thead>
         <tbody id="leaderboard-body">
-          <tr><td colspan="4">Chargement…</td></tr>
+          <tr><td colspan="4" data-i18n="lb.loading">Chargement…</td></tr>
         </tbody>
       </table>
     </div>
@@ -97,8 +103,8 @@
 </main>
 
 <footer>
-  <span>🇫🇷 🇦🇱 Pronos entre amis · Keendoo</span>
-  <span>⚽ Coupe du Monde 2026</span>
+  <span data-i18n="footer.left">🇫🇷 🇦🇱 Pronos entre collègues · Keendoo</span>
+  <span data-i18n="footer.right">⚽ Coupe du Monde 2026</span>
 </footer>
 
 <script type="module" src="js/app.js"></script>
