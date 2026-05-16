@@ -22,10 +22,16 @@ service cloud.firestore {
       allow write: if true;
     }
 
-    // Résultats: lecture par tous, écriture bloquée côté client (via console Firebase ou admin)
+    // Résultats: lecture par tous, écriture par l'admin depuis admin.html
     match /results/{matchId} {
       allow read: if true;
-      allow write: if true; // L'admin entre les scores depuis admin.html
+      allow write: if true;
+    }
+
+    // Matchs éliminatoires: créés par l'admin depuis admin.html
+    match /matches_extra/{matchId} {
+      allow read: if true;
+      allow write: if true;
     }
   }
 }

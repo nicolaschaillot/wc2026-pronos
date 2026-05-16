@@ -3,37 +3,42 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Admin · Pronos 2026</title>
+  <title>Admin · Pronos 2026 · Keendoo</title>
   <link rel="stylesheet" href="css/style.css">
-  <style>
-    main { max-width: 1000px; }
-    .admin-header { margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; }
-    .admin-header h1 { color: var(--gold); font-size: 1.3rem; }
-  </style>
 </head>
 <body>
 
 <header>
-  <div class="header-logo">⚙️</div>
+  <a href="https://www.keendoo.com" target="_blank" rel="noopener" class="keendoo-brand">
+    <img src="img/keendoo-logo.png" alt="Keendoo" class="keendoo-logo"
+         onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='inline'">
+    <span class="keendoo-text" style="display:none">Keendoo</span>
+  </a>
   <div class="header-title">
     Admin — Pronos 2026
-    <small>Gestion des codes et des résultats</small>
+    <small>🇫🇷 France &amp; 🇦🇱 Albanie · Gestion des codes et résultats</small>
   </div>
-  <button class="btn-ghost" id="btn-admin-logout">Déconnexion</button>
+  <div class="header-right">
+    <button class="btn-ghost" id="btn-admin-logout">Déconnexion</button>
+  </div>
 </header>
 
-<main>
+<main style="max-width:1100px">
 
-  <!-- ── Admin Login ─────────────────────────────────────────────────────── -->
+  <!-- ── Login admin ─────────────────────────────────────────────────────── -->
   <div id="admin-login" hidden>
     <div class="login-card">
+      <div class="login-logo">
+        <img src="img/keendoo-logo.png" alt="Keendoo" class="login-keendoo-logo"
+             onerror="this.onerror=null; this.style.display='none'">
+      </div>
       <div class="login-icon">🔐</div>
       <h1>Accès Admin</h1>
       <p>Mot de passe défini dans <code>js/firebase-config.js</code>.</p>
       <form id="admin-login-form">
         <div class="form-group">
           <label for="admin-pwd">Mot de passe</label>
-          <input id="admin-pwd" type="password" required>
+          <input id="admin-pwd" type="password" required autofocus>
         </div>
         <button type="submit" class="btn-primary">Connexion</button>
         <div class="error-msg" id="admin-login-error"></div>
@@ -41,7 +46,7 @@
     </div>
   </div>
 
-  <!-- ── Admin Panel ─────────────────────────────────────────────────────── -->
+  <!-- ── Panel admin ─────────────────────────────────────────────────────── -->
   <div id="admin-panel" hidden>
 
     <!-- Codes -->
@@ -55,20 +60,18 @@
       </div>
       <div class="table-wrap">
         <table>
-          <thead>
-            <tr><th>Code</th><th>Utilisé par</th><th></th></tr>
-          </thead>
+          <thead><tr><th>Code</th><th>Utilisé par</th><th></th></tr></thead>
           <tbody id="codes-body"></tbody>
         </table>
       </div>
       <p style="font-size:.75rem;color:var(--muted);margin-top:8px">
-        Transmets chaque code à un participant. Un code = un joueur.
+        Un code = un joueur. Transmets chaque code à son destinataire.
       </p>
     </div>
 
-    <!-- Match results -->
+    <!-- Résultats phase de groupes -->
     <div class="admin-section">
-      <h2>📋 Résultats des matchs</h2>
+      <h2>📋 Résultats — Phase de groupes</h2>
       <div class="table-wrap">
         <table>
           <thead>
@@ -79,10 +82,78 @@
       </div>
     </div>
 
-  </div>
+    <!-- Matchs éliminatoires -->
+    <div class="admin-section">
+      <h2>🏆 Phase éliminatoire — Ajouter un match</h2>
+      <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px">
+        Saisir l'heure en heure locale <strong>France / Albanie (UTC+2 en été)</strong>.
+        Les pronos se verrouillent automatiquement au coup d'envoi.
+      </p>
+      <form id="ko-form" class="ko-form">
+        <div class="ko-form-row">
+          <div class="form-group" style="flex:0 0 180px">
+            <label>Tour</label>
+            <select id="ko-round" class="ko-select">
+              <option value="1/32">1/32 de finale (×1)</option>
+              <option value="1/16">1/16 de finale (×1)</option>
+              <option value="1/4">Quart de finale (×2)</option>
+              <option value="1/2">Demi-finale (×3)</option>
+              <option value="Petite finale">Petite finale (×2)</option>
+              <option value="Finale">Finale (×4)</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex:0 0 60px">
+            <label>Drapeau 1</label>
+            <input id="ko-flag1" type="text" placeholder="🇫🇷" maxlength="4">
+          </div>
+          <div class="form-group" style="flex:1">
+            <label>Équipe 1</label>
+            <input id="ko-name1" type="text" placeholder="France" required>
+          </div>
+          <div class="form-group" style="flex:0 0 60px">
+            <label>Drapeau 2</label>
+            <input id="ko-flag2" type="text" placeholder="🇦🇷" maxlength="4">
+          </div>
+          <div class="form-group" style="flex:1">
+            <label>Équipe 2</label>
+            <input id="ko-name2" type="text" placeholder="Argentine" required>
+          </div>
+          <div class="form-group" style="flex:0 0 190px">
+            <label>Date &amp; heure (heure FR/AL)</label>
+            <input id="ko-datetime" type="datetime-local" required>
+          </div>
+          <div class="form-group" style="flex:1">
+            <label>Stade</label>
+            <input id="ko-venue" type="text" placeholder="Dallas (AT&T Stadium)" required>
+          </div>
+          <div class="form-group" style="flex:0 0 auto;align-self:flex-end">
+            <button type="submit" class="btn-primary" style="width:auto;padding:9px 20px">
+              + Ajouter
+            </button>
+          </div>
+        </div>
+        <div class="error-msg" id="ko-error"></div>
+      </form>
+
+      <div class="table-wrap" style="margin-top:16px">
+        <table>
+          <thead>
+            <tr><th>Tour</th><th>Équipe 1</th><th>Équipe 2</th><th>Date / Stade</th><th>Score</th><th>Actions</th></tr>
+          </thead>
+          <tbody id="ko-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /admin-panel -->
 </main>
 
-<!-- ── Result Modal ───────────────────────────────────────────────────────── -->
+<footer>
+  <span>🇫🇷 🇦🇱 Pronos entre amis · Keendoo</span>
+  <span>⚙️ Interface Admin</span>
+</footer>
+
+<!-- Modal saisie score -->
 <div id="result-modal" class="modal-backdrop" hidden>
   <div class="modal">
     <h3 id="modal-title"></h3>

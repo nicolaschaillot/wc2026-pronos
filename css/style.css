@@ -38,26 +38,44 @@ code { font-family: 'Courier New', monospace; font-size: .9em; }
 header {
   background: var(--surface);
   border-bottom: 1px solid var(--border);
-  padding: 12px 20px;
+  padding: 10px 20px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
   position: sticky; top: 0; z-index: 100;
 }
 
-.header-logo { font-size: 1.5rem; }
+/* Keendoo brand */
+.keendoo-brand {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  flex-shrink: 0;
+}
+.keendoo-logo {
+  height: 32px;
+  width: auto;
+  display: block;
+}
+.keendoo-text {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: .02em;
+}
 
 .header-title {
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 700;
   color: var(--gold);
   flex: 1;
-  line-height: 1.2;
+  line-height: 1.3;
 }
-.header-title small { display: block; font-size: .7rem; color: var(--muted); font-weight: 400; }
+.header-title small { display: block; font-size: .68rem; color: var(--muted); font-weight: 400; }
 
-.header-user { font-size: .85rem; color: var(--muted); }
-.header-user strong { color: var(--primary); }
+.header-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.header-user  { font-size: .85rem; color: var(--primary); font-weight: 600; }
 
 /* ── Navigation tabs ───────────────────────────────────────────────────────── */
 nav {
@@ -84,6 +102,31 @@ nav button.active { color: var(--primary); border-bottom-color: var(--primary); 
 /* ── Main content ──────────────────────────────────────────────────────────── */
 main { flex: 1; padding: 20px; max-width: 900px; margin: 0 auto; width: 100%; }
 
+/* ── Footer ────────────────────────────────────────────────────────────────── */
+footer {
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: .75rem;
+  color: var(--muted);
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* ── Timezone note ─────────────────────────────────────────────────────────── */
+.tz-note {
+  font-size: .75rem;
+  color: var(--muted);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 12px;
+  margin-bottom: 16px;
+}
+
 /* ── Login ─────────────────────────────────────────────────────────────────── */
 .login-card {
   background: var(--surface);
@@ -96,6 +139,9 @@ main { flex: 1; padding: 20px; max-width: 900px; margin: 0 auto; width: 100%; }
   text-align: center;
 }
 
+.login-logo { margin-bottom: 12px; min-height: 36px; }
+.login-keendoo-logo { height: 36px; width: auto; margin: 0 auto; display: block; }
+.login-flags { font-size: 1.1rem; margin-bottom: 6px; }
 .login-icon { font-size: 3rem; margin-bottom: 8px; }
 .login-card h1 { font-size: 1.4rem; color: var(--gold); margin-bottom: 4px; }
 .login-card p  { color: var(--muted); font-size: .9rem; margin-bottom: 24px; }
@@ -160,7 +206,16 @@ main { flex: 1; padding: 20px; max-width: 900px; margin: 0 auto; width: 100%; }
 .match-card:not(.locked):hover { border-color: var(--primary); }
 .match-card.locked { opacity: .7; }
 
-.match-date { font-size: .75rem; color: var(--muted); margin-bottom: 10px; }
+/* ── Match meta (date + venue) ─────────────────────────────────────────────── */
+.match-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.match-date  { font-size: .75rem; color: var(--muted); }
+.match-venue { font-size: .72rem; color: var(--muted); flex: 1; }
 
 .match-teams {
   display: flex;
@@ -237,6 +292,68 @@ main { flex: 1; padding: 20px; max-width: 900px; margin: 0 auto; width: 100%; }
 .btn-save:hover { background: var(--primary); color: #000; border-color: var(--primary); }
 
 .save-status { font-size: .8rem; color: var(--primary); min-width: 80px; }
+
+/* ── Knockout section ──────────────────────────────────────────────────────── */
+.ko-header {
+  border-top: 2px solid var(--gold);
+  margin-top: 32px;
+  padding-top: 20px;
+}
+.ko-header h2 { font-size: 1.1rem; color: var(--gold); margin-bottom: 0; }
+
+.round-mult-badge {
+  display: inline-block;
+  background: var(--gold);
+  color: #000;
+  font-size: .7rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+.multiplier-badge {
+  background: var(--gold);
+  color: #000;
+  font-size: .65rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 20px;
+  white-space: nowrap;
+}
+
+.round-badge {
+  display: inline-block;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  font-size: .72rem;
+  padding: 2px 8px;
+  border-radius: 20px;
+  color: var(--text);
+  margin-right: 4px;
+}
+
+/* ── Admin knockout form ───────────────────────────────────────────────────── */
+.ko-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
+.ko-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+}
+.ko-form-row .form-group { margin-bottom: 0; }
+.ko-form-row .form-group input,
+.ko-form-row .form-group select {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 10px;
+  color: var(--text);
+  font-size: .88rem;
+}
+.ko-select { cursor: pointer; }
 
 /* ── Leaderboard ───────────────────────────────────────────────────────────── */
 .leaderboard-header { margin-bottom: 16px; }

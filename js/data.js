@@ -194,6 +194,15 @@ export const MATCHES = (() => {
   return matches.sort((a, b) => new Date(a.date) - new Date(b.date));
 })();
 
+export const ROUND_MULTIPLIERS = {
+  '1/32': 1,
+  '1/16': 1,
+  '1/4':  2,
+  '1/2':  3,
+  'Petite finale': 2,
+  'Finale': 4,
+};
+
 export function calcPoints(pred, result) {
   if (!result || result.score1 == null || result.score2 == null) return null;
   if (pred.score1 === result.score1 && pred.score2 === result.score2) return 3;

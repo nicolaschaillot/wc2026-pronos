@@ -1,5 +1,5 @@
 import { db, ADMIN_PASSWORD_HASH } from './firebase-config.js';
-import { MATCHES } from './data.js';
+import { MATCHES, ROUND_MULTIPLIERS } from './data.js';
 import {
   doc, getDoc, setDoc, getDocs, addDoc,
   collection, deleteDoc, serverTimestamp,
@@ -7,9 +7,7 @@ import {
 
 // ─── Auth ─────────────────────────────────────────────────────────────────────
 
-function isAdminSession() {
-  return sessionStorage.getItem('wc26_admin') === '1';
-}
+function isAdminSession() { return sessionStorage.getItem('wc26_admin') === '1'; }
 
 async function sha256(str) {
   const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
@@ -21,11 +19,8 @@ async function handleAdminLogin(e) {
   const pwd = document.getElementById('admin-pwd').value;
   const err = document.getElementById('admin-login-error');
   const btn = e.target.querySelector('button');
-
   btn.disabled = true;
-  const hash = await sha256(pwd);
-
-  if (hash === ADMIN_PASSWORD_HASH) {
+  if (await sha256(pwd) === ADMIN_PASSWORD_HASH) {
     sessionStorage.setItem('wc26_admin', '1');
     showAdminPanel();
   } else {
@@ -39,23 +34,20 @@ function showAdminPanel() {
   document.getElementById('admin-panel').hidden = false;
   renderMatchResults();
   loadCodes();
+  renderKnockoutMatches();
 }
 
-// ─── Match Results ────────────────────────────────────────────────────────────
+// ─── Formatage date (UTC+2 été = France & Albanie) ───────────────────────────
 
-function buildMatchOptions() {
-  const sel = document.getElementById('select-match');
-  sel.innerHTML = '<option value="">— Choisir un match —</option>';
-  for (const m of MATCHES) {
-    const opt = document.createElement('option');
-    opt.value = m.id;
-    opt.textContent = `[${m.group}] ${m.team1.flag} ${m.team1.name} vs ${m.team2.flag} ${m.team2.name}`;
-    sel.appendChild(opt);
-  }
-}
+const FMT = new Intl.DateTimeFormat('fr-FR', {
+  timeZone: 'Europe/Paris',
+  day: '2-digit', month: 'short',
+  hour: '2-digit', minute: '2-digit',
+});
+
+// ─── Résultats phase de groupes ───────────────────────────────────────────────
 
 async function renderMatchResults() {
-  buildMatchOptions();
   const snap = await getDocs(collection(db, 'results'));
   const results = {};
   snap.forEach(d => { results[d.id] = d.data(); });
@@ -70,9 +62,7 @@ async function renderMatchResults() {
       <td>${m.group}</td>
       <td>${m.team1.flag} ${m.team1.name}</td>
       <td>${m.team2.flag} ${m.team2.name}</td>
-      <td class="${r ? 'has-result' : 'no-result'}">
-        ${r ? `${r.score1} - ${r.score2}` : '–'}
-      </td>
+      <td class="${r ? 'has-result' : 'no-result'}">${r ? `${r.score1} - ${r.score2}` : '–'}</td>
       <td>
         <button class="btn-edit-result btn-sm" data-match="${m.id}">
           ${r ? 'Modifier' : 'Saisir'}
@@ -95,10 +85,12 @@ async function renderMatchResults() {
   });
 }
 
-function openResultModal(matchId, existing) {
+function openResultModal(matchId, existing, matchLabel) {
   const match = MATCHES.find(m => m.id === matchId);
-  document.getElementById('modal-title').textContent =
-    `${match.team1.flag} ${match.team1.name} vs ${match.team2.flag} ${match.team2.name}`;
+  const label = match
+    ? `${match.team1.flag} ${match.team1.name} vs ${match.team2.flag} ${match.team2.name}`
+    : matchLabel || matchId;
+  document.getElementById('modal-title').textContent = label;
   document.getElementById('modal-match-id').value = matchId;
   document.getElementById('modal-score1').value = existing?.score1 ?? '';
   document.getElementById('modal-score2').value = existing?.score2 ?? '';
@@ -111,12 +103,109 @@ async function handleSaveResult(e) {
   const s1 = parseInt(document.getElementById('modal-score1').value, 10);
   const s2 = parseInt(document.getElementById('modal-score2').value, 10);
   if (isNaN(s1) || isNaN(s2)) return;
-
-  await setDoc(doc(db, 'results', matchId), {
-    score1: s1, score2: s2, updatedAt: serverTimestamp(),
-  });
+  await setDoc(doc(db, 'results', matchId), { score1: s1, score2: s2, updatedAt: serverTimestamp() });
   document.getElementById('result-modal').hidden = true;
   renderMatchResults();
+  renderKnockoutMatches();
+}
+
+// ─── Matchs éliminatoires ────────────────────────────────────────────────────
+
+const ROUND_LABELS = {
+  '1/32': '1/32 de finale',
+  '1/16': '1/16 de finale',
+  '1/4':  'Quart de finale',
+  '1/2':  'Demi-finale',
+  'Petite finale': 'Petite finale',
+  'Finale': 'Finale',
+};
+
+async function renderKnockoutMatches() {
+  const [koSnap, resultSnap] = await Promise.all([
+    getDocs(collection(db, 'matches_extra')),
+    getDocs(collection(db, 'results')),
+  ]);
+  const results = {};
+  resultSnap.forEach(d => { results[d.id] = d.data(); });
+
+  const tbody = document.getElementById('ko-body');
+  tbody.innerHTML = '';
+
+  const matches = [];
+  koSnap.forEach(d => matches.push({ id: d.id, ...d.data() }));
+  matches.sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  if (matches.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="6" class="muted" style="text-align:center;padding:16px">Aucun match saisi pour l\'instant.</td></tr>';
+    return;
+  }
+
+  for (const m of matches) {
+    const r = results[m.id];
+    const mult = ROUND_MULTIPLIERS[m.round] || 1;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><span class="round-badge">${ROUND_LABELS[m.round] || m.round}</span>
+          ${mult > 1 ? `<span class="multiplier-badge">×${mult}</span>` : ''}</td>
+      <td>${m.team1.flag} ${m.team1.name}</td>
+      <td>${m.team2.flag} ${m.team2.name}</td>
+      <td style="font-size:.8rem;color:var(--muted)">${FMT.format(new Date(m.date))}<br>${m.venue}</td>
+      <td class="${r ? 'has-result' : 'no-result'}">${r ? `${r.score1} - ${r.score2}` : '–'}</td>
+      <td>
+        <button class="btn-sm btn-ko-result" data-match="${m.id}"
+          data-label="${escapeHtml(m.team1.flag + ' ' + m.team1.name + ' vs ' + m.team2.flag + ' ' + m.team2.name)}">
+          ${r ? 'Modifier' : 'Saisir'} score
+        </button>
+        <button class="btn-sm danger btn-ko-del" data-match="${m.id}">✕</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
+
+  tbody.querySelectorAll('.btn-ko-result').forEach(btn => {
+    btn.addEventListener('click', () =>
+      openResultModal(btn.dataset.match, results[btn.dataset.match], btn.dataset.label));
+  });
+  tbody.querySelectorAll('.btn-ko-del').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      if (!confirm('Supprimer ce match éliminatoire ?')) return;
+      await deleteDoc(doc(db, 'matches_extra', btn.dataset.match));
+      renderKnockoutMatches();
+    });
+  });
+}
+
+async function handleAddKnockoutMatch(e) {
+  e.preventDefault();
+  const round    = document.getElementById('ko-round').value;
+  const flag1    = document.getElementById('ko-flag1').value.trim() || '⚽';
+  const name1    = document.getElementById('ko-name1').value.trim();
+  const flag2    = document.getElementById('ko-flag2').value.trim() || '⚽';
+  const name2    = document.getElementById('ko-name2').value.trim();
+  const dtValue  = document.getElementById('ko-datetime').value;
+  const venue    = document.getElementById('ko-venue').value.trim();
+  const errEl    = document.getElementById('ko-error');
+
+  if (!name1 || !name2 || !dtValue || !venue) {
+    errEl.textContent = 'Tous les champs sont obligatoires.'; return;
+  }
+
+  errEl.textContent = '';
+
+  // L'admin saisit l'heure en heure locale France/Albanie (UTC+2 en été)
+  const isoDate = `${dtValue}:00+02:00`;
+
+  await addDoc(collection(db, 'matches_extra'), {
+    round,
+    team1: { flag: flag1, name: name1 },
+    team2: { flag: flag2, name: name2 },
+    date: isoDate,
+    venue,
+    createdAt: serverTimestamp(),
+  });
+
+  e.target.reset();
+  renderKnockoutMatches();
 }
 
 // ─── Codes ───────────────────────────────────────────────────────────────────
@@ -189,6 +278,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('result-modal').hidden = true;
   });
   document.getElementById('btn-add-codes').addEventListener('click', handleAddCodes);
+  document.getElementById('ko-form').addEventListener('submit', handleAddKnockoutMatch);
 
   document.getElementById('btn-admin-logout').addEventListener('click', () => {
     sessionStorage.removeItem('wc26_admin');

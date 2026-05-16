@@ -3,21 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pronos Coupe du Monde 2026</title>
+  <title>Pronos Coupe du Monde 2026 · Keendoo</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
 <header>
-  <div class="header-logo">🏆</div>
+  <a href="https://www.keendoo.com" target="_blank" rel="noopener" class="keendoo-brand">
+    <img src="img/keendoo-logo.png" alt="Keendoo" class="keendoo-logo"
+         onerror="this.onerror=null; this.style.display='none'; this.nextElementSibling.style.display='inline'">
+    <span class="keendoo-text" style="display:none">Keendoo</span>
+  </a>
   <div class="header-title">
-    Pronos 2026
-    <small>Coupe du Monde · USA / Canada / Mexique</small>
+    Pronos Coupe du Monde 2026
+    <small>🇫🇷 France &amp; 🇦🇱 Albanie · USA / Canada / Mexique</small>
   </div>
-  <div class="header-user" id="header-user">
-    Connecté : <strong id="username-display"></strong>
+  <div class="header-right">
+    <span class="header-user" id="header-user">
+      <span id="username-display"></span>
+    </span>
+    <button class="btn-ghost" id="btn-logout">Déconnexion</button>
   </div>
-  <button class="btn-ghost" id="btn-logout">Déconnexion</button>
 </header>
 
 <nav id="nav" hidden>
@@ -30,17 +36,22 @@
   <!-- ── Login ───────────────────────────────────────────────────────────── -->
   <div id="view-login" class="view">
     <div class="login-card">
-      <div class="login-icon">⚽</div>
-      <h1>Pronos Coupe du Monde</h1>
-      <p>Entre ton pseudo et le code que tu as reçu pour participer.</p>
+      <div class="login-logo">
+        <img src="img/keendoo-logo.png" alt="Keendoo" class="login-keendoo-logo"
+             onerror="this.onerror=null; this.style.display='none'">
+      </div>
+      <div class="login-icon">🏆</div>
+      <h1>Pronos Coupe du Monde 2026</h1>
+      <p class="login-flags">🇫🇷 France &nbsp;·&nbsp; 🇦🇱 Albanie</p>
+      <p>Entre ton pseudo et le code reçu pour participer.</p>
       <form id="login-form">
         <div class="form-group">
           <label for="input-pseudo">Ton pseudo</label>
-          <input id="input-pseudo" type="text" placeholder="ex: nicolas" autocomplete="off" required>
+          <input id="input-pseudo" type="text" placeholder="ex : nicolas" autocomplete="off" required>
         </div>
         <div class="form-group">
           <label for="input-code">Code de participation</label>
-          <input id="input-code" type="text" placeholder="ex: XK7P3Q" autocomplete="off"
+          <input id="input-code" type="text" placeholder="ex : XK7P3Q" autocomplete="off"
                  maxlength="8" style="text-transform:uppercase" required>
         </div>
         <button type="submit" class="btn-primary">Rejoindre →</button>
@@ -51,6 +62,7 @@
 
   <!-- ── Predictions ─────────────────────────────────────────────────────── -->
   <div id="view-predictions" class="view" hidden>
+    <p class="tz-note">🕐 Heures affichées en heure locale France / Albanie (UTC+2 en été)</p>
     <div id="predictions-list"></div>
   </div>
 
@@ -58,22 +70,18 @@
   <div id="view-leaderboard" class="view" hidden>
     <div class="leaderboard-header">
       <h2>🏅 Classement</h2>
-      <p>Mis à jour en temps réel après chaque résultat saisi par l'admin.</p>
+      <p>Mis à jour en temps réel après chaque résultat saisi.</p>
     </div>
     <div class="scoring-legend">
       <div>🎯 Score exact → <span>3 pts</span></div>
       <div>✅ Bon résultat → <span>1 pt</span></div>
       <div>❌ Mauvais → <span>0 pt</span></div>
+      <div>🏆 Phases finales → <span>×2 / ×3 / ×4</span></div>
     </div>
     <div class="table-wrap">
       <table>
         <thead>
-          <tr>
-            <th>Rang</th>
-            <th>Pseudo</th>
-            <th>Points</th>
-            <th>Détail</th>
-          </tr>
+          <tr><th>Rang</th><th>Pseudo</th><th>Points</th><th>Détail</th></tr>
         </thead>
         <tbody id="leaderboard-body">
           <tr><td colspan="4">Chargement…</td></tr>
@@ -83,6 +91,11 @@
   </div>
 
 </main>
+
+<footer>
+  <span>🇫🇷 🇦🇱 Pronos entre amis · Keendoo</span>
+  <span>⚽ Coupe du Monde 2026</span>
+</footer>
 
 <script type="module" src="js/app.js"></script>
 </body>
