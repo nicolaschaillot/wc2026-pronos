@@ -65,6 +65,9 @@ const TRANSLATIONS = {
     'rules.back':          '← Retour à la connexion',
     'last.update':         'Dernière mise à jour',
     'last.update.none':    'Aucun résultat saisi pour l\'instant',
+    'urgent.title':        '⚡ Matchs à pronostiquer aujourd\'hui',
+    'stats.top':           'Score le + prédit',
+    'lb.chart.title':      'Évolution du classement',
   },
   sq: {
     'header.title':        'Pronostikime · Kupa e Botës 2026',
@@ -131,6 +134,9 @@ const TRANSLATIONS = {
     'rules.back':          '← Kthehu te hyrja',
     'last.update':         'Përditësimi i fundit',
     'last.update.none':    'Asnjë rezultat i regjistruar për momentin',
+    'urgent.title':        '⚡ Ndeshje për t\'u pronostikuar sot',
+    'stats.top':           'Rezultati më i pronostikuar',
+    'lb.chart.title':      'Ecuria e renditjes',
   },
 };
 

@@ -70,6 +70,7 @@
   <!-- ── Predictions ─────────────────────────────────────────────────────── -->
   <div id="view-predictions" class="view" hidden>
     <p class="tz-note" data-i18n="tz.note">🕐 Heures affichées en heure locale France / Albanie (UTC+2 en été)</p>
+    <div id="urgent-banner" class="urgent-banner" hidden></div>
     <div class="predictions-layout">
       <aside id="group-sidebar" class="group-sidebar"></aside>
       <div id="predictions-content" class="predictions-content"></div>
@@ -123,6 +124,10 @@
         </tbody>
       </table>
     </div>
+    <div id="chart-container" class="chart-container" hidden>
+      <h3 class="chart-title" data-i18n="lb.chart.title">Évolution du classement</h3>
+      <canvas id="evolution-chart"></canvas>
+    </div>
   </div>
 
 </main>
@@ -132,6 +137,7 @@
   <span data-i18n="footer.right">⚽ Coupe du Monde 2026</span>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script type="module" src="js/app.js"></script>
 </body>
 </html>

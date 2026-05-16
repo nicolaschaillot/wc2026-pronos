@@ -82,6 +82,7 @@ async function handleLogin(e) {
 let userPronostics   = {};
 let knockoutMatches  = [];
 let matchResults     = {};
+let matchPronostics  = {};
 let currentGroupId   = null;
 let lastResultUpdate = null;
 
@@ -97,6 +98,121 @@ async function loadResults() {
       const ms = ts.toMillis ? ts.toMillis() : ts.seconds * 1000;
       if (!lastResultUpdate || ms > lastResultUpdate) lastResultUpdate = ms;
     }
+  });
+}
+
+async function loadAllPronostics() {
+  const snap = await getDocs(collection(db, 'pronostics'));
+  matchPronostics = {};
+  snap.forEach(d => {
+    const p = d.data();
+    if (!matchPronostics[p.matchId]) matchPronostics[p.matchId] = [];
+    matchPronostics[p.matchId].push(p);
+  });
+}
+
+function renderUrgentBanner(pseudo) {
+  const banner = document.getElementById('urgent-banner');
+  if (!banner) return;
+  const now = Date.now();
+  const in24h = now + 24 * 3600 * 1000;
+  const urgent = [...MATCHES, ...knockoutMatches].filter(m => {
+    const ms = new Date(m.date).getTime();
+    return ms > now && ms <= in24h;
+  });
+  if (urgent.length === 0) { banner.hidden = true; return; }
+  banner.hidden = false;
+  banner.innerHTML = `
+    <div class="urgent-title">${t('urgent.title')}</div>
+    <div class="urgent-list">
+      ${urgent.map(m => {
+        const hasProno = !!userPronostics[m.id];
+        return `<div class="urgent-item ${hasProno ? 'urgent-ok' : 'urgent-missing'}">
+          <span class="urgent-teams">${m.team1.flag} ${m.team1.name} <span class="urgent-vs">vs</span> ${m.team2.flag} ${m.team2.name}</span>
+          <span class="urgent-time">${formatDate(m.date)}</span>
+          <span class="urgent-badge">${hasProno ? '✓' : '!'}</span>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+function updateCountdowns() {
+  document.querySelectorAll('.countdown[data-date]').forEach(el => {
+    const diff = new Date(el.dataset.date) - Date.now();
+    if (diff <= 0 || diff > 48 * 3600 * 1000) { el.textContent = ''; return; }
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    el.textContent = h >= 1
+      ? ` · ⏱ ${h}h${String(m).padStart(2, '0')}`
+      : ` · ⏱ ${m} min`;
+  });
+}
+
+function renderEvolutionChart() {
+  const container = document.getElementById('chart-container');
+  const canvas    = document.getElementById('evolution-chart');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  const allMatchesById = {};
+  [...MATCHES, ...knockoutMatches].forEach(m => { allMatchesById[m.id] = m; });
+
+  const matchesWithResults = Object.entries(matchResults)
+    .map(([id, result]) => ({ id, result, match: allMatchesById[id] }))
+    .filter(x => x.match)
+    .sort((a, b) => new Date(a.match.date) - new Date(b.match.date));
+
+  if (matchesWithResults.length < 2) { container.hidden = true; return; }
+  container.hidden = false;
+
+  const userSet = new Set();
+  Object.values(matchPronostics).forEach(list => list.forEach(p => userSet.add(p.userId)));
+  const users = [...userSet].sort();
+  if (users.length === 0) { container.hidden = true; return; }
+
+  const totals  = Object.fromEntries(users.map(u => [u, 0]));
+  const series  = Object.fromEntries(users.map(u => [u, []]));
+  const labels  = [];
+
+  for (const { id, result, match } of matchesWithResults) {
+    const mult = ROUND_MULTIPLIERS[match.round] || 1;
+    (matchPronostics[id] || []).forEach(p => {
+      const pts = calcPoints(p, result);
+      if (pts !== null) totals[p.userId] = (totals[p.userId] || 0) + pts * mult;
+    });
+    users.forEach(u => series[u].push(totals[u] || 0));
+    labels.push(`${match.team1.flag}${match.team2.flag}`);
+  }
+
+  const me = getSession()?.pseudo;
+  const palette = ['#00c853','#ffd700','#3b82f6','#ef4444','#a855f7','#f97316','#06b6d4','#ec4899','#84cc16','#f59e0b','#14b8a6','#8b5cf6'];
+
+  if (window._wc26Chart) { window._wc26Chart.destroy(); window._wc26Chart = null; }
+
+  window._wc26Chart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: users.map((u, i) => ({
+        label: u,
+        data: series[u],
+        borderColor: palette[i % palette.length],
+        backgroundColor: 'transparent',
+        tension: 0.2,
+        pointRadius: 2,
+        borderWidth: u === me ? 3 : 1.5,
+      })),
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#e2e8f0', font: { size: 11 }, boxWidth: 20 } },
+      },
+      scales: {
+        x: { ticks: { color: '#6b7e9a', font: { size: 10 } }, grid: { color: '#1e3050' } },
+        y: { ticks: { color: '#6b7e9a', font: { size: 10 } }, grid: { color: '#1e3050' }, beginAtZero: true },
+      },
+    },
   });
 }
 
@@ -153,6 +269,29 @@ function buildMatchCard(match, pseudo, multiplier = 1) {
   const multBadge = multiplier > 1
     ? `<span class="multiplier-badge">×${multiplier}</span>` : '';
 
+  // ── Stats pronos des autres joueurs (matchs verrouillés) ─────────────────
+  let statsHtml = '';
+  if (locked) {
+    const pronoList = matchPronostics[match.id] || [];
+    if (pronoList.length > 0) {
+      const homeWins = pronoList.filter(p => p.score1 > p.score2).length;
+      const draws    = pronoList.filter(p => p.score1 === p.score2).length;
+      const awayWins = pronoList.filter(p => p.score1 < p.score2).length;
+      const total    = pronoList.length;
+      const scoreCount = {};
+      pronoList.forEach(p => { const k = `${p.score1}-${p.score2}`; scoreCount[k] = (scoreCount[k] || 0) + 1; });
+      const [topScore, topCount] = Object.entries(scoreCount).sort((a, b) => b[1] - a[1])[0];
+      statsHtml = `<div class="match-stats">
+        <div class="stats-bar">
+          ${homeWins ? `<span class="sb-home" style="flex:${homeWins}" title="${match.team1.name} (${homeWins})">${Math.round(homeWins/total*100)}%</span>` : ''}
+          ${draws    ? `<span class="sb-draw" style="flex:${draws}"    title="= (${draws})">${Math.round(draws/total*100)}%</span>` : ''}
+          ${awayWins ? `<span class="sb-away" style="flex:${awayWins}" title="${match.team2.name} (${awayWins})">${Math.round(awayWins/total*100)}%</span>` : ''}
+        </div>
+        <div class="stats-detail">${total} ${t('lb.pronos')} · ${t('stats.top')} : ${topScore} (${topCount}×)</div>
+      </div>`;
+    }
+  }
+
   // ── Ligne résultat officiel + points ──────────────────────────────────────
   let resultHtml = '';
   if (locked && result) {
@@ -173,7 +312,7 @@ function buildMatchCard(match, pseudo, multiplier = 1) {
 
   card.innerHTML = `
     <div class="match-meta">
-      <span class="match-date">${formatDate(match.date)}${locked ? ' 🔒' : ''}</span>
+      <span class="match-date">${formatDate(match.date)}${locked ? ' 🔒' : `<span class="countdown" data-date="${match.date}"></span>`}</span>
       <span class="match-venue">📍 ${match.venue}</span>
       ${multBadge}
     </div>
@@ -199,6 +338,7 @@ function buildMatchCard(match, pseudo, multiplier = 1) {
         <span class="flag">${match.team2.flag}</span>
       </span>
     </div>
+    ${statsHtml}
     ${resultHtml}
     ${!locked ? `<div class="save-row">
       <button class="btn-save" data-match="${match.id}">${t('save')}</button>
@@ -323,6 +463,8 @@ function renderPredictions(pseudo) {
     ? currentGroupId : Object.keys(GROUPS)[0];
   showGroup(defaultGroup);
   attachCardHandlers(content, pseudo);
+  renderUrgentBanner(pseudo);
+  updateCountdowns();
 }
 
 async function savePronostic(pseudo, matchId) {
@@ -504,6 +646,7 @@ async function loadLeaderboard() {
     resultSnap.forEach(d => {
       const data = d.data();
       results[d.id] = data;
+      matchResults[d.id] = data;
       const ts = data.updatedAt;
       if (ts) {
         const ms = ts.toMillis ? ts.toMillis() : ts.seconds * 1000;
@@ -521,12 +664,15 @@ async function loadLeaderboard() {
     const userPredCount = {};
     const userExact = {};
 
+    matchPronostics = {};
     pronoSnap.forEach(d => {
       const p = d.data();
       if (!userPoints[p.userId]) {
         userPoints[p.userId] = 0; userPredCount[p.userId] = 0; userExact[p.userId] = 0;
       }
       userPredCount[p.userId]++;
+      if (!matchPronostics[p.matchId]) matchPronostics[p.matchId] = [];
+      matchPronostics[p.matchId].push(p);
       const pts = calcPoints(p, results[p.matchId] || {});
       if (pts !== null) {
         const mult = multipliers[p.matchId] || 1;
@@ -552,8 +698,9 @@ async function loadLeaderboard() {
       return;
     }
 
+    const me = getSession()?.pseudo;
     container.innerHTML = ranked.map(r => `
-      <tr class="${r.rank <= 3 ? 'top-' + r.rank : ''}">
+      <tr class="${r.rank <= 3 ? 'top-' + r.rank : ''} ${r.pseudo === me ? 'own-row' : ''}">
         <td class="rank">${r.rank === 1 ? '🥇' : r.rank === 2 ? '🥈' : r.rank === 3 ? '🥉' : r.rank}</td>
         <td class="pseudo">${escapeHtml(r.pseudo)}</td>
         <td class="pts"><strong>${r.pts}</strong> ${t('lb.pts')}</td>
@@ -561,6 +708,7 @@ async function loadLeaderboard() {
       </tr>
     `).join('');
     renderLastUpdate();
+    renderEvolutionChart();
   } catch (err) {
     console.error(err);
     container.innerHTML = `<tr><td colspan="4">${t('lb.error')}</td></tr>`;
@@ -586,7 +734,7 @@ async function initApp() {
   document.getElementById('btn-logout').hidden = false;
   showView('view-predictions');
 
-  await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults()]);
+  await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults(), loadAllPronostics()]);
   renderPredictions(user.pseudo);
 }
 
@@ -628,19 +776,21 @@ document.addEventListener('DOMContentLoaded', () => {
       if (view === 'view-predictions') {
         const user = getSession();
         if (user) {
-          await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults()]);
+          await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults(), loadAllPronostics()]);
           renderPredictions(user.pseudo);
         }
       }
     });
   });
 
+  setInterval(updateCountdowns, 60000);
+
   window.addEventListener('wc26:langchange', async () => {
     const user = getSession();
     if (!user) return;
     const activeView = document.querySelector('.view:not([hidden])');
     if (activeView?.id === 'view-predictions') {
-      await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults()]);
+      await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults(), loadAllPronostics()]);
       renderPredictions(user.pseudo);
     } else if (activeView?.id === 'view-results') {
       await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults()]);
