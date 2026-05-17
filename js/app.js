@@ -219,11 +219,7 @@ function updateCountdowns() {
   document.querySelectorAll('.countdown[data-date]').forEach(el => {
     const diff = new Date(el.dataset.date) - Date.now();
     if (diff <= 0) { el.textContent = ''; return; }
-    const h = Math.floor(diff / 3600000);
-    const m = Math.floor((diff % 3600000) / 60000);
-    el.textContent = h >= 1
-      ? ` · ⏱ ${h}h${String(m).padStart(2, '0')}`
-      : ` · ⏱ ${m} min`;
+    el.textContent = ` · ⏱ ${formatCountdown(diff)}`;
   });
 }
 
