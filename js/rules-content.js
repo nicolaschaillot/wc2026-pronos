@@ -61,6 +61,8 @@ Dès que le match commence, le pronostic est <strong>verrouillé</strong> — pl
 <h3>🏅 Classement</h3>
 <p>Le classement est mis à jour <strong>en temps réel</strong> dès qu'un résultat est saisi.<br>
 Tu peux le consulter à tout moment via l'onglet <strong>Classement</strong>.</p>
+<p>En cas d'égalité de points, le départage s'effectue dans l'ordre suivant :
+  <strong>nombre de scores exacts</strong>, puis <strong>nombre de bons résultats</strong>, puis <strong>ordre alphabétique</strong> du pseudo.</p>
 `,
 
   sq: `
@@ -125,5 +127,7 @@ Sapo ndeshja fillon, parashikimi <strong>bllokohet</strong> — nuk mund të bë
 <h3>🏅 Renditja</h3>
 <p>Renditja përditësohet <strong>në kohë reale</strong> sapo të futet një rezultat.<br>
 Mund ta shikosh në çdo moment nëpërmjet skedës <strong>Renditja</strong>.</p>
+<p>Në rast barazie pikësh, renditja vendoset sipas këtij rregulli :
+  <strong>numri i rezultateve të sakta</strong>, pastaj <strong>numri i rezultateve të duhura</strong>, pastaj <strong>rendi alfabetik</strong> i pseudonimit.</p>
 `,
 };
