@@ -28,7 +28,7 @@ export const GROUPS = {
   ]},
   E: { teams: [
     { id: 'ger', name: 'Allemagne',          namesq: 'Gjermania',                  flag: '🇩🇪' },
-    { id: 'cur', name: 'Curaçao',            namesq: 'Kuraçao',                    flag: '🇨🇼' },
+    { id: 'cur', name: 'Curaçao',            namesq: 'Kurasao',                    flag: '🇨🇼' },
     { id: 'civ', name: "Côte d'Ivoire",      namesq: 'Bregu i Fildishtë',          flag: '🇨🇮' },
     { id: 'ecu', name: 'Équateur',           namesq: 'Ekuadori',                   flag: '🇪🇨' },
   ]},
@@ -36,7 +36,7 @@ export const GROUPS = {
     { id: 'ned', name: 'Pays-Bas',           namesq: 'Holanda',                    flag: '🇳🇱' },
     { id: 'jpn', name: 'Japon',              namesq: 'Japonia',                    flag: '🇯🇵' },
     { id: 'swe', name: 'Suède',              namesq: 'Suedia',                     flag: '🇸🇪' },
-    { id: 'tun', name: 'Tunisie',            namesq: 'Tunizia',                    flag: '🇹🇳' },
+    { id: 'tun', name: 'Tunisie',            namesq: 'Tunizi',                     flag: '🇹🇳' },
   ]},
   G: { teams: [
     { id: 'bel', name: 'Belgique',           namesq: 'Belgjika',                   flag: '🇧🇪' },
@@ -46,7 +46,7 @@ export const GROUPS = {
   ]},
   H: { teams: [
     { id: 'esp', name: 'Espagne',            namesq: 'Spanja',                     flag: '🇪🇸' },
-    { id: 'cpv', name: 'Cap-Vert',           namesq: 'Kepi i Gjelbër',             flag: '🇨🇻' },
+    { id: 'cpv', name: 'Cap-Vert',           namesq: 'Kape Verde',                 flag: '🇨🇻' },
     { id: 'ksa', name: 'Arabie Saoudite',    namesq: 'Arabia Saudite',             flag: '🇸🇦' },
     { id: 'uru', name: 'Uruguay',            namesq: 'Uruguaji',                   flag: '🇺🇾' },
   ]},
@@ -64,7 +64,7 @@ export const GROUPS = {
   ]},
   K: { teams: [
     { id: 'por', name: 'Portugal',           namesq: 'Portugalia',                 flag: '🇵🇹' },
-    { id: 'cod', name: 'RD Congo',           namesq: 'Kongo DR',                   flag: '🇨🇩' },
+    { id: 'cod', name: 'RD Congo',           namesq: 'RD e Kongos',                flag: '🇨🇩' },
     { id: 'uzb', name: 'Ouzbékistan',        namesq: 'Uzbekistani',                flag: '🇺🇿' },
     { id: 'col', name: 'Colombie',           namesq: 'Kolumbia',                   flag: '🇨🇴' },
   ]},
