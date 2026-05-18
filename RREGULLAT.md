@@ -26,6 +26,7 @@ Sapo ndeshja fillon, parashikimi **bllokohet** — nuk mund të bësh më ndrysh
 
 ---
 
+
 ## 🏆 Sistemi i pikëve
 
 | Rezultati i parashikimit tënd | Pikë |
