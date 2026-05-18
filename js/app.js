@@ -1,5 +1,5 @@
 import { db } from './firebase-config.js';
-import { GROUPS, MATCHES, ROUND_MULTIPLIERS, calcPoints } from './data.js';
+import { GROUPS, MATCHES, ROUND_MULTIPLIERS, TEAM_NAMES_SQ, calcPoints } from './data.js';
 import { t, getLang, initI18n } from './i18n.js';
 import { RULES_HTML } from './rules-content.js';
 import {
@@ -163,9 +163,9 @@ function renderNextMatchBanner(pseudo) {
     <div class="nm-main">
       <div class="nm-left">
         <div class="nm-teams">
-          <span>${next.team1.flag} ${next.team1.name}</span>
+          <span>${next.team1.flag} ${tTeam(next.team1)}</span>
           <span class="nm-vs">vs</span>
-          <span>${next.team2.flag} ${next.team2.name}</span>
+          <span>${next.team2.flag} ${tTeam(next.team2)}</span>
         </div>
         <div id="nm-prono">${_pronoHtml(prono)}</div>
       </div>
@@ -207,7 +207,7 @@ function renderUrgentBanner(pseudo) {
       ${urgent.map(m => {
         const hasProno = !!userPronostics[m.id];
         return `<div class="urgent-item ${hasProno ? 'urgent-ok' : 'urgent-missing'}">
-          <span class="urgent-teams">${m.team1.flag} ${m.team1.name} <span class="urgent-vs">vs</span> ${m.team2.flag} ${m.team2.name}</span>
+          <span class="urgent-teams">${m.team1.flag} ${tTeam(m.team1)} <span class="urgent-vs">vs</span> ${m.team2.flag} ${tTeam(m.team2)}</span>
           <span class="urgent-time">${formatDate(m.date)}</span>
           <span class="urgent-badge">${hasProno ? '✓' : '!'}</span>
         </div>`;
@@ -358,9 +358,9 @@ function buildMatchCard(match, pseudo, multiplier = 1) {
       const [topScore, topCount] = Object.entries(scoreCount).sort((a, b) => b[1] - a[1])[0];
       statsHtml = `<div class="match-stats">
         <div class="stats-bar">
-          ${homeWins ? `<span class="sb-home" style="flex:${homeWins}" title="${match.team1.name} (${homeWins})">${Math.round(homeWins/total*100)}%</span>` : ''}
+          ${homeWins ? `<span class="sb-home" style="flex:${homeWins}" title="${tTeam(match.team1)} (${homeWins})">${Math.round(homeWins/total*100)}%</span>` : ''}
           ${draws    ? `<span class="sb-draw" style="flex:${draws}"    title="= (${draws})">${Math.round(draws/total*100)}%</span>` : ''}
-          ${awayWins ? `<span class="sb-away" style="flex:${awayWins}" title="${match.team2.name} (${awayWins})">${Math.round(awayWins/total*100)}%</span>` : ''}
+          ${awayWins ? `<span class="sb-away" style="flex:${awayWins}" title="${tTeam(match.team2)} (${awayWins})">${Math.round(awayWins/total*100)}%</span>` : ''}
         </div>
         <div class="stats-detail">${total} ${t('lb.pronos')} · ${t('stats.top')} : ${topScore} (${topCount}×)</div>
       </div>`;
@@ -394,7 +394,7 @@ function buildMatchCard(match, pseudo, multiplier = 1) {
     <div class="match-teams">
       <span class="team">
         <span class="flag">${match.team1.flag}</span>
-        <span class="name">${match.team1.name}</span>
+        <span class="name">${tTeam(match.team1)}</span>
       </span>
       <div class="score-inputs">
         ${locked
@@ -409,7 +409,7 @@ function buildMatchCard(match, pseudo, multiplier = 1) {
         }
       </div>
       <span class="team right">
-        <span class="name">${match.team2.name}</span>
+        <span class="name">${tTeam(match.team2)}</span>
         <span class="flag">${match.team2.flag}</span>
       </span>
     </div>
@@ -486,7 +486,7 @@ function renderPredictions(pseudo) {
         ${progressBadge}
       </div>
       <div class="gsb-teams">
-        ${GROUPS[groupId].teams.map(team => `<span class="gsb-team">${team.flag} ${team.name}</span>`).join('')}
+        ${GROUPS[groupId].teams.map(team => `<span class="gsb-team">${team.flag} ${tTeam(team)}</span>`).join('')}
       </div>`;
     btn.addEventListener('click', () => showGroup(groupId));
     sidebar.appendChild(btn);
@@ -648,7 +648,7 @@ function renderMyResults() {
         : `<span class="muted">–</span>`;
 
       return `<tr>
-        <td class="res-match">${m.team1.flag} ${m.team1.name} – ${m.team2.flag} ${m.team2.name}</td>
+        <td class="res-match">${m.team1.flag} ${tTeam(m.team1)} – ${m.team2.flag} ${tTeam(m.team2)}</td>
         <td class="res-prono">${pronoStr}</td>
         <td class="res-result"><strong>${result.score1} – ${result.score2}</strong></td>
         <td class="res-pts">${ptsStr}</td>
@@ -797,6 +797,11 @@ async function loadLeaderboard() {
 }
 
 // ─── Utilities ───────────────────────────────────────────────────────────────
+
+function tTeam(team) {
+  if (getLang() !== 'sq') return team.name;
+  return team.namesq || TEAM_NAMES_SQ[team.name] || team.name;
+}
 
 function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, c =>
