@@ -28,7 +28,7 @@ Sapo ndeshja fillon, parashikimi **bllokohet** — nuk mund të bësh më ndrysh
 
 ## 🏆 Sistemi i pikëve
 
-| Rezultati i pronostikimit tënd | Pikë |
+| Rezultati i parashikimit tënd | Pikë |
 |---|---|
 | 🎯 Rezultat i saktë (p.sh.: 2-1, ke vendosur 2-1) | **3 pikë** |
 | ✅ Rezultat i duhur, por jo rezultati i saktë (p.sh.: fitues i parashikuar saktë) | **1 pikë** |
