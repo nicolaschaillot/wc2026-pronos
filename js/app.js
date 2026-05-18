@@ -744,12 +744,14 @@ async function loadLeaderboard() {
     const userPoints = {};
     const userPredCount = {};
     const userExact = {};
+    const userCorrect = {};
 
     matchPronostics = {};
     pronoSnap.forEach(d => {
       const p = d.data();
       if (!userPoints[p.userId]) {
-        userPoints[p.userId] = 0; userPredCount[p.userId] = 0; userExact[p.userId] = 0;
+        userPoints[p.userId] = 0; userPredCount[p.userId] = 0;
+        userExact[p.userId] = 0; userCorrect[p.userId] = 0;
       }
       userPredCount[p.userId]++;
       if (!matchPronostics[p.matchId]) matchPronostics[p.matchId] = [];
@@ -759,16 +761,25 @@ async function loadLeaderboard() {
         const mult = multipliers[p.matchId] || 1;
         userPoints[p.userId] += pts * mult;
         if (pts === 3) userExact[p.userId]++;
+        else if (pts === 1) userCorrect[p.userId]++;
       }
     });
 
     usersSnap.forEach(d => {
       const u = d.data().pseudo;
-      if (!userPoints[u]) { userPoints[u] = 0; userPredCount[u] = 0; userExact[u] = 0; }
+      if (!userPoints[u]) {
+        userPoints[u] = 0; userPredCount[u] = 0;
+        userExact[u] = 0; userCorrect[u] = 0;
+      }
     });
 
     const ranked = Object.entries(userPoints)
-      .sort(([, a], [, b]) => b - a)
+      .sort(([pA, ptsA], [pB, ptsB]) => {
+        if (ptsB !== ptsA)               return ptsB - ptsA;
+        if (userExact[pB] !== userExact[pA])     return userExact[pB] - userExact[pA];
+        if (userCorrect[pB] !== userCorrect[pA]) return userCorrect[pB] - userCorrect[pA];
+        return pA.localeCompare(pB);
+      })
       .map(([pseudo, pts], i) => ({
         rank: i + 1, pseudo, pts,
         pred: userPredCount[pseudo], exact: userExact[pseudo],
