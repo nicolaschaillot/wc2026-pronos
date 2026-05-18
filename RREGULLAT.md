@@ -1,12 +1,12 @@
-# ⚽ Pronostikime · Kupa e Botës 2026 — Si të marrësh pjesë?
+# ⚽ Parashikime · Kupa e Botës 2026 — Si të marrësh pjesë?
 
-Mirë se vini në lojën e pronostikimeve të Kupës së Botës 2026 mes kolegëve! 🇫🇷 🇦🇱
+Mirë se vini në lojën e parashikimeve të Kupës së Botës 2026 mes kolegëve! 🇫🇷 🇦🇱
 
 ---
 
 ## 📲 Si të regjistrohesh?
 
-1. Shko në faqen e pronostikimeve: **https://nicolaschaillot.github.io/wc2026-pronos/**
+1. Shko në faqen e parashikimeve: **https://nicolaschaillot.github.io/wc2026-pronos/**
 2. Shkruaj **pseudonimin** që dëshiron dhe **kodin** që të është dërguar personalisht.
 3. Kliko **Hyr** — kaq!
 
@@ -17,10 +17,10 @@ Mirë se vini në lojën e pronostikimeve të Kupës së Botës 2026 mes kolegë
 
 ## ⚽ Si funksionon?
 
-Për çdo ndeshje, shëno **pronostikimin tënd për rezultatin** (p.sh.: Franca 2 – 1 Maroku).
+Për çdo ndeshje, shëno **parashikimin tënd për rezultatin** (p.sh.: Franca 2 – 1 Maroku).
 
-Mund të ndryshosh pronostikimin sa herë të duash **deri në fillimin e ndeshjes**.  
-Sapo ndeshja fillon, pronostikimi **bllokohet** — nuk mund të bësh më ndryshime.
+Mund të ndryshosh parashikimin sa herë të duash **deri në fillimin e ndeshjes**.  
+Sapo ndeshja fillon, parashikimi **bllokohet** — nuk mund të bësh më ndryshime.
 
 > 🕐 Oraret shfaqen sipas **orës lokale të Francës / Shqipërisë** (UTC+2 në verë).
 
@@ -53,14 +53,14 @@ Pikët shumëzohen sipas turit:
 
 ## 📋 Faza e grupeve vs faza eliminuese
 
-- **Faza e grupeve**: të 72 ndeshjet janë të disponueshme që nga hapja e faqes. Mund të pronostikosh të gjitha ndeshjet paraprakisht.
+- **Faza e grupeve**: të 72 ndeshjet janë të disponueshme që nga hapja e faqes. Mund të parashikosh të gjitha ndeshjet paraprakisht.
 - **Faza eliminuese**: ndeshjet shtohen gradualisht nga admini, pasi të dihen skuadrat e kualifikuara. Admini do të të njoftojë kur të jenë në dispozicion ndeshje të reja.
 
 ### ⏱️ Rezultati i referencës në fazën eliminuese
 
 Në rast barazimi në fund të kohës rregullamentare (90 min), ndeshja vazhdon me kohë shtesë dhe eventualisht me penallti.
 
-> **Rezultati që merret parasysh për pronostikimet është ai në fund të kohës shtesë (120 min), pa përfshirë penalltitë.**
+> **Rezultati që merret parasysh për parashikimet është ai në fund të kohës shtesë (120 min), pa përfshirë penalltitë.**
 
 Shembuj:
 - Barazim 1-1 në 90 min → kohë shtesë → Franca fiton 2-1 në 120 min: rezultati i referencës është **2-1**
