@@ -64,12 +64,12 @@ Tu peux le consulter à tout moment via l'onglet <strong>Classement</strong>.</p
 `,
 
   sq: `
-<h2>⚽ Pronostikime · Kupa e Botës 2026</h2>
-<p class="rules-welcome">Mirë se vini në lojën e pronostikimeve të Kupës së Botës 2026 mes kolegëve! 🇫🇷 🇦🇱</p>
+<h2>⚽ Parashikime · Kupa e Botës 2026</h2>
+<p class="rules-welcome">Mirë se vini në lojën e parashikimeve të Kupës së Botës 2026 mes kolegëve! 🇫🇷 🇦🇱</p>
 
 <h3>📲 Si të regjistrohesh?</h3>
 <ol>
-  <li>Shko në faqen e pronostikimeve: <strong>https://nicolaschaillot.github.io/wc2026-pronos/</strong></li>
+  <li>Shko në faqen e parashikimeve: <strong>https://nicolaschaillot.github.io/wc2026-pronos/</strong></li>
   <li>Shkruaj <strong>pseudonimin</strong> që dëshiron dhe <strong>kodin</strong> që të është dërguar personalisht.</li>
   <li>Kliko <strong>Hyr</strong> — kaq!</li>
 </ol>
@@ -79,17 +79,17 @@ Tu peux le consulter à tout moment via l'onglet <strong>Classement</strong>.</p
 </blockquote>
 
 <h3>⚽ Si funksionon?</h3>
-<p>Për çdo ndeshje, shëno <strong>pronostikimin tënd për rezultatin</strong> (p.sh.: Franca 2 – 1 Maroku).</p>
-<p>Mund të ndryshosh pronostikimin sa herë të duash <strong>deri në fillimin e ndeshjes</strong>.<br>
-Sapo ndeshja fillon, pronostikimi <strong>bllokohet</strong> — nuk mund të bësh më ndryshime.</p>
+<p>Për çdo ndeshje, shëno <strong>parashikimin tënd për rezultatin</strong> (p.sh.: Franca 2 – 1 Maroku).</p>
+<p>Mund të ndryshosh parashikimin sa herë të duash <strong>deri në fillimin e ndeshjes</strong>.<br>
+Sapo ndeshja fillon, parashikimi <strong>bllokohet</strong> — nuk mund të bësh më ndryshime.</p>
 <blockquote>🕐 Oraret shfaqen sipas <strong>orës lokale të Francës / Shqipërisë</strong> (UTC+2 në verë).</blockquote>
 
 <h3>🏆 Sistemi i pikëve</h3>
 <table>
-  <thead><tr><th>Rezultati i pronostikimit tënd</th><th>Pikë</th></tr></thead>
+  <thead><tr><th>Rezultati i parashikimit tënd</th><th>Pikë</th></tr></thead>
   <tbody>
-    <tr><td>🎯 Rezultat i saktë (p.sh.: 2-1, ke shënuar 2-1)</td><td><strong>3 pikë</strong></td></tr>
-    <tr><td>✅ Rezultat i duhur, por jo rezultati i saktë (ke parashikuar saktë fituesin)</td><td><strong>1 pikë</strong></td></tr>
+    <tr><td>🎯 Rezultat i saktë (p.sh.: 2-1, ke vendosur 2-1)</td><td><strong>3 pikë</strong></td></tr>
+    <tr><td>✅ Rezultat i duhur, por jo rezultati i saktë (p.sh.: fitues i parashikuar saktë)</td><td><strong>1 pikë</strong></td></tr>
     <tr><td>❌ Rezultat i gabuar (ose barazim i paparashikuar)</td><td><strong>0 pikë</strong></td></tr>
   </tbody>
 </table>
@@ -110,20 +110,20 @@ Sapo ndeshja fillon, pronostikimi <strong>bllokohet</strong> — nuk mund të b�
 
 <h3>📋 Faza e grupeve vs faza eliminuese</h3>
 <ul>
-  <li><strong>Faza e grupeve</strong>: të gjitha 72 ndeshjet janë të disponueshme që nga hapja e faqes. Mund t'i pronostikosh të gjitha ndeshjet paraprakisht.</li>
+  <li><strong>Faza e grupeve</strong>: të 72 ndeshjet janë të disponueshme që nga hapja e faqes. Mund të parashikosh të gjitha ndeshjet paraprakisht.</li>
   <li><strong>Faza eliminuese</strong>: ndeshjet shtohen gradualisht nga admini, pasi të dihen skuadrat e kualifikuara. Admini do të të njoftojë kur të jenë në dispozicion ndeshje të reja.</li>
 </ul>
 
 <h4>⏱️ Rezultati i referencës në fazën eliminuese</h4>
 <p>Në rast barazimi në fund të kohës rregullamentare (90 min), ndeshja vazhdon me kohë shtesë dhe eventualisht me penallti.</p>
-<blockquote><strong>Rezultati që merret parasysh është ai në fund të kohës shtesë (120 min), pa përfshirë penalltitë.</strong></blockquote>
+<blockquote><strong>Rezultati që merret parasysh për parashikimet është ai në fund të kohës shtesë (120 min), pa përfshirë penalltitë.</strong></blockquote>
 <ul>
   <li>Barazim 1-1 në 90 min → kohë shtesë → Franca fiton 2-1 në 120 min: rezultati i referencës është <strong>2-1</strong></li>
   <li>Barazim 1-1 në 90 min → kohë shtesë → 1-1 në 120 min → Franca fiton me penallti: rezultati i referencës është <strong>1-1</strong></li>
 </ul>
 
 <h3>🏅 Renditja</h3>
-<p>Renditja përditësohet <strong>në kohë reale</strong> sapo të regjistrohet një rezultat.<br>
+<p>Renditja përditësohet <strong>në kohë reale</strong> sapo të futet një rezultat.<br>
 Mund ta shikosh në çdo moment nëpërmjet skedës <strong>Renditja</strong>.</p>
 `,
 };
