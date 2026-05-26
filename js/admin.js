@@ -34,10 +34,12 @@ function showAdminPanel() {
   document.getElementById('admin-panel').hidden = false;
   initAdminTabs();
   buildTeamSelects();
+  buildWinnerSelect();
   buildTopScorerSelect();
   renderMatchResults();
   loadCodes();
   renderKnockoutMatches();
+  renderWinnerAdmin();
   renderTopScorerAdmin();
 }
 
@@ -240,6 +242,95 @@ async function handleAddKnockoutMatch(e) {
   renderKnockoutMatches();
 }
 
+// ─── Vainqueur ────────────────────────────────────────────────────────────────
+
+function buildWinnerSelect() {
+  const teams = Object.values(GROUPS)
+    .flatMap(g => g.teams)
+    .sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+
+  const sel = document.getElementById('winner-admin-select');
+  teams.forEach(t => {
+    const opt = document.createElement('option');
+    opt.value = t.id;
+    opt.dataset.flag = t.flag;
+    opt.dataset.name = t.name;
+    opt.dataset.namesq = t.namesq || '';
+    opt.textContent = `${t.flag} ${t.name}`;
+    sel.appendChild(opt);
+  });
+}
+
+async function renderWinnerAdmin() {
+  const [resultSnap, pronoSnap] = await Promise.all([
+    getDoc(doc(db, 'special_results', 'winner')),
+    getDocs(collection(db, 'special_pronostics')),
+  ]);
+
+  const currentResultEl = document.getElementById('winner-current-result');
+  if (resultSnap.exists()) {
+    const r = resultSnap.data();
+    currentResultEl.innerHTML = `
+      <div class="admin-info-box">
+        ✅ Vainqueur enregistré : <strong>${r.flag || ''} ${escapeHtml(r.teamName)}</strong>
+        <button class="btn-sm danger" id="winner-del-result" style="margin-left:12px">✕ Supprimer</button>
+      </div>`;
+    document.getElementById('winner-del-result').addEventListener('click', async () => {
+      if (!confirm('Supprimer le résultat vainqueur ?')) return;
+      await deleteDoc(doc(db, 'special_results', 'winner'));
+      renderWinnerAdmin();
+    });
+    document.getElementById('winner-admin-select').value = r.teamId;
+  } else {
+    currentResultEl.innerHTML = '<p class="muted" style="font-size:.85rem">Aucun vainqueur enregistré pour l\'instant.</p>';
+  }
+
+  const tbody = document.getElementById('winner-pronos-body');
+  tbody.innerHTML = '';
+  const pronos = [];
+  pronoSnap.forEach(d => { const p = d.data(); if (p.teamId) pronos.push(p); });
+  pronos.sort((a, b) => a.userId.localeCompare(b.userId));
+
+  if (pronos.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="2" class="muted" style="text-align:center;padding:12px">Aucun pronostic saisi.</td></tr>';
+    return;
+  }
+  for (const p of pronos) {
+    const tr = document.createElement('tr');
+    const isCorrect = resultSnap.exists() && p.teamId === resultSnap.data().teamId;
+    tr.innerHTML = `
+      <td><strong>${escapeHtml(p.userId)}</strong></td>
+      <td>${p.flag || ''} ${escapeHtml(p.teamName)} ${isCorrect ? '<span class="gsb-ok">🏆</span>' : ''}</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+async function handleSaveWinner(e) {
+  e.preventDefault();
+  const sel   = document.getElementById('winner-admin-select');
+  const errEl = document.getElementById('winner-admin-error');
+  if (!sel.value) { errEl.textContent = 'Sélectionne une équipe.'; return; }
+
+  const teamId = sel.value;
+  const team   = Object.values(GROUPS).flatMap(g => g.teams).find(t => t.id === teamId);
+  if (!team) { errEl.textContent = 'Équipe introuvable.'; return; }
+
+  errEl.textContent = '';
+  try {
+    await setDoc(doc(db, 'special_results', 'winner'), {
+      teamId:    team.id,
+      teamName:  team.name,
+      teamNamesq: team.namesq || '',
+      flag:      team.flag,
+      updatedAt: serverTimestamp(),
+    });
+    renderWinnerAdmin();
+  } catch (err) {
+    console.error(err);
+    errEl.textContent = `Erreur : ${err.message}`;
+  }
+}
+
 // ─── Meilleur buteur ──────────────────────────────────────────────────────────
 
 function buildTopScorerSelect() {
@@ -289,7 +380,7 @@ async function renderTopScorerAdmin() {
   const tbody = document.getElementById('ts-pronos-body');
   tbody.innerHTML = '';
   const pronos = [];
-  pronoSnap.forEach(d => pronos.push(d.data()));
+  pronoSnap.forEach(d => { const p = d.data(); if (p.playerId) pronos.push(p); });
   pronos.sort((a, b) => a.userId.localeCompare(b.userId));
 
   if (pronos.length === 0) {
@@ -408,6 +499,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-add-codes').addEventListener('click', handleAddCodes);
   document.getElementById('ko-form').addEventListener('submit', handleAddKnockoutMatch);
   document.getElementById('ts-form').addEventListener('submit', handleSaveTopScorer);
+  document.getElementById('winner-form').addEventListener('submit', handleSaveWinner);
 
   document.getElementById('btn-admin-logout').addEventListener('click', () => {
     sessionStorage.removeItem('wc26_admin');

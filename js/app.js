@@ -1,5 +1,5 @@
 import { db } from './firebase-config.js';
-import { GROUPS, MATCHES, ROUND_MULTIPLIERS, TEAM_NAMES_SQ, calcPoints, TOP_SCORERS, TOP_SCORER_POINTS, TOP_SCORER_LOCK_DATE } from './data.js';
+import { GROUPS, MATCHES, ROUND_MULTIPLIERS, TEAM_NAMES_SQ, calcPoints, TOP_SCORERS, TOP_SCORER_POINTS, TOP_SCORER_LOCK_DATE, WINNER_POINTS, WINNER_LOCK_DATE } from './data.js';
 import { t, getLang, initI18n } from './i18n.js';
 import { RULES_HTML } from './rules-content.js';
 import {
@@ -87,6 +87,8 @@ let currentGroupId        = null;
 let lastResultUpdate      = null;
 let topScorerPronostic    = null;
 let topScorerResult       = null;
+let winnerPronostic       = null;
+let winnerResult          = null;
 
 async function loadResults() {
   const snap = await getDocs(collection(db, 'results'));
@@ -360,12 +362,16 @@ async function loadPronostics(pseudo) {
 }
 
 async function loadTopScorerData(pseudo) {
-  const [pronoSnap, resultSnap] = await Promise.all([
+  const [pronoSnap, resultSnap, winnerPronoSnap, winnerResultSnap] = await Promise.all([
     getDoc(doc(db, 'special_pronostics', `${pseudo}_topscorer`)),
     getDoc(doc(db, 'special_results', 'topscorer')),
+    getDoc(doc(db, 'special_pronostics', `${pseudo}_winner`)),
+    getDoc(doc(db, 'special_results', 'winner')),
   ]);
   topScorerPronostic = pronoSnap.exists() ? pronoSnap.data() : null;
   topScorerResult    = resultSnap.exists() ? resultSnap.data() : null;
+  winnerPronostic    = winnerPronoSnap.exists() ? winnerPronoSnap.data() : null;
+  winnerResult       = winnerResultSnap.exists() ? winnerResultSnap.data() : null;
 }
 
 async function loadKnockoutMatches() {
@@ -596,6 +602,147 @@ async function saveTopScorer(pseudo, card) {
   }
 }
 
+function buildWinnerCard(pseudo) {
+  const locked = new Date() >= new Date(WINNER_LOCK_DATE);
+  const prono  = winnerPronostic;
+  const result = winnerResult;
+
+  const allTeams = Object.values(GROUPS)
+    .flatMap(g => g.teams)
+    .sort((a, b) => a.name.localeCompare(b.name, 'fr'));
+
+  const card = document.createElement('div');
+  card.className = `match-card top-scorer-card${locked ? ' locked' : ''}`;
+
+  let resultHtml = '';
+  if (result) {
+    const correct = prono && prono.teamId === result.teamId;
+    const icon = correct ? '🏆' : '❌';
+    const cls  = correct ? 'pts-exact' : 'pts-wrong';
+    resultHtml = `
+      <div class="result-row">
+        <span class="result-label">${t('winner.result')} :</span>
+        <span class="result-score">${result.flag || ''} ${escapeHtml(getLang() === 'sq' ? (result.teamNamesq || result.teamName) : result.teamName)}</span>
+        <span class="result-pts ${cls}">${icon} ${correct ? `+${WINNER_POINTS} ${t('lb.pts')}` : t('winner.wrong')}</span>
+      </div>`;
+  }
+
+  let inputHtml = '';
+  if (locked) {
+    const teamDisplay = prono
+      ? `${prono.flag || ''} ${escapeHtml(getLang() === 'sq' ? (prono.teamNamesq || prono.teamName) : prono.teamName)}`
+      : `<span class="muted">${t('winner.noprono')}</span>`;
+    inputHtml = `<div class="ts-locked-prono">${teamDisplay}</div>`;
+  } else {
+    const selectedId = prono?.teamId || '';
+    const options = allTeams.map(team =>
+      `<option value="${team.id}" data-flag="${team.flag}" data-name="${escapeHtml(team.name)}" data-namesq="${escapeHtml(team.namesq || '')}" ${selectedId === team.id ? 'selected' : ''}>
+        ${team.flag} ${getLang() === 'sq' ? (team.namesq || team.name) : team.name}
+       </option>`
+    ).join('');
+    inputHtml = `
+      <select id="winner-select" class="ts-select">
+        <option value="">${t('winner.placeholder')}</option>
+        ${options}
+      </select>
+      <div class="save-row">
+        <button class="btn-save" id="winner-save-btn">${t('winner.title').replace('🏆 ', '')} — ${t('save')}</button>
+        <span class="save-status" id="winner-status"></span>
+      </div>`;
+  }
+
+  card.innerHTML = `
+    <div class="match-meta">
+      <span class="match-date">${locked ? t('winner.locked') : `<span class="ts-bonus">${t('winner.bonus')}</span>`}</span>
+    </div>
+    <div class="ts-body">
+      <div class="ts-label">${t('winner.label')} :</div>
+      ${inputHtml}
+    </div>
+    ${resultHtml}
+  `;
+
+  if (!locked) {
+    card.querySelector('#winner-save-btn').addEventListener('click', () => saveWinner(pseudo, card));
+  }
+
+  return card;
+}
+
+async function saveWinner(pseudo, card) {
+  const sel    = card.querySelector('#winner-select');
+  const status = card.querySelector('#winner-status');
+  if (!sel || !sel.value) return;
+
+  const opt      = sel.options[sel.selectedIndex];
+  const teamId   = sel.value;
+  const teamName = opt.dataset.name;
+  const teamNamesq = opt.dataset.namesq;
+  const flag     = opt.dataset.flag;
+
+  status.textContent = '…';
+  try {
+    await setDoc(doc(db, 'special_pronostics', `${pseudo}_winner`), {
+      userId: pseudo, teamId, teamName, teamNamesq, flag, submittedAt: serverTimestamp(),
+    });
+    winnerPronostic = { userId: pseudo, teamId, teamName, teamNamesq, flag };
+    renderWinnerBanner();
+    status.textContent = t('saved');
+    setTimeout(() => { status.textContent = ''; }, 2000);
+  } catch (err) {
+    console.error(err);
+    status.textContent = t('save.error');
+  }
+}
+
+function renderWinnerBanner() {
+  const el = document.getElementById('winner-banner');
+  if (!el) return;
+
+  const locked = new Date() >= new Date(WINNER_LOCK_DATE);
+  const prono  = winnerPronostic;
+  const result = winnerResult;
+
+  let playerHtml, rightHtml, warnClass = '';
+  const teamName = p => p ? (getLang() === 'sq' ? (p.teamNamesq || p.teamName) : p.teamName) : null;
+
+  if (result) {
+    const correct = prono && prono.teamId === result.teamId;
+    playerHtml = prono
+      ? `${prono.flag || ''} <strong>${escapeHtml(teamName(prono))}</strong>`
+      : `<span class="muted">${t('winner.noprono')}</span>`;
+    rightHtml = correct
+      ? `<span class="tsb-pts tsb-correct">🏆 +${WINNER_POINTS} ${t('lb.pts')}</span>`
+      : `<span class="tsb-pts tsb-wrong">❌ ${t('winner.wrong')}</span>`;
+  } else if (locked) {
+    playerHtml = prono
+      ? `${prono.flag || ''} <strong>${escapeHtml(teamName(prono))}</strong>`
+      : `<span class="muted">${t('winner.noprono')}</span>`;
+    rightHtml = `<span class="tsb-lock">🔒</span>`;
+  } else {
+    if (!prono) {
+      warnClass = ' tsb-warn';
+      playerHtml = `<span class="nm-prono-warn">⚠ ${t('winner.noprono')}</span>`;
+    } else {
+      playerHtml = `${prono.flag || ''} <strong>${escapeHtml(teamName(prono))}</strong> <span class="nm-prono-ok">✓</span>`;
+    }
+    rightHtml = `<span class="tsb-bonus">+${WINNER_POINTS} pts</span>`;
+  }
+
+  el.className = `tsb-banner${warnClass}`;
+  el.innerHTML = `
+    <div class="nm-label">${t('winner.title')}</div>
+    <div class="tsb-main">
+      <div class="tsb-player">${playerHtml}</div>
+      <div class="tsb-right">
+        ${rightHtml}
+        ${!locked ? `<button class="tsb-btn">${prono ? '✏ Modifier' : '→ Choisir'}</button>` : ''}
+      </div>
+    </div>`;
+
+  el.onclick = () => showGroup('WIN');
+}
+
 function attachCardHandlers(container, pseudo) {
   container.querySelectorAll('.btn-save').forEach(btn => {
     btn.addEventListener('click', () => savePronostic(pseudo, btn.dataset.match));
@@ -707,6 +854,33 @@ function renderPredictions(pseudo) {
     sidebar.appendChild(koBtn);
   }
 
+  // ── Bonus vainqueur ──────────────────────────────────────────────────────
+  const winContainer = document.createElement('div');
+  winContainer.id = 'group-section-WIN';
+  winContainer.hidden = true;
+  const winHeading = document.createElement('h2');
+  winHeading.className = 'group-title';
+  winHeading.textContent = t('winner.title');
+  winContainer.appendChild(winHeading);
+  const winSubtitle = document.createElement('p');
+  winSubtitle.className = 'ts-subtitle';
+  winSubtitle.textContent = t('winner.subtitle');
+  winContainer.appendChild(winSubtitle);
+  winContainer.appendChild(buildWinnerCard(pseudo));
+  content.appendChild(winContainer);
+
+  const winLocked = new Date() >= new Date(WINNER_LOCK_DATE);
+  const winBtn = document.createElement('button');
+  winBtn.className = 'group-sidebar-btn gsb-ts';
+  winBtn.dataset.group = 'WIN';
+  winBtn.innerHTML = `
+    <div class="gsb-header">
+      <span class="gsb-letter">${t('winner.title')}</span>
+      ${winnerPronostic ? `<span class="gsb-ok">✓</span>` : `<span class="gsb-badge">${winLocked ? '?' : '!'}</span>`}
+    </div>`;
+  winBtn.addEventListener('click', () => showGroup('WIN'));
+  sidebar.appendChild(winBtn);
+
   // ── Bonus meilleur buteur ────────────────────────────────────────────────
   const tsContainer = document.createElement('div');
   tsContainer.id = 'group-section-TS';
@@ -745,6 +919,7 @@ function renderPredictions(pseudo) {
   })();
   showGroup(defaultGroup);
   attachCardHandlers(content, pseudo);
+  renderWinnerBanner();
   renderTopScorerBanner();
   renderNextMatchBanner(pseudo);
   renderUrgentBanner(pseudo);
@@ -902,6 +1077,48 @@ function renderMyResults() {
     }
   }
 
+  // ── Vainqueur ────────────────────────────────────────────────────────────
+  if (winnerResult) {
+    hasAny = true;
+    const prono = winnerPronostic;
+    const correct = prono && prono.teamId === winnerResult.teamId;
+    const pts = prono && correct ? WINNER_POINTS : prono ? 0 : null;
+    if (pts !== null) grandTotal += pts;
+
+    const teamDisplay = p => p ? `${p.flag || ''} ${escapeHtml(getLang() === 'sq' ? (p.teamNamesq || p.teamName) : p.teamName)}` : `<span class="muted">–</span>`;
+    const resultStr = teamDisplay(winnerResult);
+    const pronoStr  = prono ? teamDisplay(prono) : `<span class="muted">–</span>`;
+    const icon  = pts === WINNER_POINTS ? '🏆' : pts === 0 ? '❌' : '';
+    const cls   = pts === WINNER_POINTS ? 'pts-exact' : pts === 0 ? 'pts-wrong' : '';
+    const ptsStr = pts !== null
+      ? `<span class="result-pts ${cls}">${icon} ${pts}</span>`
+      : `<span class="muted">–</span>`;
+
+    const winSection = document.createElement('div');
+    winSection.className = 'results-section';
+    winSection.innerHTML = `
+      <h3 class="results-group-title">${t('winner.title')}</h3>
+      <div class="table-wrap">
+        <table class="results-table">
+          <thead><tr>
+            <th>Équipe</th>
+            <th>${t('results.col.prono')}</th>
+            <th>${t('results.col.result')}</th>
+            <th>${t('results.col.pts')}</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td>${t('winner.title')}</td>
+              <td class="res-prono">${pronoStr}</td>
+              <td class="res-result"><strong>${resultStr}</strong></td>
+              <td class="res-pts">${ptsStr}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>`;
+    content.appendChild(winSection);
+  }
+
   // ── Meilleur buteur ───────────────────────────────────────────────────────
   if (topScorerResult) {
     hasAny = true;
@@ -1018,20 +1235,26 @@ async function loadLeaderboard() {
       }
     });
 
-    // ── Meilleur buteur ──────────────────────────────────────────────────────
-    const tsResult = tsResultSnap.exists() ? tsResultSnap.data() : null;
-    if (tsResult) {
-      tsPronoSnap.forEach(d => {
-        const p = d.data();
-        if (!userPoints[p.userId]) {
-          userPoints[p.userId] = 0; userPredCount[p.userId] = 0;
-          userExact[p.userId] = 0; userCorrect[p.userId] = 0;
-        }
+    // ── Bonus spéciaux (vainqueur + meilleur buteur) ─────────────────────────
+    const tsResult  = tsResultSnap.exists() ? tsResultSnap.data() : null;
+    const winResult = await getDoc(doc(db, 'special_results', 'winner'));
+    const winResultData = winResult.exists() ? winResult.data() : null;
+
+    tsPronoSnap.forEach(d => {
+      const p = d.data();
+      if (!userPoints[p.userId]) {
+        userPoints[p.userId] = 0; userPredCount[p.userId] = 0;
+        userExact[p.userId] = 0; userCorrect[p.userId] = 0;
+      }
+      if (p.teamId && winResultData && p.teamId === winResultData.teamId) {
+        userPoints[p.userId] += WINNER_POINTS;
+      }
+      if (p.playerId && tsResult) {
         const correct = p.playerId === tsResult.playerId ||
           (p.playerId === 'other' && p.playerName && p.playerName.toLowerCase() === (tsResult.playerName || '').toLowerCase());
         if (correct) userPoints[p.userId] += TOP_SCORER_POINTS;
-      });
-    }
+      }
+    });
 
     usersSnap.forEach(d => {
       const u = d.data().pseudo;

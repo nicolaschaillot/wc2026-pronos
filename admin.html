@@ -55,7 +55,7 @@
       <button data-tab="tab-codes" class="active">🎟 Codes</button>
       <button data-tab="tab-results">📋 Résultats groupes</button>
       <button data-tab="tab-ko">🏆 Phase éliminatoire</button>
-      <button data-tab="tab-topscorer">🥇 Meilleur buteur</button>
+      <button data-tab="tab-bonus">🎯 Bonus</button>
     </nav>
 
     <!-- Tab — Codes -->
@@ -157,16 +157,48 @@
       </div>
     </div>
 
-    <!-- Tab — Meilleur buteur -->
-    <div id="tab-topscorer" class="admin-tab" hidden>
+    <!-- Tab — Bonus (Vainqueur + Meilleur buteur) -->
+    <div id="tab-bonus" class="admin-tab" hidden>
+
+      <!-- Vainqueur -->
+      <div class="admin-section" style="margin-bottom:24px">
+        <h2>🏆 Vainqueur du tournoi</h2>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px">
+          Sélectionne l'équipe vainqueur. Les participants ayant pronostiqué cette équipe reçoivent <strong>10 points</strong>.
+        </p>
+        <div id="winner-current-result" style="margin-bottom:16px"></div>
+        <form id="winner-form" class="ko-form">
+          <div class="ko-form-row" style="align-items:flex-end;gap:12px">
+            <div class="form-group" style="flex:1">
+              <label>Équipe vainqueur</label>
+              <select id="winner-admin-select" class="ko-select" required>
+                <option value="">— Sélectionner —</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex:0 0 auto;align-self:flex-end">
+              <button type="submit" class="btn-primary" style="width:auto;padding:9px 20px">✓ Valider</button>
+            </div>
+          </div>
+          <div class="error-msg" id="winner-admin-error"></div>
+        </form>
+        <h3 style="margin-top:20px">Pronostics des participants</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Participant</th><th>Équipe pronostiquée</th></tr></thead>
+            <tbody id="winner-pronos-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <hr style="border-color:var(--border);margin:0 0 24px">
+
+      <!-- Meilleur buteur -->
       <div class="admin-section">
         <h2>🥇 Meilleur buteur du tournoi</h2>
         <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px">
           Sélectionne le meilleur buteur officiel. Les participants ayant pronostiqué ce joueur reçoivent <strong>10 points</strong>.
         </p>
-
         <div id="ts-current-result" style="margin-bottom:16px"></div>
-
         <form id="ts-form" class="ko-form">
           <div class="ko-form-row" style="align-items:flex-end;gap:12px">
             <div class="form-group" style="flex:1">
@@ -180,15 +212,12 @@
               <input type="text" id="ts-admin-other-input" placeholder="Prénom Nom" class="ko-select">
             </div>
             <div class="form-group" style="flex:0 0 auto;align-self:flex-end">
-              <button type="submit" class="btn-primary" style="width:auto;padding:9px 20px">
-                ✓ Valider
-              </button>
+              <button type="submit" class="btn-primary" style="width:auto;padding:9px 20px">✓ Valider</button>
             </div>
           </div>
           <div class="error-msg" id="ts-admin-error"></div>
         </form>
-
-        <h3 style="margin-top:24px">Pronostics des participants</h3>
+        <h3 style="margin-top:20px">Pronostics des participants</h3>
         <div class="table-wrap">
           <table>
             <thead><tr><th>Participant</th><th>Joueur pronostiqué</th></tr></thead>
@@ -196,6 +225,7 @@
           </table>
         </div>
       </div>
+
     </div>
 
   </div><!-- /admin-panel -->

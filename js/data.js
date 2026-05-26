@@ -230,6 +230,9 @@ export const TOP_SCORERS = [
 export const TOP_SCORER_POINTS = 10;
 export const TOP_SCORER_LOCK_DATE = '2026-06-11T19:00:00Z';
 
+export const WINNER_POINTS = 10;
+export const WINNER_LOCK_DATE = '2026-06-11T19:00:00Z';
+
 export const ROUND_MULTIPLIERS = {
   '1/32': 1,
   '1/16': 1,

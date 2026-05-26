@@ -58,14 +58,22 @@ Dès que le match commence, le pronostic est <strong>verrouillé</strong> — pl
   <li>Match nul 1-1 à 90 min → prolongations → 1-1 à 120 min → France gagne aux tirs : score de référence <strong>1-1</strong></li>
 </ul>
 
-<h3>🥇 Meilleur buteur</h3>
-<p>En plus des pronostics de score, tu peux pronostiquer le <strong>meilleur buteur du tournoi</strong>.</p>
+<h3>🎯 Pronostics bonus</h3>
+<p>En plus des pronostics de score, deux <strong>pronostics bonus</strong> valant chacun <strong>10 points</strong> sont disponibles :</p>
+
+<table>
+  <thead><tr><th>Pronostic</th><th>Récompense</th></tr></thead>
+  <tbody>
+    <tr><td>🏆 Vainqueur du tournoi</td><td><strong>10 pts</strong></td></tr>
+    <tr><td>🥇 Meilleur buteur du tournoi</td><td><strong>10 pts</strong></td></tr>
+  </tbody>
+</table>
 <ul>
-  <li>Choisis un joueur dans la liste prédéfinie (ou « Autre joueur » si ton favori n'y est pas).</li>
-  <li>Ce pronostic est verrouillé au <strong>coup d'envoi du premier match</strong> du tournoi.</li>
-  <li>Si ton joueur finit meilleur buteur : <strong>+10 points</strong> !</li>
+  <li>Le vainqueur se choisit parmi les <strong>48 équipes qualifiées</strong>.</li>
+  <li>Le meilleur buteur se choisit dans une <strong>liste prédéfinie</strong> (ou « Autre joueur »).</li>
+  <li>Ces deux pronostics sont verrouillés au <strong>coup d'envoi du premier match</strong> du tournoi.</li>
 </ul>
-<blockquote>🎯 10 pts pour le bon pronostic — une belle récompense pour qui vise juste !</blockquote>
+<blockquote>🎯 20 pts en jeu — deux occasions de prendre de l'avance sur tes concurrents !</blockquote>
 
 <h3>🏅 Classement</h3>
 <p>Le classement est mis à jour <strong>en temps réel</strong> dès qu'un résultat est saisi.<br>
@@ -133,14 +141,22 @@ Sapo ndeshja fillon, parashikimi <strong>bllokohet</strong> — nuk mund të bë
   <li>Barazim 1-1 në 90 min → kohë shtesë → 1-1 në 120 min → Franca fiton me penallti: rezultati i referencës është <strong>1-1</strong></li>
 </ul>
 
-<h3>🥇 Golëshënuesi më i mirë</h3>
-<p>Përveç parashikimeve të rezultateve, mund të parashikosh gjithashtu <strong>golëshënuesin më të mirë të turneut</strong>.</p>
+<h3>🎯 Parashikimet bonus</h3>
+<p>Përveç parashikimeve të rezultateve, dy <strong>parashikime bonus</strong> me vlerë <strong>10 pikë</strong> secili janë në dispozicion:</p>
+
+<table>
+  <thead><tr><th>Parashikimi</th><th>Shpërblimi</th></tr></thead>
+  <tbody>
+    <tr><td>🏆 Fituesi i turneut</td><td><strong>10 pikë</strong></td></tr>
+    <tr><td>🥇 Golëshënuesi më i mirë i turneut</td><td><strong>10 pikë</strong></td></tr>
+  </tbody>
+</table>
 <ul>
-  <li>Zgjidh një lojtar nga lista e paracaktuar (ose « Lojtar tjetër » nëse i preferuari yt nuk është atje).</li>
-  <li>Ky parashikim bllokohet në <strong>fillimin e ndeshjes së parë</strong> të turneut.</li>
-  <li>Nëse lojtari yt përfundon si golëshënues më i mirë: <strong>+10 pikë</strong>!</li>
+  <li>Fituesi zgjidhet nga <strong>48 ekipet e kualifikuara</strong>.</li>
+  <li>Golëshënuesi më i mirë zgjidhet nga një <strong>listë e paracaktuar</strong> (ose « Lojtar tjetër »).</li>
+  <li>Të dy parashikimet bllokohen në <strong>fillimin e ndeshjes së parë</strong> të turneut.</li>
 </ul>
-<blockquote>🎯 10 pikë për parashikimin e saktë — një shpërblim i bukur për atë që synon saktë!</blockquote>
+<blockquote>🎯 20 pikë në lojë — dy mundësi për të fituar avantazh ndaj kundërshtarëve!</blockquote>
 
 <h3>🏅 Renditja</h3>
 <p>Renditja përditësohet <strong>në kohë reale</strong> sapo të futet një rezultat.<br>
