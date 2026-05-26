@@ -1,5 +1,5 @@
 import { db, ADMIN_PASSWORD_HASH } from './firebase-config.js';
-import { MATCHES, GROUPS, ROUND_MULTIPLIERS } from './data.js';
+import { MATCHES, GROUPS, ROUND_MULTIPLIERS, TOP_SCORERS } from './data.js';
 import {
   doc, getDoc, setDoc, getDocs, addDoc,
   collection, deleteDoc, serverTimestamp,
@@ -34,9 +34,11 @@ function showAdminPanel() {
   document.getElementById('admin-panel').hidden = false;
   initAdminTabs();
   buildTeamSelects();
+  buildTopScorerSelect();
   renderMatchResults();
   loadCodes();
   renderKnockoutMatches();
+  renderTopScorerAdmin();
 }
 
 function initAdminTabs() {
@@ -238,6 +240,102 @@ async function handleAddKnockoutMatch(e) {
   renderKnockoutMatches();
 }
 
+// ─── Meilleur buteur ──────────────────────────────────────────────────────────
+
+function buildTopScorerSelect() {
+  const sel = document.getElementById('ts-admin-select');
+  TOP_SCORERS.forEach(p => {
+    const opt = document.createElement('option');
+    opt.value = p.id;
+    opt.dataset.flag = p.flag;
+    opt.dataset.name = p.name;
+    opt.textContent = `${p.flag} ${p.name}${p.country ? ` (${p.country})` : ''}`;
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', () => {
+    document.getElementById('ts-admin-other-wrap').hidden = sel.value !== 'other';
+  });
+}
+
+async function renderTopScorerAdmin() {
+  const [resultSnap, pronoSnap] = await Promise.all([
+    getDoc(doc(db, 'special_results', 'topscorer')),
+    getDocs(collection(db, 'special_pronostics')),
+  ]);
+
+  const currentResultEl = document.getElementById('ts-current-result');
+  if (resultSnap.exists()) {
+    const r = resultSnap.data();
+    currentResultEl.innerHTML = `
+      <div class="admin-info-box">
+        ✅ Meilleur buteur enregistré : <strong>${r.flag || ''} ${escapeHtml(r.playerName || r.playerId)}</strong>
+        <button class="btn-sm danger" id="ts-del-result" style="margin-left:12px">✕ Supprimer</button>
+      </div>`;
+    document.getElementById('ts-del-result').addEventListener('click', async () => {
+      if (!confirm('Supprimer le résultat meilleur buteur ?')) return;
+      await deleteDoc(doc(db, 'special_results', 'topscorer'));
+      renderTopScorerAdmin();
+    });
+    const sel = document.getElementById('ts-admin-select');
+    sel.value = r.playerId;
+    if (r.playerId === 'other') {
+      document.getElementById('ts-admin-other-wrap').hidden = false;
+      document.getElementById('ts-admin-other-input').value = r.playerName || '';
+    }
+  } else {
+    currentResultEl.innerHTML = '<p class="muted" style="font-size:.85rem">Aucun meilleur buteur enregistré pour l\'instant.</p>';
+  }
+
+  const tbody = document.getElementById('ts-pronos-body');
+  tbody.innerHTML = '';
+  const pronos = [];
+  pronoSnap.forEach(d => pronos.push(d.data()));
+  pronos.sort((a, b) => a.userId.localeCompare(b.userId));
+
+  if (pronos.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="2" class="muted" style="text-align:center;padding:12px">Aucun pronostic saisi.</td></tr>';
+    return;
+  }
+  for (const p of pronos) {
+    const tr = document.createElement('tr');
+    const playerDisplay = `${p.flag || ''} ${escapeHtml(p.playerName || p.playerId)}`;
+    const isCorrect = resultSnap.exists() && (
+      p.playerId === resultSnap.data().playerId ||
+      (p.playerId === 'other' && p.playerName && p.playerName.toLowerCase() === (resultSnap.data().playerName || '').toLowerCase())
+    );
+    tr.innerHTML = `
+      <td><strong>${escapeHtml(p.userId)}</strong></td>
+      <td>${playerDisplay} ${isCorrect ? '<span class="gsb-ok">🥇</span>' : ''}</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+async function handleSaveTopScorer(e) {
+  e.preventDefault();
+  const sel   = document.getElementById('ts-admin-select');
+  const errEl = document.getElementById('ts-admin-error');
+  if (!sel.value) { errEl.textContent = 'Sélectionne un joueur.'; return; }
+
+  const playerId = sel.value;
+  let playerName, flag;
+
+  if (playerId === 'other') {
+    playerName = document.getElementById('ts-admin-other-input').value.trim();
+    if (!playerName) { errEl.textContent = 'Saisis le nom du joueur.'; return; }
+    flag = '🌍';
+  } else {
+    const opt = sel.options[sel.selectedIndex];
+    playerName = opt.dataset.name;
+    flag = opt.dataset.flag;
+  }
+
+  errEl.textContent = '';
+  await setDoc(doc(db, 'special_results', 'topscorer'), {
+    playerId, playerName, flag, updatedAt: serverTimestamp(),
+  });
+  renderTopScorerAdmin();
+}
+
 // ─── Codes ───────────────────────────────────────────────────────────────────
 
 async function loadCodes() {
@@ -309,6 +407,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.getElementById('btn-add-codes').addEventListener('click', handleAddCodes);
   document.getElementById('ko-form').addEventListener('submit', handleAddKnockoutMatch);
+  document.getElementById('ts-form').addEventListener('submit', handleSaveTopScorer);
 
   document.getElementById('btn-admin-logout').addEventListener('click', () => {
     sessionStorage.removeItem('wc26_admin');

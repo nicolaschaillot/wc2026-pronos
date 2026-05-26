@@ -749,6 +749,65 @@ td.detail { color: var(--muted); font-size: .8rem; }
 .login-rules-link a { color: var(--muted); font-size: .85rem; text-decoration: none; transition: color .15s; }
 .login-rules-link a:hover { color: var(--primary); }
 
+/* ── Top scorer banner ─────────────────────────────────────────────────────── */
+.tsb-banner {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--gold);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  margin-bottom: 12px;
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.tsb-banner:hover { background: var(--surface); border-color: var(--gold); }
+.tsb-banner.tsb-warn { border-left-color: var(--gold); }
+.tsb-main { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.tsb-player { font-size: .95rem; flex: 1; min-width: 0; }
+.tsb-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+.tsb-bonus { background: var(--gold); color: #111; font-size: .72rem; font-weight: 800; padding: 2px 8px; border-radius: 20px; }
+.tsb-lock { font-size: .85rem; color: var(--muted); }
+.tsb-pts { font-size: .85rem; font-weight: 700; }
+.tsb-correct { color: var(--primary); }
+.tsb-wrong { color: #ef4444; }
+.tsb-btn {
+  font-size: .75rem; padding: 4px 10px; border-radius: 20px;
+  border: 1px solid var(--gold); color: var(--gold);
+  background: transparent; cursor: pointer; font-weight: 700;
+  transition: background .15s, color .15s;
+}
+.tsb-btn:hover { background: var(--gold); color: #111; }
+
+/* ── Top scorer card ───────────────────────────────────────────────────────── */
+.top-scorer-card { border-color: var(--gold); }
+.top-scorer-card .match-meta { border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 12px; }
+.ts-bonus { color: var(--gold); font-weight: 700; font-size: .9rem; }
+.ts-subtitle { color: var(--muted); font-size: .9rem; margin-bottom: 16px; }
+.ts-body { display: flex; flex-direction: column; gap: 10px; }
+.ts-label { font-size: .85rem; color: var(--muted); }
+.ts-select {
+  width: 100%; padding: 9px 12px; border: 1.5px solid var(--border);
+  border-radius: 8px; background: var(--card); color: var(--text);
+  font-size: .95rem; cursor: pointer;
+}
+.ts-select:focus { outline: none; border-color: var(--primary); }
+.ts-other-wrap { margin-top: 6px; }
+.ts-other-input {
+  width: 100%; padding: 8px 12px; border: 1.5px solid var(--border);
+  border-radius: 8px; background: var(--card); color: var(--text);
+  font-size: .9rem; box-sizing: border-box;
+}
+.ts-other-input:focus { outline: none; border-color: var(--primary); }
+.ts-locked-prono { font-size: 1rem; font-weight: 600; padding: 6px 0; }
+.gsb-ts .gsb-letter { font-size: .78rem; }
+
+/* ── Admin info box ────────────────────────────────────────────────────────── */
+.admin-info-box {
+  background: #0f2a1a; border: 1px solid #00c853; border-radius: 8px;
+  padding: 10px 14px; font-size: .9rem; color: #00c853;
+  display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+
 /* ── Responsive ────────────────────────────────────────────────────────────── */
 @media (max-width: 600px) {
   .name { font-size: .8rem; }

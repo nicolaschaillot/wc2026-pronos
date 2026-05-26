@@ -33,5 +33,17 @@ service cloud.firestore {
       allow read: if true;
       allow write: if true;
     }
+
+    // Pronostics spéciaux (meilleur buteur…): lecture par tous, écriture libre
+    match /special_pronostics/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
+
+    // Résultats spéciaux (meilleur buteur…): lecture par tous, écriture par l'admin
+    match /special_results/{docId} {
+      allow read: if true;
+      allow write: if true;
+    }
   }
 }

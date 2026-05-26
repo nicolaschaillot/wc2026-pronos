@@ -1,5 +1,5 @@
 import { db } from './firebase-config.js';
-import { GROUPS, MATCHES, ROUND_MULTIPLIERS, TEAM_NAMES_SQ, calcPoints } from './data.js';
+import { GROUPS, MATCHES, ROUND_MULTIPLIERS, TEAM_NAMES_SQ, calcPoints, TOP_SCORERS, TOP_SCORER_POINTS, TOP_SCORER_LOCK_DATE } from './data.js';
 import { t, getLang, initI18n } from './i18n.js';
 import { RULES_HTML } from './rules-content.js';
 import {
@@ -79,12 +79,14 @@ async function handleLogin(e) {
 
 // ─── Predictions ─────────────────────────────────────────────────────────────
 
-let userPronostics   = {};
-let knockoutMatches  = [];
-let matchResults     = {};
-let matchPronostics  = {};
-let currentGroupId   = null;
-let lastResultUpdate = null;
+let userPronostics        = {};
+let knockoutMatches       = [];
+let matchResults          = {};
+let matchPronostics       = {};
+let currentGroupId        = null;
+let lastResultUpdate      = null;
+let topScorerPronostic    = null;
+let topScorerResult       = null;
 
 async function loadResults() {
   const snap = await getDocs(collection(db, 'results'));
@@ -139,6 +141,56 @@ function refreshNextMatchProno(matchId) {
   const prono = userPronostics[matchId];
   pronoEl.innerHTML = _pronoHtml(prono);
   if (bannerEl) bannerEl.className = `next-match-banner ${prono ? '' : 'nm-warn'}`;
+}
+
+function renderTopScorerBanner() {
+  const el = document.getElementById('top-scorer-banner');
+  if (!el) return;
+
+  const locked  = new Date() >= new Date(TOP_SCORER_LOCK_DATE);
+  const prono   = topScorerPronostic;
+  const result  = topScorerResult;
+
+  let playerHtml, rightHtml, warnClass = '';
+
+  if (result) {
+    const correct = prono && (
+      prono.playerId === result.playerId ||
+      (prono.playerId === 'other' && prono.playerName && prono.playerName.toLowerCase() === (result.playerName || '').toLowerCase())
+    );
+    playerHtml = prono
+      ? `${prono.flag || ''} <strong>${escapeHtml(prono.playerName || prono.playerId)}</strong>`
+      : `<span class="muted">${t('topscorer.noprono')}</span>`;
+    rightHtml = correct
+      ? `<span class="tsb-pts tsb-correct">🥇 +${TOP_SCORER_POINTS} ${t('lb.pts')}</span>`
+      : `<span class="tsb-pts tsb-wrong">❌ ${t('topscorer.wrong')}</span>`;
+  } else if (locked) {
+    playerHtml = prono
+      ? `${prono.flag || ''} <strong>${escapeHtml(prono.playerName || prono.playerId)}</strong>`
+      : `<span class="muted">${t('topscorer.noprono')}</span>`;
+    rightHtml = `<span class="tsb-lock">🔒</span>`;
+  } else {
+    if (!prono) {
+      warnClass = ' tsb-warn';
+      playerHtml = `<span class="nm-prono-warn">⚠ ${t('topscorer.noprono')}</span>`;
+    } else {
+      playerHtml = `${prono.flag || ''} <strong>${escapeHtml(prono.playerName || prono.playerId)}</strong> <span class="nm-prono-ok">✓</span>`;
+    }
+    rightHtml = `<span class="tsb-bonus">+${TOP_SCORER_POINTS} pts</span>`;
+  }
+
+  el.className = `tsb-banner${warnClass}`;
+  el.innerHTML = `
+    <div class="nm-label">${t('topscorer.title')}</div>
+    <div class="tsb-main">
+      <div class="tsb-player">${playerHtml}</div>
+      <div class="tsb-right">
+        ${rightHtml}
+        ${!locked ? `<button class="tsb-btn">${prono ? '✏ Modifier' : '→ Choisir'}</button>` : ''}
+      </div>
+    </div>`;
+
+  el.onclick = () => showGroup('TS');
 }
 
 function renderNextMatchBanner(pseudo) {
@@ -307,6 +359,15 @@ async function loadPronostics(pseudo) {
   });
 }
 
+async function loadTopScorerData(pseudo) {
+  const [pronoSnap, resultSnap] = await Promise.all([
+    getDoc(doc(db, 'special_pronostics', `${pseudo}_topscorer`)),
+    getDoc(doc(db, 'special_results', 'topscorer')),
+  ]);
+  topScorerPronostic = pronoSnap.exists() ? pronoSnap.data() : null;
+  topScorerResult    = resultSnap.exists() ? resultSnap.data() : null;
+}
+
 async function loadKnockoutMatches() {
   const snap = await getDocs(collection(db, 'matches_extra'));
   knockoutMatches = [];
@@ -423,6 +484,118 @@ function buildMatchCard(match, pseudo, multiplier = 1) {
   return card;
 }
 
+function buildTopScorerCard(pseudo) {
+  const locked = new Date() >= new Date(TOP_SCORER_LOCK_DATE);
+  const prono  = topScorerPronostic;
+  const result = topScorerResult;
+
+  const card = document.createElement('div');
+  card.className = `match-card top-scorer-card${locked ? ' locked' : ''}`;
+
+  let resultHtml = '';
+  if (result) {
+    const correct = prono && (
+      prono.playerId === result.playerId ||
+      (prono.playerId === 'other' && prono.playerName && prono.playerName.toLowerCase() === (result.playerName || '').toLowerCase())
+    );
+    const icon = correct ? '🥇' : '❌';
+    const cls  = correct ? 'pts-exact' : 'pts-wrong';
+    resultHtml = `
+      <div class="result-row">
+        <span class="result-label">${t('topscorer.result')} :</span>
+        <span class="result-score">${result.flag || ''} ${escapeHtml(result.playerName || result.playerId)}</span>
+        <span class="result-pts ${cls}">${icon} ${correct ? `+${TOP_SCORER_POINTS} ${t('lb.pts')}` : t('topscorer.wrong')}</span>
+      </div>`;
+  }
+
+  let inputHtml = '';
+  if (locked) {
+    const playerDisplay = prono
+      ? `${prono.flag || ''} ${escapeHtml(prono.playerName || prono.playerId)}`
+      : `<span class="muted">${t('topscorer.noprono')}</span>`;
+    inputHtml = `<div class="ts-locked-prono">${playerDisplay}</div>`;
+  } else {
+    const selectedId   = prono?.playerId || '';
+    const selectedName = prono?.playerName || '';
+    const options = TOP_SCORERS.map(p =>
+      `<option value="${p.id}" data-flag="${p.flag}" data-name="${escapeHtml(p.name)}" ${selectedId === p.id ? 'selected' : ''}>
+        ${p.flag} ${p.name}${p.country ? ` (${tPlayerCountry(p)})` : ''}
+       </option>`
+    ).join('');
+    const otherHidden = selectedId !== 'other' ? 'hidden' : '';
+    inputHtml = `
+      <select id="ts-select" class="ts-select">
+        <option value="">${t('topscorer.placeholder')}</option>
+        ${options}
+      </select>
+      <div id="ts-other-wrap" class="ts-other-wrap" ${otherHidden}>
+        <input type="text" id="ts-other-input" class="ts-other-input"
+               placeholder="${t('topscorer.other.label')}"
+               value="${selectedId === 'other' ? escapeHtml(selectedName) : ''}">
+      </div>
+      <div class="save-row">
+        <button class="btn-save" id="ts-save-btn">${t('topscorer.title').replace('🥇 ', '')} — ${t('save')}</button>
+        <span class="save-status" id="ts-status"></span>
+      </div>`;
+  }
+
+  card.innerHTML = `
+    <div class="match-meta">
+      <span class="match-date">${locked ? t('topscorer.locked') : `<span class="ts-bonus">${t('topscorer.bonus')}</span>`}</span>
+    </div>
+    <div class="ts-body">
+      <div class="ts-label">${t('topscorer.label')} :</div>
+      ${inputHtml}
+    </div>
+    ${resultHtml}
+  `;
+
+  if (!locked) {
+    const sel = card.querySelector('#ts-select');
+    const otherWrap = card.querySelector('#ts-other-wrap');
+    sel.addEventListener('change', () => {
+      otherWrap.hidden = sel.value !== 'other';
+    });
+    card.querySelector('#ts-save-btn').addEventListener('click', () => saveTopScorer(pseudo, card));
+  }
+
+  return card;
+}
+
+async function saveTopScorer(pseudo, card) {
+  const sel    = card.querySelector('#ts-select');
+  const status = card.querySelector('#ts-status');
+  if (!sel || !sel.value) return;
+
+  const playerId = sel.value;
+  let playerName, flag;
+
+  if (playerId === 'other') {
+    const input = card.querySelector('#ts-other-input');
+    playerName = input?.value.trim();
+    if (!playerName) { status.textContent = '⚠ Précise le joueur'; return; }
+    flag = '🌍';
+  } else {
+    const opt = sel.options[sel.selectedIndex];
+    playerName = opt.dataset.name;
+    flag = opt.dataset.flag;
+  }
+
+  status.textContent = '…';
+  try {
+    await setDoc(doc(db, 'special_pronostics', `${pseudo}_topscorer`), {
+      userId: pseudo, playerId, playerName, flag, submittedAt: serverTimestamp(),
+    });
+    topScorerPronostic = { userId: pseudo, playerId, playerName, flag };
+    renderTopScorerBanner();
+    status.textContent = t('saved');
+    setTimeout(() => { status.textContent = ''; }, 2000);
+  } catch (err) {
+    console.error(err);
+    status.textContent = t('save.error');
+  }
+}
+
 function attachCardHandlers(container, pseudo) {
   container.querySelectorAll('.btn-save').forEach(btn => {
     btn.addEventListener('click', () => savePronostic(pseudo, btn.dataset.match));
@@ -534,6 +707,37 @@ function renderPredictions(pseudo) {
     sidebar.appendChild(koBtn);
   }
 
+  // ── Bonus meilleur buteur ────────────────────────────────────────────────
+  const tsContainer = document.createElement('div');
+  tsContainer.id = 'group-section-TS';
+  tsContainer.hidden = true;
+  const tsHeading = document.createElement('h2');
+  tsHeading.className = 'group-title';
+  tsHeading.textContent = t('topscorer.title');
+  tsContainer.appendChild(tsHeading);
+  const tsSubtitle = document.createElement('p');
+  tsSubtitle.className = 'ts-subtitle';
+  tsSubtitle.textContent = t('topscorer.subtitle');
+  tsContainer.appendChild(tsSubtitle);
+  tsContainer.appendChild(buildTopScorerCard(pseudo));
+  content.appendChild(tsContainer);
+
+  const tsLocked = new Date() >= new Date(TOP_SCORER_LOCK_DATE);
+  const tsProno  = topScorerPronostic;
+  const tsBtn = document.createElement('button');
+  tsBtn.className = 'group-sidebar-btn gsb-ts';
+  tsBtn.dataset.group = 'TS';
+  tsBtn.innerHTML = `
+    <div class="gsb-header">
+      <span class="gsb-letter">${t('topscorer.title')}</span>
+      ${tsLocked
+        ? (tsProno ? `<span class="gsb-ok" title="">✓</span>` : `<span class="gsb-badge">?</span>`)
+        : (tsProno ? `<span class="gsb-ok">✓</span>` : `<span class="gsb-badge">!</span>`)
+      }
+    </div>`;
+  tsBtn.addEventListener('click', () => showGroup('TS'));
+  sidebar.appendChild(tsBtn);
+
   const defaultGroup = (() => {
     if (currentGroupId && document.getElementById(`group-section-${currentGroupId}`)) return currentGroupId;
     if (knockoutMatches.length > 0 && MATCHES.every(m => isLocked(m))) return 'KO';
@@ -541,6 +745,7 @@ function renderPredictions(pseudo) {
   })();
   showGroup(defaultGroup);
   attachCardHandlers(content, pseudo);
+  renderTopScorerBanner();
   renderNextMatchBanner(pseudo);
   renderUrgentBanner(pseudo);
   updateCountdowns();
@@ -697,6 +902,52 @@ function renderMyResults() {
     }
   }
 
+  // ── Meilleur buteur ───────────────────────────────────────────────────────
+  if (topScorerResult) {
+    hasAny = true;
+    const prono = topScorerPronostic;
+    const correct = prono && (
+      prono.playerId === topScorerResult.playerId ||
+      (prono.playerId === 'other' && prono.playerName && prono.playerName.toLowerCase() === (topScorerResult.playerName || '').toLowerCase())
+    );
+    const pts = prono && correct ? TOP_SCORER_POINTS : prono ? 0 : null;
+    if (pts !== null) grandTotal += pts;
+
+    const pronoStr = prono
+      ? `${escapeHtml(prono.flag || '')} ${escapeHtml(prono.playerName || prono.playerId)}`
+      : `<span class="muted">–</span>`;
+    const resultStr = `${topScorerResult.flag || ''} ${escapeHtml(topScorerResult.playerName || topScorerResult.playerId)}`;
+    const icon  = pts === TOP_SCORER_POINTS ? '🥇' : pts === 0 ? '❌' : '';
+    const cls   = pts === TOP_SCORER_POINTS ? 'pts-exact' : pts === 0 ? 'pts-wrong' : '';
+    const ptsStr = pts !== null
+      ? `<span class="result-pts ${cls}">${icon} ${pts}</span>`
+      : `<span class="muted">–</span>`;
+
+    const tsSection = document.createElement('div');
+    tsSection.className = 'results-section';
+    tsSection.innerHTML = `
+      <h3 class="results-group-title">${t('topscorer.title')}</h3>
+      <div class="table-wrap">
+        <table class="results-table">
+          <thead><tr>
+            <th>Joueur</th>
+            <th>${t('results.col.prono')}</th>
+            <th>${t('results.col.result')}</th>
+            <th>${t('results.col.pts')}</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td>${t('topscorer.title')}</td>
+              <td class="res-prono">${pronoStr}</td>
+              <td class="res-result"><strong>${resultStr}</strong></td>
+              <td class="res-pts">${ptsStr}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>`;
+    content.appendChild(tsSection);
+  }
+
   if (!hasAny) {
     content.innerHTML = `<p class="muted" style="text-align:center;padding:32px">${t('results.empty')}</p>`;
     return;
@@ -716,11 +967,13 @@ async function loadLeaderboard() {
   container.innerHTML = `<tr><td colspan="4">${t('lb.loading')}</td></tr>`;
 
   try {
-    const [pronoSnap, resultSnap, usersSnap, koSnap] = await Promise.all([
+    const [pronoSnap, resultSnap, usersSnap, koSnap, tsPronoSnap, tsResultSnap] = await Promise.all([
       getDocs(collection(db, 'pronostics')),
       getDocs(collection(db, 'results')),
       getDocs(collection(db, 'users')),
       getDocs(collection(db, 'matches_extra')),
+      getDocs(collection(db, 'special_pronostics')),
+      getDoc(doc(db, 'special_results', 'topscorer')),
     ]);
 
     const results = {};
@@ -764,6 +1017,21 @@ async function loadLeaderboard() {
         else if (pts === 1) userCorrect[p.userId]++;
       }
     });
+
+    // ── Meilleur buteur ──────────────────────────────────────────────────────
+    const tsResult = tsResultSnap.exists() ? tsResultSnap.data() : null;
+    if (tsResult) {
+      tsPronoSnap.forEach(d => {
+        const p = d.data();
+        if (!userPoints[p.userId]) {
+          userPoints[p.userId] = 0; userPredCount[p.userId] = 0;
+          userExact[p.userId] = 0; userCorrect[p.userId] = 0;
+        }
+        const correct = p.playerId === tsResult.playerId ||
+          (p.playerId === 'other' && p.playerName && p.playerName.toLowerCase() === (tsResult.playerName || '').toLowerCase());
+        if (correct) userPoints[p.userId] += TOP_SCORER_POINTS;
+      });
+    }
 
     usersSnap.forEach(d => {
       const u = d.data().pseudo;
@@ -814,6 +1082,12 @@ function tTeam(team) {
   return team.namesq || TEAM_NAMES_SQ[team.name] || team.name;
 }
 
+function tPlayerCountry(player) {
+  if (!player.country) return '';
+  if (getLang() === 'sq') return player.countrysq || player.country;
+  return player.country;
+}
+
 function escapeHtml(str) {
   return String(str).replace(/[&<>"']/g, c =>
     ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])
@@ -831,7 +1105,7 @@ async function initApp() {
   document.getElementById('btn-logout').hidden = false;
   showView('view-predictions');
 
-  await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults(), loadAllPronostics()]);
+  await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults(), loadAllPronostics(), loadTopScorerData(user.pseudo)]);
   renderPredictions(user.pseudo);
 }
 
@@ -867,14 +1141,14 @@ document.addEventListener('DOMContentLoaded', () => {
       if (view === 'view-results') {
         const user = getSession();
         if (user) {
-          await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults()]);
+          await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults(), loadTopScorerData(user.pseudo)]);
           renderMyResults();
         }
       }
       if (view === 'view-predictions') {
         const user = getSession();
         if (user) {
-          await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults(), loadAllPronostics()]);
+          await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults(), loadAllPronostics(), loadTopScorerData(user.pseudo)]);
           renderPredictions(user.pseudo);
         }
       }
@@ -888,10 +1162,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!user) return;
     const activeView = document.querySelector('.view:not([hidden])');
     if (activeView?.id === 'view-predictions') {
-      await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults(), loadAllPronostics()]);
+      await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults(), loadAllPronostics(), loadTopScorerData(user.pseudo)]);
       renderPredictions(user.pseudo);
     } else if (activeView?.id === 'view-results') {
-      await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults()]);
+      await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults(), loadTopScorerData(user.pseudo)]);
       renderMyResults();
     } else if (activeView?.id === 'view-leaderboard') {
       await loadLeaderboard();

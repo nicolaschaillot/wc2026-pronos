@@ -55,6 +55,7 @@
       <button data-tab="tab-codes" class="active">🎟 Codes</button>
       <button data-tab="tab-results">📋 Résultats groupes</button>
       <button data-tab="tab-ko">🏆 Phase éliminatoire</button>
+      <button data-tab="tab-topscorer">🥇 Meilleur buteur</button>
     </nav>
 
     <!-- Tab — Codes -->
@@ -151,6 +152,47 @@
               <tr><th>Tour</th><th>Équipe 1</th><th>Équipe 2</th><th>Date / Stade</th><th>Score</th><th>Actions</th></tr>
             </thead>
             <tbody id="ko-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tab — Meilleur buteur -->
+    <div id="tab-topscorer" class="admin-tab" hidden>
+      <div class="admin-section">
+        <h2>🥇 Meilleur buteur du tournoi</h2>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px">
+          Sélectionne le meilleur buteur officiel. Les participants ayant pronostiqué ce joueur reçoivent <strong>10 points</strong>.
+        </p>
+
+        <div id="ts-current-result" style="margin-bottom:16px"></div>
+
+        <form id="ts-form" class="ko-form">
+          <div class="ko-form-row" style="align-items:flex-end;gap:12px">
+            <div class="form-group" style="flex:1">
+              <label>Meilleur buteur officiel</label>
+              <select id="ts-admin-select" class="ko-select" required>
+                <option value="">— Sélectionner —</option>
+              </select>
+            </div>
+            <div id="ts-admin-other-wrap" class="form-group" style="flex:1" hidden>
+              <label>Nom du joueur</label>
+              <input type="text" id="ts-admin-other-input" placeholder="Prénom Nom" class="ko-select">
+            </div>
+            <div class="form-group" style="flex:0 0 auto;align-self:flex-end">
+              <button type="submit" class="btn-primary" style="width:auto;padding:9px 20px">
+                ✓ Valider
+              </button>
+            </div>
+          </div>
+          <div class="error-msg" id="ts-admin-error"></div>
+        </form>
+
+        <h3 style="margin-top:24px">Pronostics des participants</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Participant</th><th>Joueur pronostiqué</th></tr></thead>
+            <tbody id="ts-pronos-body"></tbody>
           </table>
         </div>
       </div>

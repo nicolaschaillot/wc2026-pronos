@@ -201,6 +201,35 @@ export const MATCHES = (() => {
   return matches.sort((a, b) => new Date(a.date) - new Date(b.date));
 })();
 
+export const TOP_SCORERS = [
+  { id: 'mbappe',      name: 'Kylian Mbappé',       country: 'France',     countrysq: 'Francë',     flag: '🇫🇷' },
+  { id: 'haaland',     name: 'Erling Haaland',       country: 'Norvège',    countrysq: 'Norvegji',   flag: '🇳🇴' },
+  { id: 'kane',        name: 'Harry Kane',            country: 'Angleterre', countrysq: 'Angli',      flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+  { id: 'messi',       name: 'Lionel Messi',          country: 'Argentine',  countrysq: 'Argjentinë', flag: '🇦🇷' },
+  { id: 'ronaldo',     name: 'Cristiano Ronaldo',     country: 'Portugal',   countrysq: 'Portugali',  flag: '🇵🇹' },
+  { id: 'vinicius',    name: 'Vinicius Jr',           country: 'Brésil',     countrysq: 'Brazil',     flag: '🇧🇷' },
+  { id: 'lautaro',     name: 'Lautaro Martínez',      country: 'Argentine',  countrysq: 'Argjentinë', flag: '🇦🇷' },
+  { id: 'lukaku',      name: 'Romelu Lukaku',         country: 'Belgique',   countrysq: 'Belgjikë',   flag: '🇧🇪' },
+  { id: 'musiala',     name: 'Jamal Musiala',         country: 'Allemagne',  countrysq: 'Gjermani',   flag: '🇩🇪' },
+  { id: 'wirtz',       name: 'Florian Wirtz',         country: 'Allemagne',  countrysq: 'Gjermani',   flag: '🇩🇪' },
+  { id: 'gakpo',       name: 'Cody Gakpo',            country: 'Pays-Bas',   countrysq: 'Hollandë',   flag: '🇳🇱' },
+  { id: 'saka',        name: 'Bukayo Saka',           country: 'Angleterre', countrysq: 'Angli',      flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+  { id: 'bellingham',  name: 'Jude Bellingham',       country: 'Angleterre', countrysq: 'Angli',      flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' },
+  { id: 'yamale',      name: 'Lamine Yamal',          country: 'Espagne',    countrysq: 'Spanjë',     flag: '🇪🇸' },
+  { id: 'diaz',        name: 'Luis Díaz',             country: 'Colombie',   countrysq: 'Kolumbi',    flag: '🇨🇴' },
+  { id: 'leao',        name: 'Rafael Leão',           country: 'Portugal',   countrysq: 'Portugali',  flag: '🇵🇹' },
+  { id: 'endrick',     name: 'Endrick',               country: 'Brésil',     countrysq: 'Brazil',     flag: '🇧🇷' },
+  { id: 'ennesyri',    name: 'Youssef En-Nesyri',     country: 'Maroc',      countrysq: 'Marok',      flag: '🇲🇦' },
+  { id: 'dembele',     name: 'Ousmane Dembele',       country: 'France',     countrysq: 'Francë',     flag: '🇫🇷' },
+  { id: 'oyarzabal',   name: 'Mikel Oyarzabal',       country: 'Espagne',    countrysq: 'Spanjë',     flag: '🇪🇸' },
+  { id: 'havertz',     name: 'Kai Havertz',           country: 'Allemagne',  countrysq: 'Gjermani',   flag: '🇩🇪' },
+  { id: 'raphinha',    name: 'Raphinha',              country: 'Brésil',     countrysq: 'Brazil',     flag: '🇧🇷' },
+  { id: 'other',       name: 'Autre joueur',          country: '',           countrysq: '',            flag: '🌍' },
+];
+
+export const TOP_SCORER_POINTS = 10;
+export const TOP_SCORER_LOCK_DATE = '2026-06-11T19:00:00Z';
+
 export const ROUND_MULTIPLIERS = {
   '1/32': 1,
   '1/16': 1,
