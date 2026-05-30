@@ -66,14 +66,27 @@ Dès que le match commence, le pronostic est <strong>verrouillé</strong> — pl
   <tbody>
     <tr><td>🏆 Vainqueur du tournoi</td><td><strong>10 pts</strong></td></tr>
     <tr><td>🥇 Meilleur buteur du tournoi</td><td><strong>10 pts</strong></td></tr>
+    <tr><td>⚽ Nombre de buts total</td><td><strong>2 / 5 / 10 pts</strong></td></tr>
   </tbody>
 </table>
 <ul>
   <li>Le vainqueur se choisit parmi les <strong>48 équipes qualifiées</strong>.</li>
   <li>Le meilleur buteur se choisit dans une <strong>liste prédéfinie</strong> (ou « Autre joueur »).</li>
-  <li>Ces deux pronostics sont verrouillés au <strong>coup d'envoi du premier match</strong> du tournoi.</li>
+  <li>Le nombre de buts total est un nombre entier libre (tous buts confondus, hors tirs au but).</li>
+  <li>Ces trois pronostics sont verrouillés au <strong>coup d'envoi du premier match</strong> du tournoi.</li>
 </ul>
-<blockquote>🎯 20 pts en jeu — deux occasions de prendre de l'avance sur tes concurrents !</blockquote>
+
+<h4>⚽ Barème — Nombre de buts total</h4>
+<table>
+  <thead><tr><th>Écart avec le total réel</th><th>Points</th></tr></thead>
+  <tbody>
+    <tr><td>🎯 Exact</td><td><strong>10 pts</strong></td></tr>
+    <tr><td>± 1 à 5 buts</td><td><strong>5 pts</strong></td></tr>
+    <tr><td>± 6 à 15 buts</td><td><strong>2 pts</strong></td></tr>
+    <tr><td>Plus de ± 15 buts</td><td><strong>0 pt</strong></td></tr>
+  </tbody>
+</table>
+<blockquote>🎯 Jusqu'à 30 pts en jeu sur les trois bonus — trois occasions de prendre de l'avance !</blockquote>
 
 <h3>🏅 Classement</h3>
 <p>Le classement est mis à jour <strong>en temps réel</strong> dès qu'un résultat est saisi.<br>
@@ -150,14 +163,27 @@ Sapo ndeshja fillon, parashikimi <strong>bllokohet</strong> — nuk mund të bë
   <tbody>
     <tr><td>🏆 Fituesi i turneut</td><td><strong>10 pikë</strong></td></tr>
     <tr><td>🥇 Golëshënuesi më i mirë i turneut</td><td><strong>10 pikë</strong></td></tr>
+    <tr><td>⚽ Numri total i golave</td><td><strong>2 / 5 / 10 pikë</strong></td></tr>
   </tbody>
 </table>
 <ul>
   <li>Fituesi zgjidhet nga <strong>48 ekipet e kualifikuara</strong>.</li>
   <li>Golëshënuesi më i mirë zgjidhet nga një <strong>listë e paracaktuar</strong> (ose « Lojtar tjetër »).</li>
-  <li>Të dy parashikimet bllokohen në <strong>fillimin e ndeshjes së parë</strong> të turneut.</li>
+  <li>Numri total i golave është një numër i lirë i plotë (të gjitha golat, me përjashtim të penalltive).</li>
+  <li>Të tre parashikimet bllokohen në <strong>fillimin e ndeshjes së parë</strong> të turneut.</li>
 </ul>
-<blockquote>🎯 20 pikë në lojë — dy mundësi për të fituar avantazh ndaj kundërshtarëve!</blockquote>
+
+<h4>⚽ Pikët — Numri total i golave</h4>
+<table>
+  <thead><tr><th>Diferenca me totalin real</th><th>Pikët</th></tr></thead>
+  <tbody>
+    <tr><td>🎯 Saktë</td><td><strong>10 pikë</strong></td></tr>
+    <tr><td>± 1 deri 5 gola</td><td><strong>5 pikë</strong></td></tr>
+    <tr><td>± 6 deri 15 gola</td><td><strong>2 pikë</strong></td></tr>
+    <tr><td>Më shumë se ± 15 gola</td><td><strong>0 pikë</strong></td></tr>
+  </tbody>
+</table>
+<blockquote>🎯 Deri në 30 pikë në lojë me tre bonuset — tre mundësi për të fituar avantazh!</blockquote>
 
 <h3>🏅 Renditja</h3>
 <p>Renditja përditësohet <strong>në kohë reale</strong> sapo të futet një rezultat.<br>

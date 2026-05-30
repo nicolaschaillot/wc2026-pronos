@@ -1,5 +1,5 @@
 import { db, ADMIN_PASSWORD_HASH } from './firebase-config.js';
-import { MATCHES, GROUPS, ROUND_MULTIPLIERS, TOP_SCORERS } from './data.js';
+import { MATCHES, GROUPS, ROUND_MULTIPLIERS, TOP_SCORERS, calcTotalGoalsPoints } from './data.js';
 import {
   doc, getDoc, setDoc, getDocs, addDoc,
   collection, deleteDoc, serverTimestamp,
@@ -40,6 +40,7 @@ function showAdminPanel() {
   loadCodes();
   renderKnockoutMatches();
   renderWinnerAdmin();
+  renderTotalGoalsAdmin();
   renderTopScorerAdmin();
 }
 
@@ -331,6 +332,76 @@ async function handleSaveWinner(e) {
   }
 }
 
+// ─── Nombre de buts total ─────────────────────────────────────────────────────
+
+async function renderTotalGoalsAdmin() {
+  const [resultSnap, pronoSnap] = await Promise.all([
+    getDoc(doc(db, 'special_results', 'totalgoals')),
+    getDocs(collection(db, 'special_pronostics')),
+  ]);
+
+  const currentResultEl = document.getElementById('tg-current-result');
+  const official = resultSnap.exists() ? resultSnap.data().totalGoals : null;
+
+  if (official != null) {
+    currentResultEl.innerHTML = `
+      <div class="admin-info-box">
+        ✅ Nombre de buts enregistré : <strong>${official} buts</strong>
+        <button class="btn-sm danger" id="tg-del-result" style="margin-left:12px">✕ Supprimer</button>
+      </div>`;
+    document.getElementById('tg-del-result').addEventListener('click', async () => {
+      if (!confirm('Supprimer le résultat nombre de buts ?')) return;
+      await deleteDoc(doc(db, 'special_results', 'totalgoals'));
+      renderTotalGoalsAdmin();
+    });
+    document.getElementById('tg-admin-input').value = official;
+  } else {
+    currentResultEl.innerHTML = '<p class="muted" style="font-size:.85rem">Aucun résultat enregistré pour l\'instant.</p>';
+  }
+
+  const tbody = document.getElementById('tg-pronos-body');
+  tbody.innerHTML = '';
+  const pronos = [];
+  pronoSnap.forEach(d => { const p = d.data(); if (p.totalGoals != null) pronos.push(p); });
+  pronos.sort((a, b) => a.userId.localeCompare(b.userId));
+
+  if (pronos.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="4" class="muted" style="text-align:center;padding:12px">Aucun pronostic saisi.</td></tr>';
+    return;
+  }
+  for (const p of pronos) {
+    const diff = official != null ? Math.abs(p.totalGoals - official) : null;
+    const pts  = official != null ? calcTotalGoalsPoints(p.totalGoals, official) : null;
+    const icon = pts === 10 ? '🎯' : pts === 5 ? '✅' : pts === 2 ? '🟡' : pts === 0 ? '❌' : '';
+    const tr   = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${escapeHtml(p.userId)}</strong></td>
+      <td>${p.totalGoals} buts</td>
+      <td>${diff != null ? `±${diff}` : '–'}</td>
+      <td>${pts != null ? `${icon} ${pts} pts` : '–'}</td>`;
+    tbody.appendChild(tr);
+  }
+}
+
+async function handleSaveTotalGoals(e) {
+  e.preventDefault();
+  const input = document.getElementById('tg-admin-input');
+  const errEl = document.getElementById('tg-admin-error');
+  const val   = parseInt(input.value, 10);
+  if (isNaN(val) || val < 0) { errEl.textContent = 'Nombre invalide.'; return; }
+
+  errEl.textContent = '';
+  try {
+    await setDoc(doc(db, 'special_results', 'totalgoals'), {
+      totalGoals: val, updatedAt: serverTimestamp(),
+    });
+    renderTotalGoalsAdmin();
+  } catch (err) {
+    console.error(err);
+    errEl.textContent = `Erreur : ${err.message}`;
+  }
+}
+
 // ─── Meilleur buteur ──────────────────────────────────────────────────────────
 
 function buildTopScorerSelect() {
@@ -500,6 +571,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('ko-form').addEventListener('submit', handleAddKnockoutMatch);
   document.getElementById('ts-form').addEventListener('submit', handleSaveTopScorer);
   document.getElementById('winner-form').addEventListener('submit', handleSaveWinner);
+  document.getElementById('tg-form').addEventListener('submit', handleSaveTotalGoals);
 
   document.getElementById('btn-admin-logout').addEventListener('click', () => {
     sessionStorage.removeItem('wc26_admin');

@@ -800,6 +800,15 @@ td.detail { color: var(--muted); font-size: .8rem; }
 .ts-other-input:focus { outline: none; border-color: var(--primary); }
 .ts-locked-prono { font-size: 1rem; font-weight: 600; padding: 6px 0; }
 .gsb-ts .gsb-letter { font-size: .78rem; }
+.tg-input-row { display: flex; align-items: center; gap: 8px; }
+.tg-input {
+  width: 110px; padding: 9px 12px; border: 1.5px solid var(--border);
+  border-radius: 8px; background: var(--card); color: var(--text);
+  font-size: 1.1rem; font-weight: 700; text-align: center;
+}
+.tg-input:focus { outline: none; border-color: var(--primary); }
+.tg-unit { font-size: .9rem; color: var(--muted); }
+.tg-scale { font-size: .75rem; color: var(--muted); margin-top: 4px; }
 
 /* ── Admin info box ────────────────────────────────────────────────────────── */
 .admin-info-box {

@@ -192,6 +192,36 @@
 
       <hr style="border-color:var(--border);margin:0 0 24px">
 
+      <!-- Nombre de buts total -->
+      <div class="admin-section" style="margin-bottom:24px">
+        <h2>⚽ Nombre de buts total du tournoi</h2>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px">
+          Saisis le nombre total de buts marqués. Les points sont attribués selon l'écart avec le pronostic de chaque participant.
+        </p>
+        <div id="tg-current-result" style="margin-bottom:16px"></div>
+        <form id="tg-form" class="ko-form">
+          <div class="ko-form-row" style="align-items:flex-end;gap:12px">
+            <div class="form-group" style="flex:0 0 180px">
+              <label>Nombre de buts officiel</label>
+              <input type="number" id="tg-admin-input" class="ko-select" min="0" max="600" placeholder="ex : 220" required>
+            </div>
+            <div class="form-group" style="flex:0 0 auto;align-self:flex-end">
+              <button type="submit" class="btn-primary" style="width:auto;padding:9px 20px">✓ Valider</button>
+            </div>
+          </div>
+          <div class="error-msg" id="tg-admin-error"></div>
+        </form>
+        <h3 style="margin-top:20px">Pronostics des participants</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Participant</th><th>Pronostic</th><th>Écart</th><th>Points</th></tr></thead>
+            <tbody id="tg-pronos-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <hr style="border-color:var(--border);margin:0 0 24px">
+
       <!-- Meilleur buteur -->
       <div class="admin-section">
         <h2>🥇 Meilleur buteur du tournoi</h2>

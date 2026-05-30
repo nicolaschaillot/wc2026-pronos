@@ -1,5 +1,5 @@
 import { db } from './firebase-config.js';
-import { GROUPS, MATCHES, ROUND_MULTIPLIERS, TEAM_NAMES_SQ, calcPoints, TOP_SCORERS, TOP_SCORER_POINTS, TOP_SCORER_LOCK_DATE, WINNER_POINTS, WINNER_LOCK_DATE } from './data.js';
+import { GROUPS, MATCHES, ROUND_MULTIPLIERS, TEAM_NAMES_SQ, calcPoints, TOP_SCORERS, TOP_SCORER_POINTS, TOP_SCORER_LOCK_DATE, WINNER_POINTS, WINNER_LOCK_DATE, TOTAL_GOALS_LOCK_DATE, calcTotalGoalsPoints } from './data.js';
 import { t, getLang, initI18n } from './i18n.js';
 import { RULES_HTML } from './rules-content.js';
 import {
@@ -89,6 +89,8 @@ let topScorerPronostic    = null;
 let topScorerResult       = null;
 let winnerPronostic       = null;
 let winnerResult          = null;
+let totalGoalsPronostic   = null;
+let totalGoalsResult      = null;
 
 async function loadResults() {
   const snap = await getDocs(collection(db, 'results'));
@@ -362,16 +364,20 @@ async function loadPronostics(pseudo) {
 }
 
 async function loadTopScorerData(pseudo) {
-  const [pronoSnap, resultSnap, winnerPronoSnap, winnerResultSnap] = await Promise.all([
+  const [pronoSnap, resultSnap, winnerPronoSnap, winnerResultSnap, tgPronoSnap, tgResultSnap] = await Promise.all([
     getDoc(doc(db, 'special_pronostics', `${pseudo}_topscorer`)),
     getDoc(doc(db, 'special_results', 'topscorer')),
     getDoc(doc(db, 'special_pronostics', `${pseudo}_winner`)),
     getDoc(doc(db, 'special_results', 'winner')),
+    getDoc(doc(db, 'special_pronostics', `${pseudo}_totalgoals`)),
+    getDoc(doc(db, 'special_results', 'totalgoals')),
   ]);
-  topScorerPronostic = pronoSnap.exists() ? pronoSnap.data() : null;
-  topScorerResult    = resultSnap.exists() ? resultSnap.data() : null;
-  winnerPronostic    = winnerPronoSnap.exists() ? winnerPronoSnap.data() : null;
-  winnerResult       = winnerResultSnap.exists() ? winnerResultSnap.data() : null;
+  topScorerPronostic  = pronoSnap.exists() ? pronoSnap.data() : null;
+  topScorerResult     = resultSnap.exists() ? resultSnap.data() : null;
+  winnerPronostic     = winnerPronoSnap.exists() ? winnerPronoSnap.data() : null;
+  winnerResult        = winnerResultSnap.exists() ? winnerResultSnap.data() : null;
+  totalGoalsPronostic = tgPronoSnap.exists() ? tgPronoSnap.data() : null;
+  totalGoalsResult    = tgResultSnap.exists() ? tgResultSnap.data() : null;
 }
 
 async function loadKnockoutMatches() {
@@ -743,6 +749,138 @@ function renderWinnerBanner() {
   el.onclick = () => showGroup('WIN');
 }
 
+function buildTotalGoalsCard(pseudo) {
+  const locked = new Date() >= new Date(TOTAL_GOALS_LOCK_DATE);
+  const prono  = totalGoalsPronostic;
+  const result = totalGoalsResult;
+
+  const card = document.createElement('div');
+  card.className = `match-card top-scorer-card${locked ? ' locked' : ''}`;
+
+  let resultHtml = '';
+  if (result) {
+    const pts  = prono != null ? calcTotalGoalsPoints(prono.totalGoals, result.totalGoals) : null;
+    const diff = prono != null ? Math.abs(prono.totalGoals - result.totalGoals) : null;
+    const icon = pts === 10 ? '🎯' : pts === 5 ? '✅' : pts === 2 ? '🟡' : pts === 0 ? '❌' : '';
+    const cls  = pts === 10 ? 'pts-exact' : pts >= 2 ? 'pts-correct' : 'pts-wrong';
+    const diffStr = diff !== null ? ` (écart : ${diff})` : '';
+    resultHtml = `
+      <div class="result-row">
+        <span class="result-label">${t('totalgoals.result')} :</span>
+        <span class="result-score"><strong>${result.totalGoals}</strong> buts</span>
+        ${pts !== null ? `<span class="result-pts ${cls}">${icon} +${pts} ${t('lb.pts')}${diffStr}</span>` : ''}
+      </div>`;
+  }
+
+  let inputHtml = '';
+  if (locked) {
+    inputHtml = prono != null
+      ? `<div class="ts-locked-prono"><strong>${prono.totalGoals}</strong> buts</div>`
+      : `<div class="ts-locked-prono"><span class="muted">${t('totalgoals.noprono')}</span></div>`;
+  } else {
+    inputHtml = `
+      <div class="tg-input-row">
+        <input type="number" id="tg-input" class="tg-input" min="0" max="600"
+               placeholder="${t('totalgoals.placeholder')}" value="${prono != null ? prono.totalGoals : ''}">
+        <span class="tg-unit">buts</span>
+      </div>
+      <div class="tg-scale">${t('totalgoals.scale')}</div>
+      <div class="save-row">
+        <button class="btn-save" id="tg-save-btn">${t('save')}</button>
+        <span class="save-status" id="tg-status"></span>
+      </div>`;
+  }
+
+  card.innerHTML = `
+    <div class="match-meta">
+      <span class="match-date">${locked ? t('totalgoals.locked') : `<span class="ts-bonus">${t('totalgoals.bonus')}</span>`}</span>
+    </div>
+    <div class="ts-body">
+      <div class="ts-label">${t('totalgoals.label')} :</div>
+      ${inputHtml}
+    </div>
+    ${resultHtml}
+  `;
+
+  if (!locked) {
+    card.querySelector('#tg-save-btn').addEventListener('click', () => saveTotalGoals(pseudo, card));
+    card.querySelector('#tg-input').addEventListener('keydown', e => {
+      if (e.key === 'Enter') saveTotalGoals(pseudo, card);
+    });
+  }
+
+  return card;
+}
+
+async function saveTotalGoals(pseudo, card) {
+  const input  = card.querySelector('#tg-input');
+  const status = card.querySelector('#tg-status');
+  const val    = parseInt(input.value, 10);
+  if (isNaN(val) || val < 0) { status.textContent = '⚠ Nombre invalide'; return; }
+
+  status.textContent = '…';
+  try {
+    await setDoc(doc(db, 'special_pronostics', `${pseudo}_totalgoals`), {
+      userId: pseudo, totalGoals: val, submittedAt: serverTimestamp(),
+    });
+    totalGoalsPronostic = { userId: pseudo, totalGoals: val };
+    renderTotalGoalsBanner();
+    status.textContent = t('saved');
+    setTimeout(() => { status.textContent = ''; }, 2000);
+  } catch (err) {
+    console.error(err);
+    status.textContent = t('save.error');
+  }
+}
+
+function renderTotalGoalsBanner() {
+  const el = document.getElementById('totalgoals-banner');
+  if (!el) return;
+
+  const locked = new Date() >= new Date(TOTAL_GOALS_LOCK_DATE);
+  const prono  = totalGoalsPronostic;
+  const result = totalGoalsResult;
+
+  let playerHtml, rightHtml, warnClass = '';
+
+  if (result) {
+    const pts = prono != null ? calcTotalGoalsPoints(prono.totalGoals, result.totalGoals) : null;
+    playerHtml = prono != null
+      ? `<strong>${prono.totalGoals}</strong> buts`
+      : `<span class="muted">${t('totalgoals.noprono')}</span>`;
+    const icon = pts === 10 ? '🎯' : pts === 5 ? '✅' : pts === 2 ? '🟡' : '❌';
+    rightHtml = pts !== null
+      ? `<span class="tsb-pts ${pts > 0 ? 'tsb-correct' : 'tsb-wrong'}">${icon} +${pts} ${t('lb.pts')}</span>`
+      : '';
+  } else if (locked) {
+    playerHtml = prono != null
+      ? `<strong>${prono.totalGoals}</strong> buts`
+      : `<span class="muted">${t('totalgoals.noprono')}</span>`;
+    rightHtml = `<span class="tsb-lock">🔒</span>`;
+  } else {
+    if (prono == null) {
+      warnClass  = ' tsb-warn';
+      playerHtml = `<span class="nm-prono-warn">⚠ ${t('totalgoals.noprono')}</span>`;
+    } else {
+      playerHtml = `<strong>${prono.totalGoals}</strong> buts <span class="nm-prono-ok">✓</span>`;
+    }
+    rightHtml = `<span class="tsb-bonus">2–10 pts</span>`;
+  }
+
+  el.className = `tsb-banner${warnClass}`;
+  el.innerHTML = `
+    <div class="nm-label">${t('totalgoals.title')}</div>
+    <div class="tsb-main">
+      <div class="tsb-player">${playerHtml}</div>
+      <div class="tsb-right">
+        ${rightHtml}
+        ${!locked ? `<button class="tsb-btn">${prono != null ? '✏ Modifier' : '→ Saisir'}</button>` : ''}
+      </div>
+    </div>`;
+
+  el.onclick = () => showGroup('TG');
+}
+
 function attachCardHandlers(container, pseudo) {
   container.querySelectorAll('.btn-save').forEach(btn => {
     btn.addEventListener('click', () => savePronostic(pseudo, btn.dataset.match));
@@ -881,6 +1019,33 @@ function renderPredictions(pseudo) {
   winBtn.addEventListener('click', () => showGroup('WIN'));
   sidebar.appendChild(winBtn);
 
+  // ── Bonus nombre de buts total ───────────────────────────────────────────
+  const tgContainer = document.createElement('div');
+  tgContainer.id = 'group-section-TG';
+  tgContainer.hidden = true;
+  const tgHeading = document.createElement('h2');
+  tgHeading.className = 'group-title';
+  tgHeading.textContent = t('totalgoals.title');
+  tgContainer.appendChild(tgHeading);
+  const tgSubtitle = document.createElement('p');
+  tgSubtitle.className = 'ts-subtitle';
+  tgSubtitle.textContent = t('totalgoals.subtitle');
+  tgContainer.appendChild(tgSubtitle);
+  tgContainer.appendChild(buildTotalGoalsCard(pseudo));
+  content.appendChild(tgContainer);
+
+  const tgLocked = new Date() >= new Date(TOTAL_GOALS_LOCK_DATE);
+  const tgBtn = document.createElement('button');
+  tgBtn.className = 'group-sidebar-btn gsb-ts';
+  tgBtn.dataset.group = 'TG';
+  tgBtn.innerHTML = `
+    <div class="gsb-header">
+      <span class="gsb-letter">${t('totalgoals.title')}</span>
+      ${totalGoalsPronostic != null ? `<span class="gsb-ok">✓</span>` : `<span class="gsb-badge">${tgLocked ? '?' : '!'}</span>`}
+    </div>`;
+  tgBtn.addEventListener('click', () => showGroup('TG'));
+  sidebar.appendChild(tgBtn);
+
   // ── Bonus meilleur buteur ────────────────────────────────────────────────
   const tsContainer = document.createElement('div');
   tsContainer.id = 'group-section-TS';
@@ -921,6 +1086,7 @@ function renderPredictions(pseudo) {
   attachCardHandlers(content, pseudo);
   renderWinnerBanner();
   renderTopScorerBanner();
+  renderTotalGoalsBanner();
   renderNextMatchBanner(pseudo);
   renderUrgentBanner(pseudo);
   updateCountdowns();
@@ -1075,6 +1241,40 @@ function renderMyResults() {
       const section = buildSection(label, byRound[round], () => mult);
       if (section) content.appendChild(section);
     }
+  }
+
+  // ── Nombre de buts total ─────────────────────────────────────────────────
+  if (totalGoalsResult) {
+    hasAny = true;
+    const prono = totalGoalsPronostic;
+    const pts   = prono != null ? calcTotalGoalsPoints(prono.totalGoals, totalGoalsResult.totalGoals) : null;
+    if (pts !== null) grandTotal += pts;
+    const diff  = prono != null ? Math.abs(prono.totalGoals - totalGoalsResult.totalGoals) : null;
+    const icon  = pts === 10 ? '🎯' : pts === 5 ? '✅' : pts === 2 ? '🟡' : pts === 0 ? '❌' : '';
+    const cls   = pts === 10 ? 'pts-exact' : pts > 0 ? 'pts-correct' : 'pts-wrong';
+    const tgSection = document.createElement('div');
+    tgSection.className = 'results-section';
+    tgSection.innerHTML = `
+      <h3 class="results-group-title">${t('totalgoals.title')}</h3>
+      <div class="table-wrap">
+        <table class="results-table">
+          <thead><tr>
+            <th></th>
+            <th>${t('results.col.prono')}</th>
+            <th>${t('results.col.result')}</th>
+            <th>${t('results.col.pts')}</th>
+          </tr></thead>
+          <tbody>
+            <tr>
+              <td>${t('totalgoals.title')}</td>
+              <td class="res-prono">${prono != null ? `<strong>${prono.totalGoals}</strong> buts` : '<span class="muted">–</span>'}</td>
+              <td class="res-result"><strong>${totalGoalsResult.totalGoals} buts</strong>${diff !== null ? ` <span class="muted">(écart : ${diff})</span>` : ''}</td>
+              <td class="res-pts">${pts !== null ? `<span class="result-pts ${cls}">${icon} ${pts}</span>` : '<span class="muted">–</span>'}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>`;
+    content.appendChild(tgSection);
   }
 
   // ── Vainqueur ────────────────────────────────────────────────────────────
@@ -1237,8 +1437,12 @@ async function loadLeaderboard() {
 
     // ── Bonus spéciaux (vainqueur + meilleur buteur) ─────────────────────────
     const tsResult  = tsResultSnap.exists() ? tsResultSnap.data() : null;
-    const winResult = await getDoc(doc(db, 'special_results', 'winner'));
-    const winResultData = winResult.exists() ? winResult.data() : null;
+    const [winResultSnap2, tgResultSnap2] = await Promise.all([
+      getDoc(doc(db, 'special_results', 'winner')),
+      getDoc(doc(db, 'special_results', 'totalgoals')),
+    ]);
+    const winResultData = winResultSnap2.exists() ? winResultSnap2.data() : null;
+    const tgResultData  = tgResultSnap2.exists() ? tgResultSnap2.data() : null;
 
     tsPronoSnap.forEach(d => {
       const p = d.data();
@@ -1253,6 +1457,9 @@ async function loadLeaderboard() {
         const correct = p.playerId === tsResult.playerId ||
           (p.playerId === 'other' && p.playerName && p.playerName.toLowerCase() === (tsResult.playerName || '').toLowerCase());
         if (correct) userPoints[p.userId] += TOP_SCORER_POINTS;
+      }
+      if (p.totalGoals != null && tgResultData) {
+        userPoints[p.userId] += calcTotalGoalsPoints(p.totalGoals, tgResultData.totalGoals);
       }
     });
 

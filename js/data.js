@@ -233,6 +233,15 @@ export const TOP_SCORER_LOCK_DATE = '2026-06-11T19:00:00Z';
 export const WINNER_POINTS = 10;
 export const WINNER_LOCK_DATE = '2026-06-11T19:00:00Z';
 
+export const TOTAL_GOALS_LOCK_DATE = '2026-06-11T19:00:00Z';
+export function calcTotalGoalsPoints(prediction, actual) {
+  const diff = Math.abs(prediction - actual);
+  if (diff === 0)  return 10;
+  if (diff <= 5)   return 5;
+  if (diff <= 15)  return 2;
+  return 0;
+}
+
 export const ROUND_MULTIPLIERS = {
   '1/32': 1,
   '1/16': 1,
