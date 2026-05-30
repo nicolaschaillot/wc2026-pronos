@@ -1,5 +1,5 @@
 import { db, ADMIN_PASSWORD_HASH } from './firebase-config.js';
-import { MATCHES, GROUPS, ROUND_MULTIPLIERS, TOP_SCORERS, calcTotalGoalsPoints } from './data.js';
+import { MATCHES, GROUPS, ROUND_MULTIPLIERS, TOP_SCORERS, calcTotalGoalsPoints, TOTAL_GOALS_HISTORY, TOTAL_GOALS_2026_MATCHES } from './data.js';
 import {
   doc, getDoc, setDoc, getDocs, addDoc,
   collection, deleteDoc, serverTimestamp,
@@ -334,7 +334,34 @@ async function handleSaveWinner(e) {
 
 // ─── Nombre de buts total ─────────────────────────────────────────────────────
 
+function renderTotalGoalsHistory() {
+  const el = document.getElementById('tg-history-admin');
+  if (!el) return;
+  const avgPerMatch = TOTAL_GOALS_HISTORY.reduce((s, e) => s + e.goals / e.matches, 0) / TOTAL_GOALS_HISTORY.length;
+  const projected   = Math.round(avgPerMatch * TOTAL_GOALS_2026_MATCHES);
+  const rows = TOTAL_GOALS_HISTORY.map(e =>
+    `<tr>
+      <td>${e.year} · ${e.host}</td>
+      <td class="tgh-center">${e.matches}</td>
+      <td class="tgh-center"><strong>${e.goals}</strong></td>
+      <td class="tgh-center">${(e.goals / e.matches).toFixed(2)}</td>
+     </tr>`).join('');
+  el.innerHTML = `
+    <div class="tg-history">
+      <div class="tgh-title">📊 Éditions précédentes</div>
+      <table class="tgh-table">
+        <thead><tr><th>Édition</th><th>Matchs</th><th>Buts</th><th>Moy.</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="tgh-note">
+        ⚽ <strong>2026 : ${TOTAL_GOALS_2026_MATCHES} matchs</strong> (48 équipes, contre 64 en 2022)
+        — projection : <strong>~${projected} buts</strong> (${avgPerMatch.toFixed(2)} buts/match en moy.)
+      </div>
+    </div>`;
+}
+
 async function renderTotalGoalsAdmin() {
+  renderTotalGoalsHistory();
   const [resultSnap, pronoSnap] = await Promise.all([
     getDoc(doc(db, 'special_results', 'totalgoals')),
     getDocs(collection(db, 'special_pronostics')),

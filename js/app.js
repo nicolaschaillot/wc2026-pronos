@@ -1,5 +1,5 @@
 import { db } from './firebase-config.js';
-import { GROUPS, MATCHES, ROUND_MULTIPLIERS, TEAM_NAMES_SQ, calcPoints, TOP_SCORERS, TOP_SCORER_POINTS, TOP_SCORER_LOCK_DATE, WINNER_POINTS, WINNER_LOCK_DATE, TOTAL_GOALS_LOCK_DATE, calcTotalGoalsPoints } from './data.js';
+import { GROUPS, MATCHES, ROUND_MULTIPLIERS, TEAM_NAMES_SQ, calcPoints, TOP_SCORERS, TOP_SCORER_POINTS, TOP_SCORER_LOCK_DATE, WINNER_POINTS, WINNER_LOCK_DATE, TOTAL_GOALS_LOCK_DATE, calcTotalGoalsPoints, TOTAL_GOALS_HISTORY, TOTAL_GOALS_2026_MATCHES } from './data.js';
 import { t, getLang, initI18n } from './i18n.js';
 import { RULES_HTML } from './rules-content.js';
 import {
@@ -749,6 +749,30 @@ function renderWinnerBanner() {
   el.onclick = () => showGroup('WIN');
 }
 
+function buildTotalGoalsHistoryHtml() {
+  const avgPerMatch = TOTAL_GOALS_HISTORY.reduce((s, e) => s + e.goals / e.matches, 0) / TOTAL_GOALS_HISTORY.length;
+  const projected   = Math.round(avgPerMatch * TOTAL_GOALS_2026_MATCHES);
+  const rows = TOTAL_GOALS_HISTORY.map(e => `
+    <tr>
+      <td>${e.year} · ${e.host}</td>
+      <td class="tgh-center">${e.matches}</td>
+      <td class="tgh-center"><strong>${e.goals}</strong></td>
+      <td class="tgh-center">${(e.goals / e.matches).toFixed(2)}</td>
+    </tr>`).join('');
+  return `
+    <div class="tg-history">
+      <div class="tgh-title">📊 Éditions précédentes</div>
+      <table class="tgh-table">
+        <thead><tr><th>Édition</th><th>Matchs</th><th>Buts</th><th>Moy.</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="tgh-note">
+        ⚽ <strong>2026 : ${TOTAL_GOALS_2026_MATCHES} matchs</strong> (48 équipes, contre 64 en 2022)
+        — projection : <strong>~${projected} buts</strong> sur la base de la moyenne historique (${avgPerMatch.toFixed(2)}/match)
+      </div>
+    </div>`;
+}
+
 function buildTotalGoalsCard(pseudo) {
   const locked = new Date() >= new Date(TOTAL_GOALS_LOCK_DATE);
   const prono  = totalGoalsPronostic;
@@ -785,6 +809,7 @@ function buildTotalGoalsCard(pseudo) {
         <span class="tg-unit">buts</span>
       </div>
       <div class="tg-scale">${t('totalgoals.scale')}</div>
+      ${buildTotalGoalsHistoryHtml()}
       <div class="save-row">
         <button class="btn-save" id="tg-save-btn">${t('save')}</button>
         <span class="save-status" id="tg-status"></span>

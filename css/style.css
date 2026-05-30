@@ -809,6 +809,14 @@ td.detail { color: var(--muted); font-size: .8rem; }
 .tg-input:focus { outline: none; border-color: var(--primary); }
 .tg-unit { font-size: .9rem; color: var(--muted); }
 .tg-scale { font-size: .75rem; color: var(--muted); margin-top: 4px; }
+.tg-history { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; margin-top: 12px; }
+.tgh-title { font-size: .75rem; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 8px; }
+.tgh-table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+.tgh-table th { color: var(--muted); font-weight: 600; padding: 3px 8px; text-align: left; border-bottom: 1px solid var(--border); }
+.tgh-table td { padding: 4px 8px; border-bottom: 1px solid var(--border); }
+.tgh-table tr:last-child td { border-bottom: none; }
+.tgh-center { text-align: center; }
+.tgh-note { margin-top: 10px; font-size: .78rem; color: var(--muted); line-height: 1.4; }
 
 /* ── Admin info box ────────────────────────────────────────────────────────── */
 .admin-info-box {
