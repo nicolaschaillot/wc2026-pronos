@@ -463,6 +463,13 @@ tr.own-row td { color: var(--primary); font-weight: 600; }
   color: var(--muted);
 }
 .scoring-legend span { color: var(--text); }
+.scoring-legend-bonus {
+  border-color: var(--gold);
+  margin-top: -14px;
+  border-top: none;
+  border-radius: 0 0 var(--radius) var(--radius);
+  background: color-mix(in srgb, var(--gold) 6%, var(--surface));
+}
 
 .table-wrap {
   background: var(--surface);
