@@ -752,24 +752,27 @@ function renderWinnerBanner() {
 function buildTotalGoalsHistoryHtml() {
   const avgPerMatch = TOTAL_GOALS_HISTORY.reduce((s, e) => s + e.goals / e.matches, 0) / TOTAL_GOALS_HISTORY.length;
   const projected   = Math.round(avgPerMatch * TOTAL_GOALS_2026_MATCHES);
+  const isSq = getLang() === 'sq';
   const rows = TOTAL_GOALS_HISTORY.map(e => `
     <tr>
-      <td>${e.year} · ${e.host}</td>
+      <td>${e.year} · ${isSq ? e.hostsq : e.host}</td>
       <td class="tgh-center">${e.matches}</td>
       <td class="tgh-center"><strong>${e.goals}</strong></td>
       <td class="tgh-center">${(e.goals / e.matches).toFixed(2)}</td>
     </tr>`).join('');
   return `
     <div class="tg-history">
-      <div class="tgh-title">📊 Éditions précédentes</div>
+      <div class="tgh-title">${t('totalgoals.history.title')}</div>
       <table class="tgh-table">
-        <thead><tr><th>Édition</th><th>Matchs</th><th>Buts</th><th>Moy.</th></tr></thead>
+        <thead><tr>
+          <th>${t('totalgoals.history.col.edition')}</th>
+          <th>${t('totalgoals.history.col.matches')}</th>
+          <th>${t('totalgoals.history.col.goals')}</th>
+          <th>${t('totalgoals.history.col.avg')}</th>
+        </tr></thead>
         <tbody>${rows}</tbody>
       </table>
-      <div class="tgh-note">
-        ⚽ <strong>2026 : ${TOTAL_GOALS_2026_MATCHES} matchs</strong> (48 équipes, contre 64 en 2022)
-        — projection : <strong>~${projected} buts</strong> sur la base de la moyenne historique (${avgPerMatch.toFixed(2)}/match)
-      </div>
+      <div class="tgh-note">${t('totalgoals.history.note', TOTAL_GOALS_2026_MATCHES, projected, avgPerMatch.toFixed(2))}</div>
     </div>`;
 }
 
@@ -787,11 +790,11 @@ function buildTotalGoalsCard(pseudo) {
     const diff = prono != null ? Math.abs(prono.totalGoals - result.totalGoals) : null;
     const icon = pts === 10 ? '🎯' : pts === 5 ? '✅' : pts === 2 ? '🟡' : pts === 0 ? '❌' : '';
     const cls  = pts === 10 ? 'pts-exact' : pts >= 2 ? 'pts-correct' : 'pts-wrong';
-    const diffStr = diff !== null ? ` (écart : ${diff})` : '';
+    const diffStr = diff !== null ? ` (${t('totalgoals.gap')} : ${diff})` : '';
     resultHtml = `
       <div class="result-row">
         <span class="result-label">${t('totalgoals.result')} :</span>
-        <span class="result-score"><strong>${result.totalGoals}</strong> buts</span>
+        <span class="result-score"><strong>${result.totalGoals}</strong> ${t('totalgoals.unit')}</span>
         ${pts !== null ? `<span class="result-pts ${cls}">${icon} +${pts} ${t('lb.pts')}${diffStr}</span>` : ''}
       </div>`;
   }
@@ -799,14 +802,14 @@ function buildTotalGoalsCard(pseudo) {
   let inputHtml = '';
   if (locked) {
     inputHtml = prono != null
-      ? `<div class="ts-locked-prono"><strong>${prono.totalGoals}</strong> buts</div>`
+      ? `<div class="ts-locked-prono"><strong>${prono.totalGoals}</strong> ${t('totalgoals.unit')}</div>`
       : `<div class="ts-locked-prono"><span class="muted">${t('totalgoals.noprono')}</span></div>`;
   } else {
     inputHtml = `
       <div class="tg-input-row">
         <input type="number" id="tg-input" class="tg-input" min="0" max="600"
                placeholder="${t('totalgoals.placeholder')}" value="${prono != null ? prono.totalGoals : ''}">
-        <span class="tg-unit">buts</span>
+        <span class="tg-unit">${t('totalgoals.unit')}</span>
       </div>
       <div class="tg-scale">${t('totalgoals.scale')}</div>
       ${buildTotalGoalsHistoryHtml()}
@@ -871,7 +874,7 @@ function renderTotalGoalsBanner() {
   if (result) {
     const pts = prono != null ? calcTotalGoalsPoints(prono.totalGoals, result.totalGoals) : null;
     playerHtml = prono != null
-      ? `<strong>${prono.totalGoals}</strong> buts`
+      ? `<strong>${prono.totalGoals}</strong> ${t('totalgoals.unit')}`
       : `<span class="muted">${t('totalgoals.noprono')}</span>`;
     const icon = pts === 10 ? '🎯' : pts === 5 ? '✅' : pts === 2 ? '🟡' : '❌';
     rightHtml = pts !== null
@@ -887,7 +890,7 @@ function renderTotalGoalsBanner() {
       warnClass  = ' tsb-warn';
       playerHtml = `<span class="nm-prono-warn">⚠ ${t('totalgoals.noprono')}</span>`;
     } else {
-      playerHtml = `<strong>${prono.totalGoals}</strong> buts <span class="nm-prono-ok">✓</span>`;
+      playerHtml = `<strong>${prono.totalGoals}</strong> ${t('totalgoals.unit')} <span class="nm-prono-ok">✓</span>`;
     }
     rightHtml = `<span class="tsb-bonus">2–10 pts</span>`;
   }
@@ -1292,8 +1295,8 @@ function renderMyResults() {
           <tbody>
             <tr>
               <td>${t('totalgoals.title')}</td>
-              <td class="res-prono">${prono != null ? `<strong>${prono.totalGoals}</strong> buts` : '<span class="muted">–</span>'}</td>
-              <td class="res-result"><strong>${totalGoalsResult.totalGoals} buts</strong>${diff !== null ? ` <span class="muted">(écart : ${diff})</span>` : ''}</td>
+              <td class="res-prono">${prono != null ? `<strong>${prono.totalGoals}</strong> ${t('totalgoals.unit')}` : '<span class="muted">–</span>'}</td>
+              <td class="res-result"><strong>${totalGoalsResult.totalGoals} ${t('totalgoals.unit')}</strong>${diff !== null ? ` <span class="muted">(${t('totalgoals.gap')} : ${diff})</span>` : ''}</td>
               <td class="res-pts">${pts !== null ? `<span class="result-pts ${cls}">${icon} ${pts}</span>` : '<span class="muted">–</span>'}</td>
             </tr>
           </tbody>

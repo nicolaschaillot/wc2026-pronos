@@ -236,11 +236,11 @@ export const WINNER_LOCK_DATE = '2026-06-11T19:00:00Z';
 export const TOTAL_GOALS_LOCK_DATE = '2026-06-11T19:00:00Z';
 
 export const TOTAL_GOALS_HISTORY = [
-  { year: 2022, host: 'Qatar',           matches: 64,  goals: 172 },
-  { year: 2018, host: 'Russie',          matches: 64,  goals: 169 },
-  { year: 2014, host: 'Brésil',          matches: 64,  goals: 171 },
-  { year: 2010, host: 'Afrique du Sud',  matches: 64,  goals: 145 },
-  { year: 2006, host: 'Allemagne',       matches: 64,  goals: 147 },
+  { year: 2022, host: 'Qatar',           hostsq: 'Katar',          matches: 64, goals: 172 },
+  { year: 2018, host: 'Russie',          hostsq: 'Rusia',          matches: 64, goals: 169 },
+  { year: 2014, host: 'Brésil',          hostsq: 'Brazil',         matches: 64, goals: 171 },
+  { year: 2010, host: 'Afrique du Sud',  hostsq: 'Afrika e Jugut', matches: 64, goals: 145 },
+  { year: 2006, host: 'Allemagne',       hostsq: 'Gjermani',       matches: 64, goals: 147 },
 ];
 // 2026 : 104 matchs (12 groupes de 4 → 72 matchs de poule + 32 matchs éliminatoires)
 export const TOTAL_GOALS_2026_MATCHES = 104;
