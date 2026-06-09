@@ -299,6 +299,19 @@ footer {
 }
 .btn-save:hover { background: var(--primary); color: #000; border-color: var(--primary); }
 
+.btn-random {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: .9rem;
+  cursor: pointer;
+  transition: all .2s;
+  line-height: 1;
+}
+.btn-random:hover { background: #2a3a50; border-color: #4a6a9a; transform: rotate(20deg); }
+
 .save-status { font-size: .8rem; color: var(--primary); min-width: 80px; }
 
 /* ── Résultat officiel sur carte verrouillée ───────────────────────────────── */

@@ -490,6 +490,7 @@ function buildMatchCard(match, pseudo, multiplier = 1) {
     ${resultHtml}
     ${!locked ? `<div class="save-row">
       <button class="btn-save" data-match="${match.id}">${t('save')}</button>
+      <button class="btn-random" data-match="${match.id}" title="${t('random.title')}">🎲</button>
       <span class="save-status" id="status-${match.id}"></span>
     </div>` : ''}
   `;
@@ -909,9 +910,29 @@ function renderTotalGoalsBanner() {
   el.onclick = () => showGroup('TG');
 }
 
+function randomScore() {
+  const r = Math.random();
+  if (r < 0.25) return 0;
+  if (r < 0.55) return 1;
+  if (r < 0.80) return 2;
+  if (r < 0.93) return 3;
+  return 4;
+}
+
 function attachCardHandlers(container, pseudo) {
   container.querySelectorAll('.btn-save').forEach(btn => {
     btn.addEventListener('click', () => savePronostic(pseudo, btn.dataset.match));
+  });
+  container.querySelectorAll('.btn-random').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const matchId = btn.dataset.match;
+      const i1 = container.querySelector(`.score-input[data-match="${matchId}"][data-side="1"]`);
+      const i2 = container.querySelector(`.score-input[data-match="${matchId}"][data-side="2"]`);
+      if (!i1 || !i2) return;
+      i1.value = randomScore();
+      i2.value = randomScore();
+      savePronostic(pseudo, matchId);
+    });
   });
   container.querySelectorAll('.score-input').forEach(input => {
     input.addEventListener('keydown', e => {
