@@ -9,10 +9,10 @@ import {
 // ─── Session ─────────────────────────────────────────────────────────────────
 
 function getSession() {
-  try { return JSON.parse(sessionStorage.getItem('wc26_user')); } catch { return null; }
+  try { return JSON.parse(localStorage.getItem('wc26_user')); } catch { return null; }
 }
-function saveSession(u) { sessionStorage.setItem('wc26_user', JSON.stringify(u)); }
-function clearSession() { sessionStorage.removeItem('wc26_user'); }
+function saveSession(u) { localStorage.setItem('wc26_user', JSON.stringify(u)); }
+function clearSession() { localStorage.removeItem('wc26_user'); }
 
 // ─── Navigation ──────────────────────────────────────────────────────────────
 
