@@ -42,6 +42,7 @@ function showAdminPanel() {
   renderWinnerAdmin();
   renderTotalGoalsAdmin();
   renderTopScorerAdmin();
+  renderLatePronostics();
 }
 
 function initAdminTabs() {
@@ -523,6 +524,85 @@ async function handleSaveTopScorer(e) {
     playerId, playerName, flag, updatedAt: serverTimestamp(),
   });
   renderTopScorerAdmin();
+}
+
+// ─── Pronos tardifs ───────────────────────────────────────────────────────────
+
+const FMT_FULL = new Intl.DateTimeFormat('fr-FR', {
+  timeZone: 'Europe/Paris',
+  day: '2-digit', month: 'short',
+  hour: '2-digit', minute: '2-digit', second: '2-digit',
+});
+
+function formatDelay(ms) {
+  const totalMin = Math.floor(ms / 60000);
+  if (totalMin < 60) return `+${totalMin} min`;
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if (h < 24) return `+${h}h${String(m).padStart(2, '0')}`;
+  const d = Math.floor(h / 24);
+  const rh = h % 24;
+  return `+${d}j ${rh}h${String(m).padStart(2, '0')}`;
+}
+
+async function renderLatePronostics() {
+  const tbody      = document.getElementById('late-pronos-body');
+  const summaryEl  = document.getElementById('late-summary');
+  const badgeEl    = document.getElementById('late-count-badge');
+  tbody.innerHTML  = '<tr><td colspan="6" class="muted" style="text-align:center;padding:16px">Chargement…</td></tr>';
+
+  const [pronoSnap, koSnap] = await Promise.all([
+    getDocs(collection(db, 'pronostics')),
+    getDocs(collection(db, 'matches_extra')),
+  ]);
+
+  const matchMap = {};
+  MATCHES.forEach(m => { matchMap[m.id] = m; });
+  koSnap.forEach(d => { matchMap[d.id] = { id: d.id, ...d.data() }; });
+
+  const late = [];
+  pronoSnap.forEach(d => {
+    const p = d.data();
+    const match = matchMap[p.matchId];
+    if (!match || !p.submittedAt) return;
+    const matchMs = new Date(match.date).getTime();
+    const pronoMs = p.submittedAt.toMillis ? p.submittedAt.toMillis() : p.submittedAt.seconds * 1000;
+    if (pronoMs > matchMs) late.push({ ...p, match, pronoMs, matchMs });
+  });
+
+  // Badge dans l'onglet
+  if (late.length > 0) {
+    badgeEl.textContent = late.length;
+    badgeEl.hidden = false;
+  } else {
+    badgeEl.hidden = true;
+  }
+
+  tbody.innerHTML = '';
+
+  if (late.length === 0) {
+    summaryEl.innerHTML = '<div class="admin-info-box" style="border-color:#00c853;background:rgba(0,200,83,.08)">✅ Aucun pronostic tardif détecté.</div>';
+    tbody.innerHTML = '<tr><td colspan="6" class="muted" style="text-align:center;padding:16px">–</td></tr>';
+    return;
+  }
+
+  summaryEl.innerHTML = `<div class="admin-info-box" style="border-color:#ef4444;background:rgba(239,68,68,.08)">⚠️ <strong>${late.length} pronostic${late.length > 1 ? 's' : ''} tardif${late.length > 1 ? 's' : ''}</strong> détecté${late.length > 1 ? 's' : ''}.</div>`;
+
+  late.sort((a, b) => (b.pronoMs - b.matchMs) - (a.pronoMs - a.matchMs));
+
+  for (const p of late) {
+    const delay = p.pronoMs - p.matchMs;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><strong>${escapeHtml(p.userId)}</strong></td>
+      <td style="font-size:.85rem">${p.match.team1.flag} ${escapeHtml(p.match.team1.name)} vs ${p.match.team2.flag} ${escapeHtml(p.match.team2.name)}</td>
+      <td><strong>${p.score1} – ${p.score2}</strong></td>
+      <td style="font-size:.78rem;color:var(--muted)">${FMT_FULL.format(new Date(p.matchMs))}</td>
+      <td style="font-size:.78rem;color:var(--muted)">${FMT_FULL.format(new Date(p.pronoMs))}</td>
+      <td><span class="admin-late-badge">${formatDelay(delay)}</span></td>
+    `;
+    tbody.appendChild(tr);
+  }
 }
 
 // ─── Codes ───────────────────────────────────────────────────────────────────

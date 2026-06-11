@@ -56,6 +56,7 @@
       <button data-tab="tab-results">📋 Résultats groupes</button>
       <button data-tab="tab-ko">🏆 Phase éliminatoire</button>
       <button data-tab="tab-bonus">🎯 Bonus</button>
+      <button data-tab="tab-late">🕵️ Tardifs <span id="late-count-badge" hidden class="admin-late-badge"></span></button>
     </nav>
 
     <!-- Tab — Codes -->
@@ -257,6 +258,34 @@
         </div>
       </div>
 
+    </div>
+
+    <!-- Tab — Pronos tardifs -->
+    <div id="tab-late" class="admin-tab" hidden>
+      <div class="admin-section">
+        <h2>🕵️ Pronostics tardifs</h2>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px">
+          Pronostics dont l'heure d'enregistrement (<code>submittedAt</code>, générée côté serveur Firebase) est <strong>postérieure au coup d'envoi</strong> du match.
+        </p>
+        <div id="late-summary" style="margin-bottom:12px"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Participant</th>
+                <th>Match</th>
+                <th>Score</th>
+                <th>Coup d'envoi</th>
+                <th>Heure du prono</th>
+                <th>Retard</th>
+              </tr>
+            </thead>
+            <tbody id="late-pronos-body">
+              <tr><td colspan="6" class="muted" style="text-align:center;padding:16px">Chargement…</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
 
   </div><!-- /admin-panel -->
