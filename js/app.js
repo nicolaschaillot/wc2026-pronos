@@ -1529,7 +1529,7 @@ async function loadLeaderboard() {
       })
       .map(([pseudo, pts], i) => ({
         rank: i + 1, pseudo, pts,
-        pred: userPredCount[pseudo], exact: userExact[pseudo],
+        pred: userPredCount[pseudo], exact: userExact[pseudo], correct: userCorrect[pseudo],
       }));
 
     if (ranked.length === 0) {
@@ -1543,7 +1543,7 @@ async function loadLeaderboard() {
         <td class="rank">${r.rank === 1 ? '🥇' : r.rank === 2 ? '🥈' : r.rank === 3 ? '🥉' : r.rank}</td>
         <td class="pseudo">${escapeHtml(r.pseudo)}</td>
         <td class="pts"><strong>${r.pts}</strong> ${t('lb.pts')}</td>
-        <td class="detail">${r.exact} ${t('lb.exacts')} / ${r.pred} ${t('lb.pronos')}</td>
+        <td class="detail">${r.exact + r.correct} ${t('lb.goods')} · ${r.exact} 🎯 / ${r.pred} ${t('lb.pronos')}</td>
       </tr>
     `).join('');
     renderLastUpdate();
