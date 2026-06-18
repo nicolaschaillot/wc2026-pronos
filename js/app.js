@@ -413,6 +413,7 @@ function buildMatchCard(match, pseudo, multiplier = 1) {
 
   const card = document.createElement('div');
   card.className = `match-card${locked ? ' locked' : ''}`;
+  card.dataset.matchId = match.id;
 
   const multBadge = multiplier > 1
     ? `<span class="multiplier-badge">×${multiplier}</span>` : '';
@@ -1010,24 +1011,58 @@ function renderPredictions(pseudo) {
   content.innerHTML = '';
 
   // ── À pronostiquer ────────────────────────────────────────────────────────
-  const pending = [...MATCHES, ...knockoutMatches]
-    .filter(m => !isLocked(m) && !userPronostics[m.id])
+  const upcoming = [...MATCHES, ...knockoutMatches]
+    .filter(m => !isLocked(m))
     .sort((a, b) => new Date(a.date) - new Date(b.date));
+  const pending = upcoming.filter(m => !userPronostics[m.id]);
 
   const todoSection = document.createElement('div');
   todoSection.id = 'group-section-TODO';
   todoSection.hidden = true;
   todoSection.innerHTML = `<h2 class="group-title">${t('todo.title')}</h2>`;
-  if (pending.length === 0) {
+
+  if (upcoming.length === 0) {
     const p = document.createElement('p');
     p.className = 'ts-subtitle';
     p.textContent = t('todo.empty');
     todoSection.appendChild(p);
   } else {
-    for (const match of pending) {
-      const mult = ROUND_MULTIPLIERS[match.round] || 1;
-      todoSection.appendChild(buildMatchCard(match, pseudo, mult));
+    const list = document.createElement('div');
+    list.className = 'todo-match-list';
+    for (const match of upcoming) {
+      const prono = userPronostics[match.id];
+      const mult  = ROUND_MULTIPLIERS[match.round] || 1;
+      const row   = document.createElement('div');
+      row.className = `todo-match-row${prono ? ' tmr-done' : ' tmr-missing'}`;
+      row.dataset.matchId = match.id;
+      row.innerHTML = `
+        <div class="tmr-teams">
+          <span>${match.team1.flag} ${tTeam(match.team1)}</span>
+          <span class="tmr-vs">vs</span>
+          <span>${match.team2.flag} ${tTeam(match.team2)}</span>
+          ${mult > 1 ? `<span class="multiplier-badge">×${mult}</span>` : ''}
+        </div>
+        <div class="tmr-right">
+          <span class="tmr-date">${formatDate(match.date)}</span>
+          <span class="tmr-status">${prono
+            ? `<span class="tmr-ok">✓ ${prono.score1}–${prono.score2}</span>`
+            : `<span class="tmr-warn">⚠</span>`}
+          </span>
+        </div>`;
+      const targetGroup = match.group || 'KO';
+      row.addEventListener('click', () => {
+        showGroup(targetGroup);
+        requestAnimationFrame(() => {
+          const card = document.querySelector(`.match-card[data-match-id="${match.id}"]`);
+          if (!card) return;
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          card.classList.add('match-highlight');
+          setTimeout(() => card.classList.remove('match-highlight'), 1800);
+        });
+      });
+      list.appendChild(row);
     }
+    todoSection.appendChild(list);
   }
   content.appendChild(todoSection);
 
@@ -1280,6 +1315,18 @@ function updateTodoBadge() {
     badge.className = 'gsb-ok';
     badge.textContent = '✓';
   }
+  // Mise à jour des statuts dans la liste compacte
+  document.querySelectorAll('.todo-match-row').forEach(row => {
+    const matchId = row.dataset.matchId;
+    const prono = userPronostics[matchId];
+    const statusEl = row.querySelector('.tmr-status');
+    if (statusEl) {
+      statusEl.innerHTML = prono
+        ? `<span class="tmr-ok">✓ ${prono.score1}–${prono.score2}</span>`
+        : `<span class="tmr-warn">⚠</span>`;
+    }
+    row.className = `todo-match-row${prono ? ' tmr-done' : ' tmr-missing'}`;
+  });
 }
 
 function updateSidebarBadge(matchId) {

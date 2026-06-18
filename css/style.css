@@ -727,6 +727,43 @@ td.detail { color: var(--muted); font-size: .8rem; }
 .gsb-todo.active { border-color: #f97316; background: rgba(249,115,22,.08); }
 .gsb-todo-count { background: #f97316 !important; }
 
+/* ── Liste compacte "À pronostiquer" ───────────────────────────────────────── */
+.todo-match-list { display: flex; flex-direction: column; gap: 6px; }
+
+.todo-match-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  cursor: pointer;
+  transition: border-color .15s, background .15s;
+}
+.todo-match-row:hover { background: var(--surface-2); border-color: var(--muted); }
+.todo-match-row.tmr-missing { border-left: 3px solid #f97316; }
+.todo-match-row.tmr-done   { border-left: 3px solid var(--primary); }
+
+.tmr-teams { display: flex; align-items: center; gap: 6px; font-size: .9rem; font-weight: 600; flex: 1; min-width: 0; flex-wrap: wrap; }
+.tmr-vs    { color: var(--muted); font-size: .8rem; font-weight: 400; }
+.tmr-right { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.tmr-date  { font-size: .78rem; color: var(--muted); white-space: nowrap; }
+.tmr-ok    { color: var(--primary); font-size: .82rem; font-weight: 700; white-space: nowrap; }
+.tmr-warn  { color: #f97316; font-size: .9rem; }
+
+/* Flash animation quand on arrive sur la carte depuis le TODO */
+@keyframes match-flash {
+  0%   { box-shadow: 0 0 0 0 rgba(249,115,22,.6); }
+  50%  { box-shadow: 0 0 0 8px rgba(249,115,22,.2); }
+  100% { box-shadow: 0 0 0 0 rgba(249,115,22,0); }
+}
+.match-card.match-highlight {
+  animation: match-flash 1.8s ease-out;
+  border-color: #f97316 !important;
+}
+
 .gsb-letter {
   font-size: .8rem;
   font-weight: 700;
