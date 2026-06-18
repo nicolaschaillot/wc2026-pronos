@@ -458,6 +458,35 @@ function buildMatchCard(match, pseudo, multiplier = 1) {
       </div>`;
   }
 
+  // ── Liste des pronos de tous les joueurs (matchs avec résultat) ────────────
+  let allPronosHtml = '';
+  if (locked && result) {
+    const pronoList = matchPronostics[match.id] || [];
+    if (pronoList.length > 0) {
+      const sorted = [...pronoList].sort((a, b) => {
+        const pa = calcPoints(a, result) ?? -1;
+        const pb = calcPoints(b, result) ?? -1;
+        if (pb !== pa) return pb - pa;
+        return a.userId.localeCompare(b.userId);
+      });
+      const rows = sorted.map(p => {
+        const pts  = calcPoints(p, result);
+        const icon = pts === 3 ? '🎯' : pts === 1 ? '✅' : '❌';
+        const cls  = pts === 3 ? 'ap-exact' : pts === 1 ? 'ap-correct' : 'ap-wrong';
+        const isMe = p.userId === pseudo;
+        return `<div class="ap-row${isMe ? ' ap-me' : ''}">
+          <span class="ap-pseudo">${escapeHtml(p.userId)}</span>
+          <span class="ap-score">${p.score1} – ${p.score2}</span>
+          <span class="ap-icon ${cls}">${icon}</span>
+        </div>`;
+      }).join('');
+      allPronosHtml = `
+        <div class="all-pronos-wrap" hidden>
+          <div class="all-pronos-list">${rows}</div>
+        </div>`;
+    }
+  }
+
   card.innerHTML = `
     <div class="match-meta">
       <span class="match-date">${formatDate(match.date)}${locked ? ' 🔒' : `<span class="countdown" data-date="${match.date}"></span>`}</span>
@@ -488,12 +517,27 @@ function buildMatchCard(match, pseudo, multiplier = 1) {
     </div>
     ${statsHtml}
     ${resultHtml}
+    ${allPronosHtml}
     ${!locked ? `<div class="save-row">
       <button class="btn-save" data-match="${match.id}">${t('save')}</button>
       <button class="btn-random" data-match="${match.id}" title="${t('random.title')}">🎲</button>
       <span class="save-status" id="status-${match.id}"></span>
-    </div>` : ''}
+    </div>` : (allPronosHtml ? `<div class="save-row">
+      <button class="btn-toggle-pronos">${t('pronos.show', (matchPronostics[match.id] || []).length)}</button>
+    </div>` : '')}
   `;
+
+  if (locked && result && allPronosHtml) {
+    const toggleBtn = card.querySelector('.btn-toggle-pronos');
+    const wrap      = card.querySelector('.all-pronos-wrap');
+    const count     = (matchPronostics[match.id] || []).length;
+    toggleBtn.addEventListener('click', () => {
+      const open = !wrap.hidden;
+      wrap.hidden = open;
+      toggleBtn.textContent = open ? t('pronos.show', count) : t('pronos.hide');
+    });
+  }
+
   return card;
 }
 

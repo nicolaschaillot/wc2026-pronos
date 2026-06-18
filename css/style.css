@@ -299,6 +299,45 @@ footer {
 }
 .btn-save:hover { background: var(--primary); color: #000; border-color: var(--primary); }
 
+.btn-toggle-pronos {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  border-radius: 6px;
+  padding: 4px 12px;
+  font-size: .78rem;
+  cursor: pointer;
+  transition: color .15s, border-color .15s;
+}
+.btn-toggle-pronos:hover { color: var(--text); border-color: var(--muted); }
+
+.all-pronos-wrap {
+  margin-top: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+.all-pronos-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.ap-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: .82rem;
+  padding: 3px 6px;
+  border-radius: 4px;
+}
+.ap-row.ap-me { background: rgba(0,200,83,.08); font-weight: 700; }
+.ap-pseudo { flex: 1; color: var(--muted); }
+.ap-row.ap-me .ap-pseudo { color: var(--text); }
+.ap-score { font-weight: 600; min-width: 42px; text-align: center; }
+.ap-icon { font-size: .8rem; }
+.ap-exact  { color: var(--primary); }
+.ap-correct { color: #facc15; }
+.ap-wrong  { color: var(--red); }
+
 .btn-random {
   background: var(--surface-2);
   border: 1px solid var(--border);
