@@ -262,13 +262,26 @@ function renderUrgentBanner(pseudo) {
     <div class="urgent-list">
       ${urgent.map(m => {
         const hasProno = !!userPronostics[m.id];
-        return `<div class="urgent-item ${hasProno ? 'urgent-ok' : 'urgent-missing'}">
+        return `<div class="urgent-item ${hasProno ? 'urgent-ok' : 'urgent-missing'}" data-match-id="${m.id}" data-group="${m.group || 'KO'}" style="cursor:pointer">
           <span class="urgent-teams">${m.team1.flag} ${tTeam(m.team1)} <span class="urgent-vs">vs</span> ${m.team2.flag} ${tTeam(m.team2)}</span>
           <span class="urgent-time">${formatDate(m.date)}</span>
-          <span class="urgent-badge">${hasProno ? '✓' : '!'}</span>
+          <span class="urgent-badge">${hasProno ? `✓ ${userPronostics[m.id].score1}–${userPronostics[m.id].score2}` : '→'}</span>
         </div>`;
       }).join('')}
     </div>`;
+
+  banner.querySelectorAll('.urgent-item').forEach(item => {
+    item.addEventListener('click', () => {
+      showGroup(item.dataset.group);
+      requestAnimationFrame(() => {
+        const card = document.querySelector(`.match-card[data-match-id="${item.dataset.matchId}"]`);
+        if (!card) return;
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.classList.add('match-highlight');
+        setTimeout(() => card.classList.remove('match-highlight'), 1800);
+      });
+    });
+  });
 }
 
 function updateCountdowns() {
@@ -1010,75 +1023,6 @@ function renderPredictions(pseudo) {
   sidebar.innerHTML = '';
   content.innerHTML = '';
 
-  // ── À pronostiquer ────────────────────────────────────────────────────────
-  const upcoming = [...MATCHES, ...knockoutMatches]
-    .filter(m => !isLocked(m))
-    .sort((a, b) => new Date(a.date) - new Date(b.date));
-  const pending = upcoming.filter(m => !userPronostics[m.id]);
-
-  const todoSection = document.createElement('div');
-  todoSection.id = 'group-section-TODO';
-  todoSection.hidden = true;
-  todoSection.innerHTML = `<h2 class="group-title">${t('todo.title')}</h2>`;
-
-  if (upcoming.length === 0) {
-    const p = document.createElement('p');
-    p.className = 'ts-subtitle';
-    p.textContent = t('todo.empty');
-    todoSection.appendChild(p);
-  } else {
-    const list = document.createElement('div');
-    list.className = 'todo-match-list';
-    for (const match of upcoming) {
-      const prono = userPronostics[match.id];
-      const mult  = ROUND_MULTIPLIERS[match.round] || 1;
-      const row   = document.createElement('div');
-      row.className = `todo-match-row${prono ? ' tmr-done' : ' tmr-missing'}`;
-      row.dataset.matchId = match.id;
-      row.innerHTML = `
-        <div class="tmr-teams">
-          <span>${match.team1.flag} ${tTeam(match.team1)}</span>
-          <span class="tmr-vs">vs</span>
-          <span>${match.team2.flag} ${tTeam(match.team2)}</span>
-          ${mult > 1 ? `<span class="multiplier-badge">×${mult}</span>` : ''}
-        </div>
-        <div class="tmr-right">
-          <span class="tmr-date">${formatDate(match.date)}</span>
-          <span class="tmr-status">${prono
-            ? `<span class="tmr-ok">✓ ${prono.score1}–${prono.score2}</span>`
-            : `<span class="tmr-warn">⚠</span>`}
-          </span>
-        </div>`;
-      const targetGroup = match.group || 'KO';
-      row.addEventListener('click', () => {
-        showGroup(targetGroup);
-        requestAnimationFrame(() => {
-          const card = document.querySelector(`.match-card[data-match-id="${match.id}"]`);
-          if (!card) return;
-          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          card.classList.add('match-highlight');
-          setTimeout(() => card.classList.remove('match-highlight'), 1800);
-        });
-      });
-      list.appendChild(row);
-    }
-    todoSection.appendChild(list);
-  }
-  content.appendChild(todoSection);
-
-  const todoBtn = document.createElement('button');
-  todoBtn.className = `group-sidebar-btn gsb-todo`;
-  todoBtn.dataset.group = 'TODO';
-  todoBtn.innerHTML = `
-    <div class="gsb-header">
-      <span class="gsb-letter">${t('todo.title')}</span>
-      ${pending.length > 0
-        ? `<span class="gsb-badge gsb-todo-count">${pending.length}</span>`
-        : `<span class="gsb-ok">✓</span>`}
-    </div>`;
-  todoBtn.addEventListener('click', () => showGroup('TODO'));
-  sidebar.appendChild(todoBtn);
-
   // ── Phase de groupes ──────────────────────────────────────────────────────
   for (const [groupId] of Object.entries(GROUPS)) {
     const groupMatches = MATCHES.filter(m => m.group === groupId);
@@ -1242,7 +1186,6 @@ function renderPredictions(pseudo) {
 
   const defaultGroup = (() => {
     if (currentGroupId && document.getElementById(`group-section-${currentGroupId}`)) return currentGroupId;
-    if (pending.length > 0) return 'TODO';
     if (knockoutMatches.length > 0 && MATCHES.every(m => isLocked(m))) return 'KO';
     return Object.keys(GROUPS)[0];
   })();
@@ -1269,7 +1212,6 @@ async function savePronostic(pseudo, matchId) {
         await deleteDoc(doc(db, 'pronostics', `${pseudo}_${matchId}`));
         delete userPronostics[matchId];
         updateSidebarBadge(matchId);
-        updateTodoBadge();
         refreshNextMatchProno(matchId);
       } catch (err) { console.error(err); }
     }
@@ -1302,32 +1244,6 @@ async function savePronostic(pseudo, matchId) {
   }
 }
 
-function updateTodoBadge() {
-  const btn = document.querySelector('.group-sidebar-btn[data-group="TODO"]');
-  if (!btn) return;
-  const count = [...MATCHES, ...knockoutMatches].filter(m => !isLocked(m) && !userPronostics[m.id]).length;
-  const badge = btn.querySelector('.gsb-badge, .gsb-ok');
-  if (!badge) return;
-  if (count > 0) {
-    badge.className = 'gsb-badge gsb-todo-count';
-    badge.textContent = count;
-  } else {
-    badge.className = 'gsb-ok';
-    badge.textContent = '✓';
-  }
-  // Mise à jour des statuts dans la liste compacte
-  document.querySelectorAll('.todo-match-row').forEach(row => {
-    const matchId = row.dataset.matchId;
-    const prono = userPronostics[matchId];
-    const statusEl = row.querySelector('.tmr-status');
-    if (statusEl) {
-      statusEl.innerHTML = prono
-        ? `<span class="tmr-ok">✓ ${prono.score1}–${prono.score2}</span>`
-        : `<span class="tmr-warn">⚠</span>`;
-    }
-    row.className = `todo-match-row${prono ? ' tmr-done' : ' tmr-missing'}`;
-  });
-}
 
 function updateSidebarBadge(matchId) {
   const groupId = MATCHES.find(m => m.id === matchId)?.group ?? 'KO';

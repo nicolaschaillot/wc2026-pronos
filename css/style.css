@@ -480,11 +480,12 @@ tr.own-row td { color: var(--primary); font-weight: 600; }
 .urgent-banner { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 16px; margin-bottom: 14px; }
 .urgent-banner .urgent-title { font-size: .8rem; font-weight: 700; color: var(--gold); margin-bottom: 10px; }
 .urgent-list { display: flex; flex-direction: column; gap: 6px; }
-.urgent-item { display: flex; align-items: center; gap: 10px; font-size: .82rem; padding: 5px 8px; border-radius: 6px; background: var(--surface); }
+.urgent-item { display: flex; align-items: center; gap: 10px; font-size: .82rem; padding: 5px 8px; border-radius: 6px; background: var(--surface); border: 1.5px solid transparent; transition: border-color .15s; }
+.urgent-item:hover { border-color: var(--muted); }
 .urgent-teams { flex: 1; }
 .urgent-vs { color: var(--muted); margin: 0 4px; }
 .urgent-time { color: var(--muted); font-size: .75rem; white-space: nowrap; }
-.urgent-badge { font-weight: 700; font-size: .9rem; width: 20px; text-align: center; }
+.urgent-badge { font-weight: 700; font-size: .82rem; white-space: nowrap; flex-shrink: 0; text-align: right; }
 .urgent-item.urgent-ok .urgent-badge { color: var(--primary); }
 .urgent-item.urgent-missing { border-left: 3px solid var(--gold); }
 .urgent-item.urgent-missing .urgent-badge { color: var(--gold); }
