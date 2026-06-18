@@ -717,6 +717,16 @@ td.detail { color: var(--muted); font-size: .8rem; }
 
 .gsb-ko .gsb-header { margin-bottom: 0; }
 
+.gsb-todo {
+  border-color: #f97316;
+  margin-bottom: 6px;
+}
+.gsb-todo .gsb-header { margin-bottom: 0; }
+.gsb-todo .gsb-letter { font-size: .82rem; font-weight: 700; color: #f97316; }
+.gsb-todo:hover { border-color: #f97316; }
+.gsb-todo.active { border-color: #f97316; background: rgba(249,115,22,.08); }
+.gsb-todo-count { background: #f97316 !important; }
+
 .gsb-letter {
   font-size: .8rem;
   font-weight: 700;

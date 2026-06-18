@@ -1009,6 +1009,41 @@ function renderPredictions(pseudo) {
   sidebar.innerHTML = '';
   content.innerHTML = '';
 
+  // ── À pronostiquer ────────────────────────────────────────────────────────
+  const pending = [...MATCHES, ...knockoutMatches]
+    .filter(m => !isLocked(m) && !userPronostics[m.id])
+    .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  const todoSection = document.createElement('div');
+  todoSection.id = 'group-section-TODO';
+  todoSection.hidden = true;
+  todoSection.innerHTML = `<h2 class="group-title">${t('todo.title')}</h2>`;
+  if (pending.length === 0) {
+    const p = document.createElement('p');
+    p.className = 'ts-subtitle';
+    p.textContent = t('todo.empty');
+    todoSection.appendChild(p);
+  } else {
+    for (const match of pending) {
+      const mult = ROUND_MULTIPLIERS[match.round] || 1;
+      todoSection.appendChild(buildMatchCard(match, pseudo, mult));
+    }
+  }
+  content.appendChild(todoSection);
+
+  const todoBtn = document.createElement('button');
+  todoBtn.className = `group-sidebar-btn gsb-todo`;
+  todoBtn.dataset.group = 'TODO';
+  todoBtn.innerHTML = `
+    <div class="gsb-header">
+      <span class="gsb-letter">${t('todo.title')}</span>
+      ${pending.length > 0
+        ? `<span class="gsb-badge gsb-todo-count">${pending.length}</span>`
+        : `<span class="gsb-ok">✓</span>`}
+    </div>`;
+  todoBtn.addEventListener('click', () => showGroup('TODO'));
+  sidebar.appendChild(todoBtn);
+
   // ── Phase de groupes ──────────────────────────────────────────────────────
   for (const [groupId] of Object.entries(GROUPS)) {
     const groupMatches = MATCHES.filter(m => m.group === groupId);
@@ -1172,6 +1207,7 @@ function renderPredictions(pseudo) {
 
   const defaultGroup = (() => {
     if (currentGroupId && document.getElementById(`group-section-${currentGroupId}`)) return currentGroupId;
+    if (pending.length > 0) return 'TODO';
     if (knockoutMatches.length > 0 && MATCHES.every(m => isLocked(m))) return 'KO';
     return Object.keys(GROUPS)[0];
   })();
@@ -1198,6 +1234,7 @@ async function savePronostic(pseudo, matchId) {
         await deleteDoc(doc(db, 'pronostics', `${pseudo}_${matchId}`));
         delete userPronostics[matchId];
         updateSidebarBadge(matchId);
+        updateTodoBadge();
         refreshNextMatchProno(matchId);
       } catch (err) { console.error(err); }
     }
@@ -1220,12 +1257,28 @@ async function savePronostic(pseudo, matchId) {
     });
     userPronostics[matchId] = { userId: pseudo, matchId, score1: s1, score2: s2 };
     updateSidebarBadge(matchId);
+    updateTodoBadge();
     refreshNextMatchProno(matchId);
     status.textContent = t('saved');
     setTimeout(() => { status.textContent = ''; }, 2000);
   } catch (err) {
     console.error(err);
     status.textContent = t('save.error');
+  }
+}
+
+function updateTodoBadge() {
+  const btn = document.querySelector('.group-sidebar-btn[data-group="TODO"]');
+  if (!btn) return;
+  const count = [...MATCHES, ...knockoutMatches].filter(m => !isLocked(m) && !userPronostics[m.id]).length;
+  const badge = btn.querySelector('.gsb-badge, .gsb-ok');
+  if (!badge) return;
+  if (count > 0) {
+    badge.className = 'gsb-badge gsb-todo-count';
+    badge.textContent = count;
+  } else {
+    badge.className = 'gsb-ok';
+    badge.textContent = '✓';
   }
 }
 
