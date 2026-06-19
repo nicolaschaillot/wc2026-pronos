@@ -92,6 +92,13 @@ let winnerResult          = null;
 let totalGoalsPronostic   = null;
 let totalGoalsResult      = null;
 
+let _dataLoadedAt = 0;
+const DATA_TTL = 3 * 60 * 1000;
+
+function isCacheFresh() {
+  return _dataLoadedAt > 0 && (Date.now() - _dataLoadedAt < DATA_TTL);
+}
+
 async function loadResults() {
   const snap = await getDocs(collection(db, 'results'));
   matchResults = {};
@@ -107,11 +114,14 @@ async function loadResults() {
   });
 }
 
-async function loadAllPronostics() {
+// Remplace loadPronostics + loadAllPronostics — une seule lecture pour les deux
+async function loadAllData(pseudo) {
   const snap = await getDocs(collection(db, 'pronostics'));
+  userPronostics = {};
   matchPronostics = {};
   snap.forEach(d => {
     const p = d.data();
+    if (p.userId === pseudo) userPronostics[p.matchId] = p;
     if (!matchPronostics[p.matchId]) matchPronostics[p.matchId] = [];
     matchPronostics[p.matchId].push(p);
   });
@@ -367,14 +377,6 @@ function renderLastUpdate() {
   document.querySelectorAll('.last-update-info').forEach(el => { el.textContent = text; });
 }
 
-async function loadPronostics(pseudo) {
-  const snap = await getDocs(collection(db, 'pronostics'));
-  userPronostics = {};
-  snap.forEach(d => {
-    const data = d.data();
-    if (data.userId === pseudo) userPronostics[data.matchId] = data;
-  });
-}
 
 async function loadTopScorerData(pseudo) {
   const [pronoSnap, resultSnap, winnerPronoSnap, winnerResultSnap, tgPronoSnap, tgResultSnap] = await Promise.all([
@@ -1234,7 +1236,6 @@ async function savePronostic(pseudo, matchId) {
     });
     userPronostics[matchId] = { userId: pseudo, matchId, score1: s1, score2: s2 };
     updateSidebarBadge(matchId);
-    updateTodoBadge();
     refreshNextMatchProno(matchId);
     status.textContent = t('saved');
     setTimeout(() => { status.textContent = ''; }, 2000);
@@ -1493,49 +1494,59 @@ async function loadLeaderboard() {
   container.innerHTML = `<tr><td colspan="4">${t('lb.loading')}</td></tr>`;
 
   try {
-    const [pronoSnap, resultSnap, usersSnap, koSnap, tsPronoSnap, tsResultSnap] = await Promise.all([
-      getDocs(collection(db, 'pronostics')),
-      getDocs(collection(db, 'results')),
+    const fresh = isCacheFresh();
+
+    // Toujours récupérer : liste des users + pronostics spéciaux + résultats spéciaux
+    const [usersSnap, tsPronoSnap, tsResultSnap, winResultSnap2, tgResultSnap2] = await Promise.all([
       getDocs(collection(db, 'users')),
-      getDocs(collection(db, 'matches_extra')),
       getDocs(collection(db, 'special_pronostics')),
       getDoc(doc(db, 'special_results', 'topscorer')),
+      getDoc(doc(db, 'special_results', 'winner')),
+      getDoc(doc(db, 'special_results', 'totalgoals')),
     ]);
 
-    const results = {};
-    resultSnap.forEach(d => {
-      const data = d.data();
-      results[d.id] = data;
-      matchResults[d.id] = data;
-      const ts = data.updatedAt;
-      if (ts) {
-        const ms = ts.toMillis ? ts.toMillis() : ts.seconds * 1000;
-        if (!lastResultUpdate || ms > lastResultUpdate) lastResultUpdate = ms;
-      }
-    });
+    // Ne lire les collections lourdes que si le cache est périmé
+    if (!fresh) {
+      const [pronoSnap, resultSnap, koSnap] = await Promise.all([
+        getDocs(collection(db, 'pronostics')),
+        getDocs(collection(db, 'results')),
+        getDocs(collection(db, 'matches_extra')),
+      ]);
+      matchPronostics = {};
+      pronoSnap.forEach(d => {
+        const p = d.data();
+        if (!matchPronostics[p.matchId]) matchPronostics[p.matchId] = [];
+        matchPronostics[p.matchId].push(p);
+      });
+      matchResults = {};
+      lastResultUpdate = null;
+      resultSnap.forEach(d => {
+        const data = d.data();
+        matchResults[d.id] = data;
+        const ts = data.updatedAt;
+        if (ts) {
+          const ms = ts.toMillis ? ts.toMillis() : ts.seconds * 1000;
+          if (!lastResultUpdate || ms > lastResultUpdate) lastResultUpdate = ms;
+        }
+      });
+      knockoutMatches = [];
+      koSnap.forEach(d => knockoutMatches.push({ ...d.data(), id: d.id }));
+      knockoutMatches.sort((a, b) => new Date(a.date) - new Date(b.date));
+      _dataLoadedAt = Date.now();
+    }
 
-    // Multiplicateurs pour les matchs éliminatoires
+    // Multiplicateurs depuis knockoutMatches (cachés ou fraîchement chargés)
     const multipliers = {};
-    koSnap.forEach(d => {
-      multipliers[d.id] = ROUND_MULTIPLIERS[d.data().round] || 1;
-    });
+    knockoutMatches.forEach(m => { multipliers[m.id] = ROUND_MULTIPLIERS[m.round] || 1; });
 
-    const userPoints = {};
-    const userPredCount = {};
-    const userExact = {};
-    const userCorrect = {};
-
-    matchPronostics = {};
-    pronoSnap.forEach(d => {
-      const p = d.data();
+    const userPoints = {}, userPredCount = {}, userExact = {}, userCorrect = {};
+    Object.values(matchPronostics).flat().forEach(p => {
       if (!userPoints[p.userId]) {
         userPoints[p.userId] = 0; userPredCount[p.userId] = 0;
         userExact[p.userId] = 0; userCorrect[p.userId] = 0;
       }
       userPredCount[p.userId]++;
-      if (!matchPronostics[p.matchId]) matchPronostics[p.matchId] = [];
-      matchPronostics[p.matchId].push(p);
-      const pts = calcPoints(p, results[p.matchId] || {});
+      const pts = calcPoints(p, matchResults[p.matchId] || {});
       if (pts !== null) {
         const mult = multipliers[p.matchId] || 1;
         userPoints[p.userId] += pts * mult;
@@ -1545,11 +1556,7 @@ async function loadLeaderboard() {
     });
 
     // ── Bonus spéciaux (vainqueur + meilleur buteur) ─────────────────────────
-    const tsResult  = tsResultSnap.exists() ? tsResultSnap.data() : null;
-    const [winResultSnap2, tgResultSnap2] = await Promise.all([
-      getDoc(doc(db, 'special_results', 'winner')),
-      getDoc(doc(db, 'special_results', 'totalgoals')),
-    ]);
+    const tsResult      = tsResultSnap.exists() ? tsResultSnap.data() : null;
     const winResultData = winResultSnap2.exists() ? winResultSnap2.data() : null;
     const tgResultData  = tgResultSnap2.exists() ? tgResultSnap2.data() : null;
 
@@ -1644,7 +1651,8 @@ async function initApp() {
   document.getElementById('btn-logout').hidden = false;
   showView('view-predictions');
 
-  await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults(), loadAllPronostics(), loadTopScorerData(user.pseudo)]);
+  await Promise.all([loadAllData(user.pseudo), loadKnockoutMatches(), loadResults(), loadTopScorerData(user.pseudo)]);
+  _dataLoadedAt = Date.now();
   renderPredictions(user.pseudo);
 }
 
@@ -1680,14 +1688,20 @@ document.addEventListener('DOMContentLoaded', () => {
       if (view === 'view-results') {
         const user = getSession();
         if (user) {
-          await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults(), loadTopScorerData(user.pseudo)]);
+          if (!isCacheFresh()) {
+            await Promise.all([loadAllData(user.pseudo), loadKnockoutMatches(), loadResults(), loadTopScorerData(user.pseudo)]);
+            _dataLoadedAt = Date.now();
+          }
           renderMyResults();
         }
       }
       if (view === 'view-predictions') {
         const user = getSession();
         if (user) {
-          await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults(), loadAllPronostics(), loadTopScorerData(user.pseudo)]);
+          if (!isCacheFresh()) {
+            await Promise.all([loadAllData(user.pseudo), loadKnockoutMatches(), loadResults(), loadTopScorerData(user.pseudo)]);
+            _dataLoadedAt = Date.now();
+          }
           renderPredictions(user.pseudo);
         }
       }
@@ -1707,10 +1721,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!user) return;
     const activeView = document.querySelector('.view:not([hidden])');
     if (activeView?.id === 'view-predictions') {
-      await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults(), loadAllPronostics(), loadTopScorerData(user.pseudo)]);
       renderPredictions(user.pseudo);
     } else if (activeView?.id === 'view-results') {
-      await Promise.all([loadPronostics(user.pseudo), loadKnockoutMatches(), loadResults(), loadTopScorerData(user.pseudo)]);
       renderMyResults();
     } else if (activeView?.id === 'view-leaderboard') {
       await loadLeaderboard();
