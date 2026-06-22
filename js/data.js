@@ -253,8 +253,8 @@ export function calcTotalGoalsPoints(prediction, actual) {
 }
 
 export const ROUND_MULTIPLIERS = {
-  '1/32': 1,
   '1/16': 1,
+  '1/8':  1,
   '1/4':  2,
   '1/2':  3,
   'Petite finale': 2,

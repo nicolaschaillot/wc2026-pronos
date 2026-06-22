@@ -1070,7 +1070,7 @@ function renderPredictions(pseudo) {
     koContainer.hidden = true;
     koContainer.innerHTML = `<div class="ko-header"><h2>${t('ko.title')}</h2></div>`;
 
-    const ROUND_ORDER = ['1/32', '1/16', '1/4', '1/2', 'Petite finale', 'Finale'];
+    const ROUND_ORDER = ['1/16', '1/8', '1/4', '1/2', 'Petite finale', 'Finale'];
     const byRound = {};
     knockoutMatches.forEach(m => { (byRound[m.round] = byRound[m.round] || []).push(m); });
 
@@ -1340,7 +1340,7 @@ function renderMyResults() {
 
   // Phase éliminatoire par tour
   if (knockoutMatches.length > 0) {
-    const ROUND_ORDER = ['1/32', '1/16', '1/4', '1/2', 'Petite finale', 'Finale'];
+    const ROUND_ORDER = ['1/16', '1/8', '1/4', '1/2', 'Petite finale', 'Finale'];
     const byRound = {};
     knockoutMatches.forEach(m => { (byRound[m.round] = byRound[m.round] || []).push(m); });
 

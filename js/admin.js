@@ -149,8 +149,8 @@ async function handleSaveResult(e) {
 // ─── Matchs éliminatoires ────────────────────────────────────────────────────
 
 const ROUND_LABELS = {
-  '1/32': '1/32 de finale',
   '1/16': '1/16 de finale',
+  '1/8':  '1/8 de finale',
   '1/4':  'Quart de finale',
   '1/2':  'Demi-finale',
   'Petite finale': 'Petite finale',
