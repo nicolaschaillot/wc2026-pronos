@@ -474,26 +474,32 @@ function buildMatchCard(match, pseudo, multiplier = 1) {
       </div>`;
   }
 
-  // ── Liste des pronos de tous les joueurs (matchs avec résultat) ────────────
+  // ── Liste des pronos de tous les joueurs (matchs verrouillés) ───────────────
   let allPronosHtml = '';
-  if (locked && result) {
+  if (locked) {
     const pronoList = matchPronostics[match.id] || [];
     if (pronoList.length > 0) {
       const sorted = [...pronoList].sort((a, b) => {
-        const pa = calcPoints(a, result) ?? -1;
-        const pb = calcPoints(b, result) ?? -1;
-        if (pb !== pa) return pb - pa;
+        if (result) {
+          const pa = calcPoints(a, result) ?? -1;
+          const pb = calcPoints(b, result) ?? -1;
+          if (pb !== pa) return pb - pa;
+        }
         return a.userId.localeCompare(b.userId);
       });
       const rows = sorted.map(p => {
-        const pts  = calcPoints(p, result);
-        const icon = pts === 3 ? '🎯' : pts === 1 ? '✅' : '❌';
-        const cls  = pts === 3 ? 'ap-exact' : pts === 1 ? 'ap-correct' : 'ap-wrong';
         const isMe = p.userId === pseudo;
+        let iconHtml = '';
+        if (result) {
+          const pts  = calcPoints(p, result);
+          const icon = pts === 3 ? '🎯' : pts === 1 ? '✅' : '❌';
+          const cls  = pts === 3 ? 'ap-exact' : pts === 1 ? 'ap-correct' : 'ap-wrong';
+          iconHtml = `<span class="ap-icon ${cls}">${icon}</span>`;
+        }
         return `<div class="ap-row${isMe ? ' ap-me' : ''}">
           <span class="ap-pseudo">${escapeHtml(p.userId)}</span>
           <span class="ap-score">${p.score1} – ${p.score2}</span>
-          <span class="ap-icon ${cls}">${icon}</span>
+          ${iconHtml}
         </div>`;
       }).join('');
       allPronosHtml = `
@@ -543,7 +549,7 @@ function buildMatchCard(match, pseudo, multiplier = 1) {
     </div>` : '')}
   `;
 
-  if (locked && result && allPronosHtml) {
+  if (locked && allPronosHtml) {
     const toggleBtn = card.querySelector('.btn-toggle-pronos');
     const wrap      = card.querySelector('.all-pronos-wrap');
     const count     = (matchPronostics[match.id] || []).length;
