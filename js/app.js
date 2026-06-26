@@ -1031,41 +1031,7 @@ function renderPredictions(pseudo) {
   sidebar.innerHTML = '';
   content.innerHTML = '';
 
-  // ── Phase de groupes ──────────────────────────────────────────────────────
-  for (const [groupId] of Object.entries(GROUPS)) {
-    const groupMatches = MATCHES.filter(m => m.group === groupId);
-    const total   = groupMatches.length;
-    const saved   = groupMatches.filter(m => userPronostics[m.id]).length;
-    const missing = groupMatches.filter(m => !isLocked(m) && !userPronostics[m.id]).length;
-
-    const section = document.createElement('section');
-    section.className = 'group-section';
-    section.id = `group-section-${groupId}`;
-    section.hidden = true;
-    section.innerHTML = `<h2 class="group-title">${t('group.label')} ${groupId}</h2>`;
-    for (const match of groupMatches) section.appendChild(buildMatchCard(match, pseudo));
-    content.appendChild(section);
-
-    const progressBadge = missing > 0
-      ? `<span class="gsb-badge" title="${t('sidebar.missing', missing)}">${saved}/${total}</span>`
-      : `<span class="gsb-ok" title="${t('sidebar.complete')}">✓</span>`;
-
-    const btn = document.createElement('button');
-    btn.className = 'group-sidebar-btn';
-    btn.dataset.group = groupId;
-    btn.innerHTML = `
-      <div class="gsb-header">
-        <span class="gsb-letter">${t('group.label')} ${groupId}</span>
-        ${progressBadge}
-      </div>
-      <div class="gsb-teams">
-        ${GROUPS[groupId].teams.map(team => `<span class="gsb-team">${team.flag} ${tTeam(team)}</span>`).join('')}
-      </div>`;
-    btn.addEventListener('click', () => showGroup(groupId));
-    sidebar.appendChild(btn);
-  }
-
-  // ── Phase éliminatoire ────────────────────────────────────────────────────
+  // ── Phase éliminatoire (en premier si des matchs existent) ──────────────────
   if (knockoutMatches.length > 0) {
     const koTotal   = knockoutMatches.length;
     const koSaved   = knockoutMatches.filter(m => userPronostics[m.id]).length;
@@ -1105,6 +1071,40 @@ function renderPredictions(pseudo) {
       </div>`;
     koBtn.addEventListener('click', () => showGroup('KO'));
     sidebar.appendChild(koBtn);
+  }
+
+  // ── Phase de groupes ──────────────────────────────────────────────────────
+  for (const [groupId] of Object.entries(GROUPS)) {
+    const groupMatches = MATCHES.filter(m => m.group === groupId);
+    const total   = groupMatches.length;
+    const saved   = groupMatches.filter(m => userPronostics[m.id]).length;
+    const missing = groupMatches.filter(m => !isLocked(m) && !userPronostics[m.id]).length;
+
+    const section = document.createElement('section');
+    section.className = 'group-section';
+    section.id = `group-section-${groupId}`;
+    section.hidden = true;
+    section.innerHTML = `<h2 class="group-title">${t('group.label')} ${groupId}</h2>`;
+    for (const match of groupMatches) section.appendChild(buildMatchCard(match, pseudo));
+    content.appendChild(section);
+
+    const progressBadge = missing > 0
+      ? `<span class="gsb-badge" title="${t('sidebar.missing', missing)}">${saved}/${total}</span>`
+      : `<span class="gsb-ok" title="${t('sidebar.complete')}">✓</span>`;
+
+    const btn = document.createElement('button');
+    btn.className = 'group-sidebar-btn';
+    btn.dataset.group = groupId;
+    btn.innerHTML = `
+      <div class="gsb-header">
+        <span class="gsb-letter">${t('group.label')} ${groupId}</span>
+        ${progressBadge}
+      </div>
+      <div class="gsb-teams">
+        ${GROUPS[groupId].teams.map(team => `<span class="gsb-team">${team.flag} ${tTeam(team)}</span>`).join('')}
+      </div>`;
+    btn.addEventListener('click', () => showGroup(groupId));
+    sidebar.appendChild(btn);
   }
 
   // ── Bonus vainqueur ──────────────────────────────────────────────────────
