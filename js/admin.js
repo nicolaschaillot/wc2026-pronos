@@ -43,6 +43,7 @@ function showAdminPanel() {
   renderTotalGoalsAdmin();
   renderTopScorerAdmin();
   renderLatePronostics();
+  renderMissingPronostics();
 }
 
 function initAdminTabs() {
@@ -602,6 +603,96 @@ async function renderLatePronostics() {
       <td><span class="admin-late-badge">${formatDelay(delay)}</span></td>
     `;
     tbody.appendChild(tr);
+  }
+}
+
+// ─── Pronostics manquants ─────────────────────────────────────────────────────
+
+async function renderMissingPronostics() {
+  const summaryEl = document.getElementById('missing-summary');
+  const listEl    = document.getElementById('missing-list');
+  const badgeEl   = document.getElementById('missing-count-badge');
+  summaryEl.innerHTML = '<div class="admin-info-box">Chargement…</div>';
+  listEl.innerHTML = '';
+
+  const [usersSnap, pronoSnap, koSnap] = await Promise.all([
+    getDocs(collection(db, 'users')),
+    getDocs(collection(db, 'pronostics')),
+    getDocs(collection(db, 'matches_extra')),
+  ]);
+
+  const allMatches = {};
+  MATCHES.forEach(m => { allMatches[m.id] = m; });
+  koSnap.forEach(d => { allMatches[d.id] = { id: d.id, ...d.data() }; });
+  const matchList = Object.values(allMatches).sort((a, b) => new Date(a.date) - new Date(b.date));
+
+  const pronosByUser = {};
+  pronoSnap.forEach(d => {
+    const p = d.data();
+    if (!pronosByUser[p.userId]) pronosByUser[p.userId] = new Set();
+    pronosByUser[p.userId].add(p.matchId);
+  });
+
+  const users = [];
+  usersSnap.forEach(d => users.push(d.data().pseudo || d.id));
+  users.sort((a, b) => a.localeCompare(b));
+
+  const now = Date.now();
+  const usersWithMissing = [];
+  for (const pseudo of users) {
+    const predicted = pronosByUser[pseudo] || new Set();
+    const missing = matchList.filter(m => !predicted.has(m.id));
+    if (missing.length > 0) usersWithMissing.push({ pseudo, missing });
+  }
+
+  badgeEl.hidden = usersWithMissing.length === 0;
+  badgeEl.textContent = usersWithMissing.length;
+
+  if (usersWithMissing.length === 0) {
+    summaryEl.innerHTML = '<div class="admin-info-box" style="border-color:#00c853;background:rgba(0,200,83,.08)">✅ Tous les joueurs ont rempli tous leurs pronostics.</div>';
+    return;
+  }
+
+  const totalMissing = usersWithMissing.reduce((acc, u) => acc + u.missing.length, 0);
+  summaryEl.innerHTML = `<div class="admin-info-box" style="border-color:#ef4444;background:rgba(239,68,68,.08)">
+    ⚠️ <strong>${usersWithMissing.length} joueur${usersWithMissing.length > 1 ? 's' : ''}</strong> ont des pronostics manquants
+    (<strong>${totalMissing}</strong> au total).
+  </div>`;
+
+  listEl.innerHTML = '';
+  for (const { pseudo, missing } of usersWithMissing) {
+    const stillOpen = missing.filter(m => now < new Date(m.date).getTime());
+    const locked    = missing.filter(m => now >= new Date(m.date).getTime());
+
+    const rows = missing.map(m => {
+      const isLocked = now >= new Date(m.date).getTime();
+      const label = m.team1
+        ? `${m.team1.flag} ${m.team1.name} vs ${m.team2.flag} ${m.team2.name}`
+        : `Match ${m.id}`;
+      const dateStr = FMT.format(new Date(m.date));
+      return `<tr>
+        <td style="font-size:.85rem">${label}</td>
+        <td style="font-size:.78rem;color:var(--muted)">${dateStr}</td>
+        <td>${isLocked
+          ? '<span class="admin-late-badge">🔒 Verrouillé</span>'
+          : '<span style="color:#00c853;font-size:.8rem;font-weight:600">⏳ Encore temps</span>'}</td>
+      </tr>`;
+    }).join('');
+
+    const block = document.createElement('div');
+    block.style.cssText = 'margin-bottom:18px;border:1px solid var(--border);border-radius:8px;overflow:hidden';
+    block.innerHTML = `
+      <div style="padding:10px 14px;background:var(--card-bg);display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <strong>${escapeHtml(pseudo)}</strong>
+        <span style="font-size:.8rem;color:var(--muted)">${missing.length} manquant${missing.length > 1 ? 's' : ''}</span>
+        ${stillOpen.length > 0 ? `<span style="color:#00c853;font-size:.78rem;font-weight:600">· ${stillOpen.length} encore ouverts</span>` : ''}
+        ${locked.length > 0 ? `<span style="color:#ef4444;font-size:.78rem;font-weight:600">· ${locked.length} verrouillé${locked.length > 1 ? 's' : ''}</span>` : ''}
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Match</th><th>Date</th><th>Statut</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+    listEl.appendChild(block);
   }
 }
 

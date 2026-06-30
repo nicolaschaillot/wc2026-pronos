@@ -57,6 +57,7 @@
       <button data-tab="tab-ko">🏆 Phase éliminatoire</button>
       <button data-tab="tab-bonus">🎯 Bonus</button>
       <button data-tab="tab-late">🕵️ Tardifs <span id="late-count-badge" hidden class="admin-late-badge"></span></button>
+      <button data-tab="tab-missing">❌ Manquants <span id="missing-count-badge" hidden class="admin-late-badge"></span></button>
     </nav>
 
     <!-- Tab — Codes -->
@@ -285,6 +286,18 @@
             </tbody>
           </table>
         </div>
+      </div>
+    </div>
+
+    <!-- Tab — Manquants -->
+    <div id="tab-missing" class="admin-tab" hidden>
+      <div class="admin-section">
+        <h2>❌ Pronostics manquants</h2>
+        <p style="font-size:.82rem;color:var(--muted);margin-bottom:14px">
+          Matchs pour lesquels un joueur n'a pas encore saisi de pronostic. Les matchs <strong>verrouillés</strong> (⏱ déjà commencés) ne peuvent plus être remplis.
+        </p>
+        <div id="missing-summary" style="margin-bottom:12px"></div>
+        <div id="missing-list"></div>
       </div>
     </div>
 
