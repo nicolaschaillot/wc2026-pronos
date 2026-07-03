@@ -1219,6 +1219,9 @@ async function savePronostic(pseudo, matchId) {
       try {
         await deleteDoc(doc(db, 'pronostics', `${pseudo}_${matchId}`));
         delete userPronostics[matchId];
+        if (matchPronostics[matchId]) {
+          matchPronostics[matchId] = matchPronostics[matchId].filter(p => p.userId !== pseudo);
+        }
         updateSidebarBadge(matchId);
         refreshNextMatchProno(matchId);
       } catch (err) { console.error(err); }
@@ -1240,7 +1243,12 @@ async function savePronostic(pseudo, matchId) {
     await setDoc(doc(db, 'pronostics', `${pseudo}_${matchId}`), {
       userId: pseudo, matchId, score1: s1, score2: s2, submittedAt: serverTimestamp(),
     });
-    userPronostics[matchId] = { userId: pseudo, matchId, score1: s1, score2: s2 };
+    const pronoData = { userId: pseudo, matchId, score1: s1, score2: s2 };
+    userPronostics[matchId] = pronoData;
+    if (!matchPronostics[matchId]) matchPronostics[matchId] = [];
+    const existingIdx = matchPronostics[matchId].findIndex(p => p.userId === pseudo);
+    if (existingIdx >= 0) matchPronostics[matchId][existingIdx] = pronoData;
+    else matchPronostics[matchId].push(pronoData);
     updateSidebarBadge(matchId);
     refreshNextMatchProno(matchId);
     status.textContent = t('saved');
@@ -1511,19 +1519,21 @@ async function loadLeaderboard() {
       getDoc(doc(db, 'special_results', 'totalgoals')),
     ]);
 
-    // Ne lire les collections lourdes que si le cache est périmé
+    // Pronostics : toujours rechargés (données de tous les joueurs, doivent être fraîches)
+    // Résultats et matchs KO : rechargés seulement si le cache est périmé
+    const pronoSnap = await getDocs(collection(db, 'pronostics'));
+    matchPronostics = {};
+    pronoSnap.forEach(d => {
+      const p = d.data();
+      if (!matchPronostics[p.matchId]) matchPronostics[p.matchId] = [];
+      matchPronostics[p.matchId].push(p);
+    });
+
     if (!fresh) {
-      const [pronoSnap, resultSnap, koSnap] = await Promise.all([
-        getDocs(collection(db, 'pronostics')),
+      const [resultSnap, koSnap] = await Promise.all([
         getDocs(collection(db, 'results')),
         getDocs(collection(db, 'matches_extra')),
       ]);
-      matchPronostics = {};
-      pronoSnap.forEach(d => {
-        const p = d.data();
-        if (!matchPronostics[p.matchId]) matchPronostics[p.matchId] = [];
-        matchPronostics[p.matchId].push(p);
-      });
       matchResults = {};
       lastResultUpdate = null;
       resultSnap.forEach(d => {
@@ -1540,6 +1550,9 @@ async function loadLeaderboard() {
       knockoutMatches.sort((a, b) => new Date(a.date) - new Date(b.date));
       _dataLoadedAt = Date.now();
     }
+
+    // DEBUG — à supprimer après diagnostic
+    window._dbgMatchPronostics = matchPronostics;
 
     // Multiplicateurs depuis knockoutMatches (cachés ou fraîchement chargés)
     const multipliers = {};
